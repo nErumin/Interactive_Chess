@@ -12,8 +12,12 @@
 using namespace cv;
 using namespace std;
 
+int displayImage();
+int captureImage(VideoCapture cap);
+
 int main(int, char**)
 {
+
 	Mat frame;
 	//--- INITIALIZE VIDEOCAPTURE
 	VideoCapture cap;
@@ -30,19 +34,6 @@ int main(int, char**)
 		return -1;
 	}
 
-	/*
-	// Get the frame
-	Mat save_img;
-	cap >> save_img;
-
-	if (save_img.empty())
-	{
-		std::cerr << "Something is wrong with the webcam, could not get frame." << std::endl;
-	}
-	// Save the frame into a file
-	imwrite("test.jpg", save_img); // A JPG FILE IS BEING SAVED
-	*/
-
 	//--- GRAB AND WRITE LOOP
 	cout << "Start grabbing" << endl
 		<< "Press any key to terminate" << endl;
@@ -58,20 +49,59 @@ int main(int, char**)
 		// show live and wait for a key with timeout long enough to show images
 		imshow("Live", frame);
 		if (waitKey(5) >= 0) {
-			Mat save_img;
-
-			cap >> save_img;
-
-			if (save_img.empty())
-			{
-				std::cerr << "Something is wrong with the webcam, could not get frame." << std::endl;
-			}
-			// Save the frame into a file
-			imwrite("test.jpg", save_img); // A JPG FILE IS BEING SAVED
-
+			captureImage(cap);
 			break;
 		}
 	}
+	
+	displayImage();
+
+	return 0;
+}
+
+int captureImage(VideoCapture cap) {
+	Mat save_img;
+
+	cap >> save_img;
+
+	String title;
+
+	cin >> title;
+	cout << "tlte : " << title << endl;
+
+	if (save_img.empty())
+	{
+		std::cerr << "Something is wrong with the webcam, could not get frame." << std::endl;
+		cin.get(); //wait for any key press
+		return -1;
+	}
+	// Save the frame into a file
+	imwrite(title, save_img); // A JPG FILE IS BEING SAVED
+
+	return 0;
+}
+
+int displayImage() {
+	Mat image = imread("D:/Documents/2019_1_cau/Capstone2019/Interactive_Chess/OpenCV_practice/OpenCV_practice/test.jpg");
+
+	// Check for failure
+	if (image.empty())
+	{
+		cout << "Could not open or find the image" << endl;
+		cin.get(); //wait for any key press
+		return -1;
+	}
+
+	String windowName = "Test"; //Name of the window
+
+	namedWindow(windowName); // Create a window
+
+	imshow(windowName, image); // Show our image inside the created window.
+
+	waitKey(0); // Wait for any keystroke in the window
+
+	destroyWindow(windowName); //destroy the created window
 	// the camera will be deinitialized automatically in VideoCapture destructor
+
 	return 0;
 }
