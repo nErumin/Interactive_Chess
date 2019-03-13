@@ -26,8 +26,8 @@ int main(int, char**)
 {
 
 	//takeVideo();
-	
-	//displayImage("chess_board.png");
+
+	//displayImage("wood_chess_board.jpg");
 
 	detectAndDrawChessboardCorners();
 	return 0;
@@ -125,11 +125,11 @@ int displayImage(String imageName) {
 
 bool detectAndDrawChessboardCorners()
 {
-	Mat img = imread("D:/Documents/2019_1_cau/Capstone2019/Interactive_Chess/OpenCV_practice/OpenCV_practice/chess_board.png");
+	Mat img = imread("D:/Documents/2019_1_cau/Capstone2019/Interactive_Chess/OpenCV_practice/OpenCV_practice/wood_chess_board.jpg");
 	imshow("image", img);
-	moveWindow("image", 40, 40);
+	//moveWindow("image", 40, 40);
 
-	Size patternsize(8, 8); //interior number of corners
+	Size patternsize(7, 7); //interior number of corners
 	Mat gray;
 	cvtColor(img, gray, COLOR_BGR2GRAY);//source image
 	vector<Point2f> corners; //this will be filled by the detected corners
