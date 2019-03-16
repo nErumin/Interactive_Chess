@@ -139,12 +139,27 @@ bool detectAndDrawChessboardCorners()
 	bool patternfound = findChessboardCorners(gray, patternsize, corners,
 		CALIB_CB_ADAPTIVE_THRESH + CALIB_CB_NORMALIZE_IMAGE
 		+ CALIB_CB_FAST_CHECK);
-	printf("%d", patternfound);
-	/*
-	if (patternfound)
-		cornerSubPix(gray, corners, Size(11, 11), Size(-1, -1),
-			TermCriteria(cv::CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
-	*/
+
+	float distances[6][6][2] = { 0, };
+	for (int i = 0, k = 0; i < 6; i++, k += 1) {
+		for (int j = 0; j < 6; j++) {
+			distances[i][j][0] = corners[(6 * i) + j + k].x - corners[(6 * i) + j + k + 1].x;
+			distances[i][j][1] = corners[(6 * i) + j].y - corners[(6 * i) + j + 7].y;
+		}
+	}
+
+	float mean_distance_x = 0;
+	float mean_distance_y = 0;
+
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < 6; j++) {
+			mean_distance_x += distances[i][j][0];
+			mean_distance_y += distances[i][j][1];
+		}
+	}
+	mean_distance_x /= 36;
+	mean_distance_y /= 36;
+
 	drawChessboardCorners(img, patternsize, Mat(corners), patternfound);
 
 	imshow("result", img);
