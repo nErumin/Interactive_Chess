@@ -89,6 +89,18 @@ compile_commands.json
 # QtCreator local machine specific files for imported projects
 *creator.user*
 
+# A listing of all the files included in the project
+*.files
+
+# Include directories
+*.includes
+
+# Project configuration settings like predefined Macros
+*.config
+
+# Qt Creator settings
+*.creator
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/settings.json
