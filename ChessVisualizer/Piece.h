@@ -20,7 +20,7 @@ public:
 
     void setRotationDegree(double newDegree) noexcept;
     void setColor(PieceColor newColor) noexcept;
-    void setMovementStratgies(std::initializer_list<std::unique_ptr<MovementStrategy>> newStrategies);
+    void setMovementStratgies(std::vector<std::unique_ptr<MovementStrategy>>&& newStrategies);
 
     virtual ~Piece();
 protected:

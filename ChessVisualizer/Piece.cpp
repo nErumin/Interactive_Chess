@@ -1,4 +1,7 @@
 #include <exception>
+#include <iterator>
+#include <algorithm>
+
 #include "Piece.h"
 #include "MovementStrategy.h"
 #include "Vector2.h"
@@ -21,7 +24,8 @@ std::vector<Vector2> Piece::movableLocations(const Vector2& pieceLocation) const
         }
 
         auto movables = strategy->movableLocations(pieceLocation);
-        locations.emplace_back(movables.begin(), movables.end());
+
+        std::copy(movables.begin(), movables.end(), std::back_inserter(locations));
     }
 
     return locations;
@@ -47,9 +51,14 @@ void Piece::setColor(PieceColor newColor) noexcept
     color = newColor;
 }
 
-void Piece::setMovementStratgies(std::initializer_list<std::unique_ptr<MovementStrategy>> newStrategies)
+void Piece::setMovementStratgies(std::vector<std::unique_ptr<MovementStrategy>>&& newStrategies)
 {
-    movementStrategies.assign(newStrategies);
+    movementStrategies.clear();
+
+    for (auto& strategy : newStrategies)
+    {
+        movementStrategies.push_back(std::move(strategy));
+    }
 }
 
 Piece::~Piece()
