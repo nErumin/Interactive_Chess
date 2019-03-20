@@ -7,10 +7,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 SOURCES += \
     main.cpp \
-    piece.cpp \
-    vector2.cpp
+    Vector2.cpp \
+    Piece.cpp
 
 HEADERS += \
-    piececolor.h \
-    piece.h \
-    vector2.h
+    Vector2.h \
+    Piece.h \
+    PieceColor.h
