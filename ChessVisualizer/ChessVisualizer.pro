@@ -6,4 +6,9 @@ QT = core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 SOURCES += \
-    main.cpp
+    main.cpp \
+    piece.cpp
+
+HEADERS += \
+    piececolor.h \
+    piece.h
