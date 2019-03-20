@@ -1,27 +1,32 @@
 #ifndef PIECE_H
 #define PIECE_H
 
+#include <memory>
 #include <vector>
 #include <initializer_list>
-#include "piececolor.h"
+#include "PieceColor.h"
 
 class MovementStrategy;
-class Vector2;
+struct Vector2;
 
 class Piece
 {
 public:
     explicit Piece(PieceColor color = PieceColor::None);
 
-    std::vector<Vector2> movableLocations() const noexcept;
+    std::vector<Vector2> movableLocations(const Vector2& pieceLocation) const;
     double getRotationDegree() const noexcept;
     PieceColor getColor() const noexcept;
 
     void setRotationDegree(double newDegree) noexcept;
     void setColor(PieceColor newColor) noexcept;
-    void setMovementStratgies(std::initializer_list<MovementStrategy> newStrategies) noexcept;
+    void setMovementStratgies(std::initializer_list<std::unique_ptr<MovementStrategy>> newStrategies);
+
+    virtual ~Piece();
+protected:
+    virtual bool isStrategyAcceptable(const std::unique_ptr<MovementStrategy>& strategy) const noexcept = 0;
 private:
-    std::vector<MovementStrategy> movementStrategies;
+    std::vector<std::unique_ptr<MovementStrategy>> movementStrategies;
     PieceColor color;
     double rotationDegree;
 };
