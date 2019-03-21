@@ -1,4 +1,10 @@
 #include "Vector2.h"
+#include <cmath>
+
+Vector2 operator+(const Vector2& lhs, const Vector2& rhs) noexcept
+{
+    return { lhs.x() + rhs.x(), lhs.y() + rhs.y() };
+}
 
 Vector2::Vector2()
     : Vector2{ 0, 0 }
@@ -31,4 +37,21 @@ void Vector2::setX(double newX) noexcept
 void Vector2::setY(double newY) noexcept
 {
     coordY = newY;
+}
+
+Vector2 Vector2::normalize() const noexcept
+{
+    double mag = magitude();
+
+    if (mag < 0.0000001)
+    {
+        return { 0.0, 0.0 };
+    }
+
+    return { coordX / mag, coordY / mag };
+}
+
+double Vector2::magitude() const noexcept
+{
+    return std::sqrt(coordX * coordX + coordY * coordY);
 }

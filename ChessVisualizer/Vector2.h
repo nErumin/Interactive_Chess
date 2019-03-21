@@ -12,9 +12,14 @@ public:
 
     void setX(double newCoordX) noexcept;
     void setY(double newCoordY) noexcept;
+
+    Vector2 normalize() const noexcept;
+    double magitude() const noexcept;
 private:
     double coordX;
     double coordY;
 };
+
+Vector2 operator+(const Vector2& lhs, const Vector2& rhs) noexcept;
 
 #endif // VECTOR2_H
