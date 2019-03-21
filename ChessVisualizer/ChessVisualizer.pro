@@ -17,7 +17,8 @@ SOURCES += \
     Bishop.cpp \
     Rook.cpp \
     Knight.cpp \
-    Pawn.cpp
+    Pawn.cpp \
+    Cell.cpp
 
 HEADERS += \
     Vector2.h \
@@ -33,4 +34,7 @@ HEADERS += \
     Bishop.h \
     Rook.h \
     Knight.h \
-    Pawn.h
+    Pawn.h \
+    Cell.h \
+    CellColor.h \
+    NullPiece.h
