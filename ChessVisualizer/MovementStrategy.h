@@ -9,7 +9,7 @@ class MovementStrategy
 {
 public:
     virtual std::vector<Vector2> movableLocations(const Vector2& centerLocation) const noexcept = 0;
-    virtual ~MovementStrategy();
+    virtual ~MovementStrategy() = default;
 };
 
 #endif // MOVEMENTSTRATEGY_H
