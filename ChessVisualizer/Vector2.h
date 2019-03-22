@@ -1,6 +1,9 @@
 #ifndef VECTOR2_H
 #define VECTOR2_H
 
+#include <xutility>
+#include "MathUtils.h"
+
 struct Vector2
 {
 public:
@@ -20,6 +23,13 @@ private:
     double coordY;
 };
 
-Vector2 operator+(const Vector2& lhs, const Vector2& rhs) noexcept;
+Vector2 operator+(const Vector2& lhs, const Vector2& rhs);
+Vector2 operator-(const Vector2& lhs, const Vector2& rhs);
+bool operator==(const Vector2& lhs, const Vector2& rhs);
+
+inline std::pair<size_t, size_t> normalizeToIntegerVector(const Vector2& vec)
+{
+    return { static_cast<size_t>(std::round(vec.x())), static_cast<size_t>(std::round(vec.y()))};
+}
 
 #endif // VECTOR2_H

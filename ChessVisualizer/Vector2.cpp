@@ -1,9 +1,20 @@
 #include "Vector2.h"
 #include <cmath>
 
-Vector2 operator+(const Vector2& lhs, const Vector2& rhs) noexcept
+Vector2 operator+(const Vector2& lhs, const Vector2& rhs)
 {
     return { lhs.x() + rhs.x(), lhs.y() + rhs.y() };
+}
+
+Vector2 operator-(const Vector2& lhs, const Vector2& rhs)
+{
+    return { lhs.x() - rhs.x(), lhs.y() - rhs.y() };
+}
+
+bool operator==(const Vector2& lhs, const Vector2& rhs)
+{
+    return (std::abs(lhs.x() - rhs.x()) < 0.0000001) &&
+           (std::abs(lhs.y() - rhs.y()) < 0.0000001);
 }
 
 Vector2::Vector2()
