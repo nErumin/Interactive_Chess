@@ -5,6 +5,8 @@ QT = core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+QMAKE_CXXFLAGS += /std:c++17
+
 SOURCES += \
     main.cpp \
     Vector2.cpp \
@@ -18,7 +20,9 @@ SOURCES += \
     Rook.cpp \
     Knight.cpp \
     Pawn.cpp \
-    Cell.cpp
+    Cell.cpp \
+    NullPiece.cpp \
+    Board.cpp
 
 HEADERS += \
     Vector2.h \
@@ -37,4 +41,5 @@ HEADERS += \
     Pawn.h \
     Cell.h \
     CellColor.h \
-    NullPiece.h
+    NullPiece.h \
+    Board.h
