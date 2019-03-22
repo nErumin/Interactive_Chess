@@ -6,16 +6,17 @@
 
 class Piece;
 
-class Cell
+class Cell final
 {
 public:
     explicit Cell(std::shared_ptr<Piece> cellPiece, CellColor initColor = CellColor::None);
 
-    CellColor getCellColor() const noexcept;
+    CellColor getColor() const noexcept;
     bool isPieceOnBoard() const;
 
     std::shared_ptr<Piece> getPiece() const;
     void setPiece(std::shared_ptr<Piece> newPiece);
+    void setColor(CellColor newColor) noexcept;
 private:
     std::shared_ptr<Piece> piece;
     CellColor color;

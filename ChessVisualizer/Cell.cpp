@@ -10,7 +10,7 @@ Cell::Cell(std::shared_ptr<Piece> cellPiece, CellColor initColor)
 {
 }
 
-CellColor Cell::getCellColor() const noexcept
+CellColor Cell::getColor() const noexcept
 {
     return color;
 }
@@ -32,5 +32,10 @@ void Cell::setPiece(std::shared_ptr<Piece> newPiece)
         throw std::invalid_argument{ "cannot place same color piece on this cell" };
     }
 
-    piece = newPiece;
+    piece = std::move(newPiece);
+}
+
+void Cell::setColor(CellColor newColor) noexcept
+{
+    color = newColor;
 }
