@@ -11,10 +11,9 @@ public:
     NullPiece() = default;
     ~NullPiece() override = default;
 protected:
-    virtual bool isStrategyAcceptable(const std::unique_ptr<MovementStrategy>& strategy) const noexcept override
-    {
-        return false;
-    }
+    virtual bool isStrategyAcceptable(const std::unique_ptr<MovementStrategy>& strategy) const noexcept override;
 };
+
+extern std::shared_ptr<NullPiece> sharedNullPiece;
 
 #endif // NULLPIECE_H
