@@ -15,10 +15,11 @@ public:
     explicit Piece(PieceColor color = PieceColor::None);
 
     std::vector<Vector2> movableLocations(const Vector2& pieceLocation) const;
+    std::vector<Vector2> movableLocationsUsingObstacles(const Vector2& pieceLocation, const std::vector<std::vector<PieceColor>>& obstacleMap) const;
     double getRotationDegree() const noexcept;
     PieceColor getColor() const noexcept;
 
-    void setRotationDegree(double newDegree) noexcept;
+    virtual void setRotationDegree(double newDegree) noexcept;
     void setColor(PieceColor newColor) noexcept;
     void setMovementStratgies(std::vector<std::unique_ptr<MovementStrategy>>&& newStrategies);
 
