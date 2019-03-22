@@ -48,3 +48,34 @@ std::vector<Vector2> LineMovementStrategy::movableLocations(const Vector2& cente
 
     return locations;
 }
+
+ObstacleMovablePair LineMovementStrategy::movableLocationsUsingObstacles(const Vector2& centerLocation, std::vector<std::deque<bool>> obstacleMap) const noexcept
+{
+    std::vector<Vector2> obstacles;
+    std::vector<Vector2> locations;
+
+    for (const auto& direction : directions)
+    {
+        auto deltaVector = discritizePolarCoordinate(direction);
+        int directionLength = static_cast<int>(direction.getRadius());
+
+        for (int length = 1; length <= directionLength; ++length)
+        {
+            Vector2 nextLocation{ centerLocation.x() + deltaVector.x() * length, centerLocation.y() + deltaVector.y() * length };
+            auto normalizedNextLocation = normalizeToIntegerVector(nextLocation);
+
+            // are there any obstacles?
+            if (normalizedNextLocation.first < obstacleMap.size() &&
+                normalizedNextLocation.second < obstacleMap.front().size() &&
+                obstacleMap[normalizedNextLocation.first][normalizedNextLocation.second])
+            {
+                obstacles.push_back(nextLocation);
+                break;
+            }
+
+            locations.push_back(nextLocation);
+        }
+    }
+
+    return { obstacles, locations };
+}

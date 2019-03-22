@@ -17,3 +17,9 @@ std::vector<Vector2> LShapedMovementStrategy::movableLocations(const Vector2& ce
 
     return locations;
 };
+
+ObstacleMovablePair LShapedMovementStrategy::movableLocationsUsingObstacles(const Vector2& centerLocation, [[maybe_unused]] std::vector<std::deque<bool>> obstacleMap) const noexcept
+{
+    // no obstacles
+    return { {}, movableLocations(centerLocation) };
+}

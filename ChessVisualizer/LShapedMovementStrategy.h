@@ -8,8 +8,9 @@ class LShapedMovementStrategy : public MovementStrategy
 {
 public:
     explicit LShapedMovementStrategy(PolarCoordinate bodyDirection, PolarCoordinate edgeDirection);
-    std::vector<Vector2> movableLocations(const Vector2& centerLocation) const noexcept override;
+    ObstacleMovablePair movableLocationsUsingObstacles(const Vector2& centerLocation, std::vector<std::deque<bool>> obstacleMap) const noexcept override;
 
+    std::vector<Vector2> movableLocations(const Vector2& centerLocation) const noexcept override;
 private:
     PolarCoordinate body;
     PolarCoordinate edge;
