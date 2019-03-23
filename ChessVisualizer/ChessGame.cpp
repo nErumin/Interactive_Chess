@@ -3,6 +3,7 @@
 #include "Board.h"
 #include "PieceColor.h"
 #include "PlayerType.h"
+#include "NullPiece.h"
 
 ChessGame::ChessGame()
     : currentTurnPlayerIndex{ 0 }
@@ -35,9 +36,12 @@ const Player& ChessGame::getCurrentPlayer() const noexcept
 
 void ChessGame::notify([[maybe_unused]] const Cell& cell, [[maybe_unused]] Vector2&& location)
 {
-    currentTurnPlayerIndex = (currentTurnPlayerIndex + 1) % players.size();
+    if (std::dynamic_pointer_cast<NullPiece>(cell.getPiece()) != nullptr)
+    {
+        currentTurnPlayerIndex = (currentTurnPlayerIndex + 1) % players.size();
 
-    notifyToObservers(players[currentTurnPlayerIndex]);
+        notifyToObservers(players[currentTurnPlayerIndex]);
+    }
 }
 
 ChessGame::~ChessGame()
