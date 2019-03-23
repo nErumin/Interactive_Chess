@@ -32,7 +32,10 @@ void Cell::setPiece(std::shared_ptr<Piece> newPiece)
         throw std::invalid_argument{ "cannot place same color piece on this cell" };
     }
 
+    bool isNewPieceEnemyPiece = newPiece->getColor() != PieceColor::None;
     piece = std::move(newPiece);
+
+    notifyToObservers(*this, std::move(isNewPieceEnemyPiece));
 }
 
 void Cell::setColor(CellColor newColor) noexcept

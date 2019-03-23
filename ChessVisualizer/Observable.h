@@ -11,23 +11,23 @@ class Observable
 public:
     Observable() = default;
 
-    void registerObserver(std::shared_ptr<Observer<T...>> newObserver);
-    void unregisterObserver(std::shared_ptr<Observer<T...>> removedObserver);
+    void registerObserver(Observer<T...>* newObserver);
+    void unregisterObserver(Observer<T...>* removedObserver);
     void notifyToObservers(T&&... args);
 
     virtual ~Observable() = default;
 private:
-    std::vector<std::shared_ptr<Observer<T...>>> observers;
+    std::vector<Observer<T...>*> observers;
 };
 
 template <typename... T>
-void Observable<T...>::registerObserver(std::shared_ptr<Observer<T...>> newObserver)
+void Observable<T...>::registerObserver(Observer<T...>* newObserver)
 {
     observers.push_back(newObserver);
 }
 
 template <typename... T>
-void Observable<T...>::unregisterObserver(std::shared_ptr<Observer<T...>> removedObserver)
+void Observable<T...>::unregisterObserver(Observer<T...>* removedObserver)
 {
     auto foundIterator = std::find(observers.cbegin(), observers.cend(), removedObserver);
 

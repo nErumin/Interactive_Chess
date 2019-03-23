@@ -3,10 +3,11 @@
 
 #include <memory>
 #include "CellColor.h"
+#include "Observable.h"
 
 class Piece;
 
-class Cell final
+class Cell final : public Observable<Cell&, bool>
 {
 public:
     explicit Cell(std::shared_ptr<Piece> cellPiece, CellColor initColor = CellColor::None);
