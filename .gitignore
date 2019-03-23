@@ -1,6 +1,14 @@
 # Created by https://www.gitignore.io/api/qt,c++,opencv,windows,visualstudio,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=qt,c++,opencv,windows,visualstudio,visualstudiocode
 
+# Qt autosave
+*.cpp*
+!*.cpp
+*.h*
+!*.h
+*.pro*
+!*.pro
+
 ### User ###
 *.jpg
 
