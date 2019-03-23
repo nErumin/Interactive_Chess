@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <algorithm>
 #include "Observer.h"
 
 template <typename... T>
