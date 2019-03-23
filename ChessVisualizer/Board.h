@@ -20,6 +20,9 @@ public:
 
     std::vector<Vector2> findPieceMovableLocations(const Vector2 pieceLocation) const;
     void movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation);
+
+    Cell& getCell(size_t row, size_t column) noexcept;
+    const Cell& getCell(size_t row, size_t column) const noexcept;
 private:
     void initializeBoardCellColors();
     void initializeBoardCellPieces();

@@ -203,6 +203,8 @@ void Board::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation)
         }
     });
 
+    Vector2 previousLocation = pieceLocation;
+    notifyToObservers(currentCell, std::move(previousLocation));
     notifyToObservers(targetCell, std::move(nextLocation));
 }
 
@@ -218,4 +220,14 @@ void Board::PawnsFor(std::function<void (Pawn&, std::pair<size_t,size_t>)> handl
             }
         }
     }
+}
+
+Cell& Board::getCell(size_t row, size_t column) noexcept
+{
+    return boardCells[row][column];
+}
+
+const Cell& Board::getCell(size_t row, size_t column) const noexcept
+{
+    return boardCells[row][column];
 }
