@@ -22,7 +22,8 @@ SOURCES += \
     Pawn.cpp \
     Cell.cpp \
     NullPiece.cpp \
-    Board.cpp
+    Board.cpp \
+    MainWindow.cpp
 
 HEADERS += \
     Vector2.h \
@@ -42,4 +43,11 @@ HEADERS += \
     Cell.h \
     CellColor.h \
     NullPiece.h \
-    Board.h
+    Board.h \
+    MainWindow.h
+
+FORMS += \
+    MainWindow.ui
+
+RESOURCES += \
+    resource.qrc
