@@ -6,6 +6,8 @@
 !*.cpp
 *.h*
 !*.h
+*.pro*
+!*.pro
 
 ### User ###
 *.jpg
