@@ -23,7 +23,10 @@ SOURCES += \
     Cell.cpp \
     NullPiece.cpp \
     Board.cpp \
-    MainWindow.cpp
+    MainWindow.cpp \
+    Player.cpp \
+    ChessGame.cpp \
+    ChessController.cpp
 
 HEADERS += \
     Vector2.h \
@@ -44,7 +47,13 @@ HEADERS += \
     CellColor.h \
     NullPiece.h \
     Board.h \
-    MainWindow.h
+    MainWindow.h \
+    ChessGame.h \
+    PlayerType.h \
+    Player.h \
+    Observable.h \
+    Observer.h \
+    ChessController.h
 
 FORMS += \
     MainWindow.ui

@@ -3,15 +3,17 @@
 
 #include <vector>
 #include <functional>
+#include "Cell.h"
+#include "Observable.h"
 
 enum class PieceColor;
-class Cell;
+
 class Pawn;
 struct Vector2;
 
 constexpr size_t boardSize = 8;
 
-class Board final
+class Board final : public Observable<const Cell&, Vector2>
 {
 public:
     Board();

@@ -202,6 +202,8 @@ void Board::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation)
             pawn.markDiagnoalMovable(pawn.getMask() | maskLocation.first);
         }
     });
+
+    notifyToObservers(targetCell, std::move(nextLocation));
 }
 
 void Board::PawnsFor(std::function<void (Pawn&, std::pair<size_t,size_t>)> handler) const
