@@ -2,6 +2,7 @@ TEMPLATE = app
 TARGET = ChessVisualizer
 
 QT = core gui
+CONFIG += console
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -23,10 +24,10 @@ SOURCES += \
     Cell.cpp \
     NullPiece.cpp \
     Board.cpp \
-    MainWindow.cpp \
     Player.cpp \
     ChessGame.cpp \
-    ChessController.cpp
+    ChessController.cpp \
+    ChessWindow.cpp
 
 HEADERS += \
     Vector2.h \
@@ -47,16 +48,15 @@ HEADERS += \
     CellColor.h \
     NullPiece.h \
     Board.h \
-    MainWindow.h \
     ChessGame.h \
     PlayerType.h \
     Player.h \
     Observable.h \
     Observer.h \
-    ChessController.h
+    ChessController.h \
+    ChessWindow.h
 
-FORMS += \
-    MainWindow.ui
+FORMS +=
 
 RESOURCES += \
     resource.qrc
