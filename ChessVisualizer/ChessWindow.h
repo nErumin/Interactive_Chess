@@ -1,22 +1,25 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef CHESSWINDOW_H
+#define CHESSWINDOW_H
 
-#include <QMainWindow>
+#include <QWidget>
+#include <QLabel>
+#include <memory>
 
-namespace Ui {
-class MainWindow;
-}
-
-class MainWindow : public QMainWindow
+class ChessWindow : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    explicit ChessWindow(QWidget* parent = nullptr);
+    QLabel& getLabel(size_t row, size_t column) noexcept;
+    const QLabel& getLabel(size_t row, size_t column) const noexcept;
+private:
+    void initializeLabels();
+    void initializeBackground();
 
 private:
-    Ui::MainWindow *ui;
+    std::vector<std::vector<std::shared_ptr<QLabel>>> labels;
+    QLabel backgroudLabel;
 };
 
-#endif // MAINWINDOW_H
+#endif // CHESSWINDOW_H
