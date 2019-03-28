@@ -9,10 +9,22 @@
 ChessGame::ChessGame()
     : currentTurnPlayerIndex{ 0 }
 {
-    players.push_back(std::make_unique<Player>(PlayerType::Human, PieceColor::White));
-    players.push_back(std::make_unique<Player>(PlayerType::Human, PieceColor::Black));
+    players.push_back(std::make_shared<Player>(PlayerType::Human, PieceColor::White));
+    players.push_back(std::make_shared<Player>(PlayerType::Human, PieceColor::Black));
 
     gameBoard.registerObserver(this);
+}
+
+std::vector<std::shared_ptr<Player>> ChessGame::getPlayers() const
+{
+    std::vector<std::shared_ptr<Player>> returnPlayers(players.size());
+
+    for (size_t i = 0; i < players.size(); ++i)
+    {
+        returnPlayers[i] = players[i];
+    }
+
+    return returnPlayers;
 }
 
 Board& ChessGame::getBoard() noexcept

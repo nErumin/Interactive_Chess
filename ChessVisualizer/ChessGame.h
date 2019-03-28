@@ -20,12 +20,13 @@ public:
     const Board& getBoard() const noexcept;
     Player& getCurrentPlayer() noexcept;
     const Player& getCurrentPlayer() const noexcept;
+    std::vector<std::shared_ptr<Player>> getPlayers() const;
 
     void notify(const Cell& cell, Vector2&& location) override;
 
     ~ChessGame() override;
 private:
-    std::vector<std::unique_ptr<Player>> players;
+    std::vector<std::shared_ptr<Player>> players;
     size_t currentTurnPlayerIndex;
     Board gameBoard;
 };
