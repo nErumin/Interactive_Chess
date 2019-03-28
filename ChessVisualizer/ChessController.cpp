@@ -6,6 +6,8 @@
 #include <QPixmap>
 #include <exception>
 #include <memory>
+#include <iostream>
+#include <sstream>
 
 #include "King.h"
 #include "Queen.h"
@@ -64,6 +66,7 @@ ChessController::ChessController()
     auto& board = game.getBoard();
     board.registerObserver(this);
 
+    // initialize image
     for (size_t i = 0; i < boardSize; ++i)
     {
         for (size_t j = 0; j < boardSize; ++j)
@@ -74,13 +77,44 @@ ChessController::ChessController()
     }
 }
 
-#include <iostream>
-
 void ChessController::startChess()
 {
     window.show();
 
-    makeMovingFromPlayer(game.getCurrentPlayer());
+    // set timers and register tick events
+    for (const auto& player : game.getPlayers())
+    {
+        player->getTimer().setTickHandler([player, capturedWindow = &window](double leftTime)
+        {
+            if ((leftTime - std::floor(leftTime)) < 0.001)
+            {
+                auto& label = player->getOwningPieceColor() == PieceColor::Black ?
+                            capturedWindow->getUpperLabel() :
+                            capturedWindow->getLowerLabel();
+
+                std::ostringstream stringStream;
+                stringStream << "Remain Time: " << static_cast<size_t>(std::floor(leftTime)) << std::endl;
+
+                label.setText(stringStream.str().c_str());
+
+                QMetaObject::invokeMethod(&label, [&label, str = stringStream.str()]
+                {
+                    label.setText(str.c_str());
+                });
+            }
+        });
+
+        player->getTimer().setFinishedHandler([]
+        {
+            std::cout << "Timer Finished!" << std::endl;
+        });
+
+        player->getTimer().start(10.0);
+        player->getTimer().pause();
+    }
+
+   game.getCurrentPlayer().getTimer().resume();
+   //makeMovingFromPlayer(game.getCurrentPlayer());
 }
 
 void ChessController::makeMovingFromPlayer(Player& player)
@@ -112,13 +146,10 @@ void ChessController::makeMovingFromPlayer(Player& player)
     }
 }
 
-void ChessController::notify(Player& changedPlayer)
+void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
 {
-    std::cout << "Changed" << std::endl;
-
-    //makeMovingFromPlayer(changedPlayer);
-
-    std::cout << "Out" << std::endl;
+    changingPlayer.getTimer().pause();
+    nextPlayer.getTimer().resume();
 }
 
 void ChessController::notify(const Cell& changedCell, Vector2&& location)
