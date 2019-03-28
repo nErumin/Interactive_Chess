@@ -41,8 +41,7 @@ jobs:
       - cmake .
       - make
   - stage: Qt
-    install: 
-      - sudo apt-get purge --auto-remove libqt4-dev
+    install:
       - sudo apt-get install qtdeclarative5-dev
       - sudo apt-get install qt5-default
       - sudo apt-get install qt5-qmake      
