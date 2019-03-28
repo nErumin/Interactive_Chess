@@ -42,11 +42,10 @@ void Timer::startLoop(Timer& timer, double timeLimit)
             return;
         }
 
-        timer.notifyToObservers(systemCountToSecond<double>(limitCount - diffCount));
+        timer.tickFunctor(systemCountToSecond<double>(limitCount - diffCount));
     }
 
-    // End
-    timer.notifyToObservers(0.0);
+    timer.finishedFunctor();
 }
 
 void Timer::start(double timeLimit)
@@ -76,24 +75,30 @@ void Timer::stop()
 
 bool Timer::isStopped() const
 {
-    std::lock_guard<std::mutex> guard{ timerMutex };
     return !running && !paused;
 }
 
 bool Timer::isPaused() const
 {
-    std::lock_guard<std::mutex> guard{ timerMutex };
     return running && paused;
 }
 
 void Timer::setRunning(bool running)
 {
-    std::lock_guard<std::mutex> guard{ timerMutex };
     this->running = running;
 }
 
 void Timer::setPaused(bool paused)
 {
-    std::lock_guard<std::mutex> guard{ timerMutex };
     this->paused = paused;
+}
+
+void Timer::setTickHandler(ArgEventHandler<double> tickHandler)
+{
+    tickFunctor = std::move(tickHandler);
+}
+
+void Timer::setFinishedHandler(EventHandler finishedHandler)
+{
+    finishedFunctor = std::move(finishedHandler);
 }

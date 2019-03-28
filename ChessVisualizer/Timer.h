@@ -1,18 +1,25 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include <mutex>
+#include <functional>
 #include "Observable.h"
 
-class Timer : public Observable<double>
+class Timer final
 {
 public:
+    template <typename T>
+    using ArgEventHandler = std::function<void (T)>;
+    using EventHandler = std::function<void ()>;
+
     Timer();
 
-    void start(double timeLimit);
+    void start( double timeLimit);
     void resume();
     void pause();
     void stop();
+
+    void setTickHandler(ArgEventHandler<double> tickHandler);
+    void setFinishedHandler(EventHandler finishedHandler);
 private:
     static void startLoop(Timer& timer, double timeLimit);
 
@@ -22,9 +29,11 @@ private:
     void setRunning(bool running);
     void setPaused(bool paused);
 private:
-    mutable std::mutex timerMutex;
     bool running = false;
     bool paused = false;
+
+    ArgEventHandler<double> tickFunctor;
+    EventHandler finishedFunctor;
 };
 
 #endif // TIMER_H
