@@ -149,7 +149,12 @@ void Board::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation)
     auto movableLocations = findPieceMovableLocations(pieceLocation);
     auto nextLocation = pieceLocation + deltaLocation;
 
-    if (std::find(movableLocations.cbegin(), movableLocations.cend(), nextLocation) == movableLocations.cend())
+    auto searchResult = std::find_if(movableLocations.cbegin(), movableLocations.cend(), [nextLocation](const Vector2& movableLocation)
+    {
+        return normalizeToIntegerVector(movableLocation) == normalizeToIntegerVector(nextLocation);
+    });
+
+    if (searchResult == movableLocations.cend())
     {
         throw std::invalid_argument{ "cannot move to that location " };
     }
