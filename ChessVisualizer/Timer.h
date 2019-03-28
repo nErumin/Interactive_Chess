@@ -10,6 +10,7 @@ public:
     Timer();
 
     void start(double timeLimit);
+    void resume();
     void pause();
     void stop();
 private:
