@@ -42,8 +42,10 @@ jobs:
       - make
   - stage: Qt
     install: 
+      - sudo apt-get purge --auto-remove libqt4-dev
+      - sudo apt-get install qt5-default
+      - sudo apt-get install qt5-qmake      
       - sudo apt-get update
-      - sudo apt-get install qt5-qmake
     before_script:
       - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
       - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
