@@ -51,9 +51,10 @@ void ChessGame::notify([[maybe_unused]] const Cell& cell, [[maybe_unused]] Vecto
 {
     if (std::dynamic_pointer_cast<NullPiece>(cell.getPiece()) != nullptr)
     {
+        Player& changingPlayer = *players[currentTurnPlayerIndex];
         currentTurnPlayerIndex = (currentTurnPlayerIndex + 1) % players.size();
 
-        notifyToObservers(*players[currentTurnPlayerIndex]);
+        notifyToObservers(changingPlayer, *players[currentTurnPlayerIndex]);
     }
 }
 

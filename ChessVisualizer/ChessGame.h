@@ -12,7 +12,7 @@ class Cell;
 struct Vector2;
 
 class ChessGame : public Observer<const Cell&, Vector2>,
-                  public Observable<Player&>
+                  public Observable<Player&, Player&>
 {
 public:
     ChessGame();
