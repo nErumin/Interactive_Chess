@@ -84,14 +84,16 @@ void ChessController::startChess()
     // set timers and register tick events
     for (const auto& player : game.getPlayers())
     {
-        player->getTimer().setTickHandler([player, capturedWindow = &window](double leftTime)
+        auto& label = player->getOwningPieceColor() == PieceColor::Black ?
+                    window.getUpperLabel() :
+                    window.getLowerLabel();
+
+        label.setText("Remain Time: 10");
+
+        player->getTimer().setTickHandler([&label](double leftTime)
         {
             if ((leftTime - std::floor(leftTime)) < 0.001)
             {
-                auto& label = player->getOwningPieceColor() == PieceColor::Black ?
-                            capturedWindow->getUpperLabel() :
-                            capturedWindow->getLowerLabel();
-
                 std::ostringstream stringStream;
                 stringStream << "Remain Time: " << static_cast<size_t>(std::floor(leftTime)) << std::endl;
 
