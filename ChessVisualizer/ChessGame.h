@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "Observer.h"
 #include "Observable.h"
+#include <memory>
 
 class Cell;
 struct Vector2;
@@ -24,7 +25,7 @@ public:
 
     ~ChessGame() override;
 private:
-    std::vector<Player> players;
+    std::vector<std::unique_ptr<Player>> players;
     size_t currentTurnPlayerIndex;
     Board gameBoard;
 };
