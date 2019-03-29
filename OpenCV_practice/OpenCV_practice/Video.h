@@ -2,7 +2,11 @@
 #define VIDEO_H
 
 #include <opencv2/opencv.hpp>
+#include <thread>
 #include <iostream>
+
+#define ENTER_KEY 0xd
+#define ESC_KEY 0x1b
 
 using namespace cv;
 using namespace std;
@@ -11,13 +15,14 @@ class Video
 {
 private:
 	Mat frame;
-	//--- INITIALIZE VIDEOCAPTURE
 	VideoCapture cap;
+	bool end_video;
 
 public:
-	virtual void startVideo(int devicdID) = 0;
-	virtual void captureImage() = 0;
-	virtual ~Video() = default;
+	Video();
+	void startVideo(int devicdId);
+	void captureImage();
+	~Video() = default;
 };
 
 #endif // OBSERVER_H
