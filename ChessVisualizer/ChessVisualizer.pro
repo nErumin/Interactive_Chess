@@ -28,7 +28,8 @@ SOURCES += \
     ChessGame.cpp \
     ChessController.cpp \
     ChessWindow.cpp \
-    Timer.cpp
+    Timer.cpp \
+    InformationModal.cpp
 
 HEADERS += \
     Vector2.h \
@@ -56,7 +57,8 @@ HEADERS += \
     Observer.h \
     ChessController.h \
     ChessWindow.h \
-    Timer.h
+    Timer.h \
+    InformationModal.h
 
 FORMS +=
 
