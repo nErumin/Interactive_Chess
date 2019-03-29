@@ -53,6 +53,6 @@ jobs:
       - gcc -v && g++ -v
       - cd ChessVisualizer
     script:
-      - qmake -project -Wall 
-      - qmake -makefile -Wall ChessVisualizer.pro
+      - /opt/qt510/bin/qmake -project -Wall 
+      - /opt/qt510/bin/qmake -makefile -Wall ChessVisualizer.pro
       - make
