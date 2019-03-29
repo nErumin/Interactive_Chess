@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <stdio.h>
+#include <thread>
 
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
@@ -18,11 +19,11 @@ bool detectAndDrawChessboardCorners();
 int main(int, char**)
 {
 
-	//takeVideo();
+	takeVideo();
 
 	//displayImage("wood_chess_board.jpg");
 
-	detectAndDrawChessboardCorners();
+	//detectAndDrawChessboardCorners();
 	return 0;
 }
 
@@ -58,8 +59,10 @@ int takeVideo() {
 		// show live and wait for a key with timeout long enough to show images
 		imshow("Live", frame);
 		if (waitKey(5) >= 0) {
-			captureImage(cap);
-			break;
+			//captureImage(cap);
+			thread t1;
+			t1 = thread(captureImage, cap);
+			t1.detach();
 		}
 	}
 
