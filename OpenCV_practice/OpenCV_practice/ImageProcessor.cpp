@@ -3,7 +3,8 @@ ImageProcessor::ImageProcessor(){}
 
 bool ImageProcessor::detectAndDrawChessboardCorners(String img_name)
 {
-	ImageProcessor::img = imread("D:/Documents/2019_1_cau/Capstone2019/Interactive_Chess/OpenCV_practice/OpenCV_practice/wood_chess_board.jpg");
+	String filePath = DEFAULT_PATH + img_name;
+	ImageProcessor::img = imread(filePath);
 	imshow("image", img);
 	//moveWindow("image", 40, 40);
 
@@ -18,25 +19,8 @@ bool ImageProcessor::detectAndDrawChessboardCorners(String img_name)
 		CALIB_CB_ADAPTIVE_THRESH + CALIB_CB_NORMALIZE_IMAGE
 		+ CALIB_CB_FAST_CHECK);
 	if (patternfound) {
-		float distances[6][6][2] = { 0, };
-		for (int i = 0, k = 0; i < 6; i++, k += 1) {
-			for (int j = 0; j < 6; j++) {
-				distances[i][j][0] = corners[(6 * i) + j + k].x - corners[(6 * i) + j + k + 1].x;
-				distances[i][j][1] = corners[(6 * i) + j].y - corners[(6 * i) + j + 7].y;
-			}
-		}
-
-		float mean_distance_x = 0;
-		float mean_distance_y = 0;
-
-		for (int i = 0; i < 6; i++) {
-			for (int j = 0; j < 6; j++) {
-				mean_distance_x += distances[i][j][0];
-				mean_distance_y += distances[i][j][1];
-			}
-		}
-		mean_distance_x /= 36;
-		mean_distance_y /= 36;
+		
+		ImageProcessor::mean_distance = calculateMeanDistanceOfCorners(corners);
 
 		drawChessboardCorners(img, patternsize, Mat(corners), patternfound);
 
@@ -48,4 +32,32 @@ bool ImageProcessor::detectAndDrawChessboardCorners(String img_name)
 	else {
 		return false;
 	}
+}
+
+Point2f ImageProcessor::calculateMeanDistanceOfCorners(vector<Point2f> corners) {
+	Point2f mean_distance = Point2f(0, 0);
+	Point2f distances[6][6];
+
+	for (int i = 0, k = 0; i < 6; i++, k += 1) {
+		for (int j = 0; j < 6; j++) {
+			distances[i][j] = Point2f(corners[(6 * i) + j + k].x - corners[(6 * i) + j + k + 1].x, 
+									corners[(6 * i) + j].y - corners[(6 * i) + j + 7].y);
+		}
+	}
+
+	float mean_distance_x = 0;
+	float mean_distance_y = 0;
+
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < 6; j++) {
+			mean_distance += distances[i][j];
+		}
+	}
+	return mean_distance / 36;
+}
+
+vector<Point2f> ImageProcessor::calculateCenterPositionsOfCells(vector<Point2f> corners) {
+	vector<Point2f> calculate_positions;
+	//to do
+	return calculate_positions;
 }
