@@ -34,7 +34,7 @@ void Timer::startLoop(Timer& timer, double timeLimit)
     {
         while (timer.isPaused())
         {
-            startCount = system_clock::now().time_since_epoch().count() + diffCount;
+            startCount = system_clock::now().time_since_epoch().count() - diffCount;
         }
 
         if (timer.isStopped())
