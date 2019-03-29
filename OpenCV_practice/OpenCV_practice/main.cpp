@@ -5,4 +5,3 @@ int main(int, char**) {
 	controller.startVideo();
 	return 0;
 }
-

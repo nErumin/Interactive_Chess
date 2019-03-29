@@ -4,6 +4,7 @@
 #include "ImageProcessor.h"
 #include "Video.h"
 #include "Observer.h"
+#include <thread>
 
 class OpenCVController : public Observer<String>
 {
