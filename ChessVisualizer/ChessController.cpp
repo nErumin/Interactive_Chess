@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "InformationModal.h"
 #include "King.h"
 #include "Queen.h"
 #include "Bishop.h"
@@ -92,7 +93,8 @@ void ChessController::startChess()
 
         player->getTimer().setTickHandler([&label](double leftTime)
         {
-            if ((leftTime - std::floor(leftTime)) < 0.001)
+            double difference = leftTime - std::floor(leftTime);
+            if (difference > 0 && difference < 0.001)
             {
                 std::ostringstream stringStream;
                 stringStream << "Remain Time: " << static_cast<size_t>(std::floor(leftTime)) << std::endl;
@@ -116,8 +118,9 @@ void ChessController::startChess()
     }
 
    game.getCurrentPlayer().getTimer().resume();
-   //makeMovingFromPlayer(game.getCurrentPlayer());
+   makeMovingFromPlayer(game.getCurrentPlayer());
 }
+
 
 void ChessController::makeMovingFromPlayer(Player& player)
 {
@@ -126,20 +129,29 @@ void ChessController::makeMovingFromPlayer(Player& player)
         std::cout << "Select!" << std::endl;
         while (true)
         {
-            double x = 0;
-            double y = 0;
-            double deltaX = 0;
-            double deltaY = 0;
+            std::this_thread::sleep_for(std::chrono::duration<int, std::milli>(1500));
 
-            std::cin >> x >> y >> deltaX >> deltaY;
+            double x = 0;
+            double y = 1;
+            double deltaX = 0;
+            double deltaY = 2;
+
 
             try
             {
                 game.getBoard().movePiece({ x, y }, { deltaX, deltaY });
             }
-            catch (const std::exception& ex)
+            catch (const std::exception&)
             {
-                std::cout << ex.what() << std::endl;
+                auto& currentPlayerTimer = game.getCurrentPlayer().getTimer();
+
+                currentPlayerTimer.pause();
+
+                InformationModal modal{ nullptr };
+                modal.exec();
+
+                currentPlayerTimer.resume();
+
                 continue;
             }
 
