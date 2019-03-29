@@ -5,6 +5,8 @@
 #include <thread>
 #include <iostream>
 
+#include "DefaultPath.h"
+
 #define ENTER_KEY 0xd
 #define ESC_KEY 0x1b
 
@@ -20,8 +22,9 @@ private:
 
 public:
 	Video();
-	void startVideo(int devicdId);
+	void takeVideo(int devicdId);
 	void captureImage();
+	void showImage(String image_name);
 	~Video() = default;
 };
 

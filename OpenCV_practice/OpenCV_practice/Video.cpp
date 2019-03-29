@@ -2,7 +2,7 @@
 Video::Video()
 	:end_video { false }{ }
 
-void Video::startVideo(int deviceId) {
+void Video::takeVideo(int deviceId) {
 
 	int apiId = cv::CAP_ANY;      // 0 = autodetect default API
 	cap.open(deviceId + apiId);	  // open selected camera using selected API
@@ -51,4 +51,28 @@ void Video::captureImage() {
 	}
 	// Save the frame into a file
 	imwrite("test.jpg", save_img); // A JPG FILE IS BEING SAVED
+}
+
+void Video::showImage(String image_name) {
+	
+	String filePath = DEFAULT_PATH + image_name;
+	Mat image = imread(filePath);
+
+	// Check for failure
+	if (image.empty())
+	{
+		cout << "Could not open or find the image" << endl;
+	}
+
+	String windowName = "Image"; //Name of the window
+
+	namedWindow(windowName); // Create a window
+
+	imshow(windowName, image); // Show our image inside the created window.
+
+	waitKey(0); // Wait for any keystroke in the window
+
+	destroyWindow(windowName); //destroy the created window
+	// the camera will be deinitialized automatically in VideoCapture destructor
+
 }
