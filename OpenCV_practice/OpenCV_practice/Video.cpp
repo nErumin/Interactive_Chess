@@ -1,6 +1,8 @@
 #include "Video.h"
 Video::Video()
-	:end_video { false }{ }
+	:end_video { false }
+{
+}
 
 void Video::takeVideo(int deviceId) {
 
@@ -51,6 +53,7 @@ void Video::captureImage() {
 	}
 	// Save the frame into a file
 	imwrite("test.jpg", save_img); // A JPG FILE IS BEING SAVED
+	notifyToObservers("test.jpg");
 }
 
 void Video::showImage(String image_name) {

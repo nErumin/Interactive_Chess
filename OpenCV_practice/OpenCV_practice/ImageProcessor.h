@@ -6,13 +6,15 @@
 #include "opencv2/calib3d.hpp"
 #include "Vector2.h"
 #include <vector>
+#include <iostream>
 
 #include "DefaultPath.h"
 
 using namespace cv;
 using namespace std;
 
-class ImageProcessor {
+class ImageProcessor
+{
 private:
 	Mat img;
 	vector<Vector2> chessboard_corners;

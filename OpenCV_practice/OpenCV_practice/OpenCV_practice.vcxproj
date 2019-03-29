@@ -146,7 +146,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ImageProcessor.cpp" />
-    <ClCompile Include="sample.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="OpenCVController.cpp" />
     <ClCompile Include="Vector2.cpp" />
     <ClCompile Include="Video.cpp" />
   </ItemGroup>
@@ -155,7 +156,8 @@
     <ClInclude Include="ImageProcessor.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="Observer.h" />
-    <ClInclude Include="Observerble.h" />
+    <ClInclude Include="Observable.h" />
+    <ClInclude Include="OpenCVController.h" />
     <ClInclude Include="Vector2.h" />
     <ClInclude Include="Video.h" />
   </ItemGroup>

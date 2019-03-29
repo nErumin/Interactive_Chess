@@ -4,8 +4,9 @@
 #include <opencv2/opencv.hpp>
 #include <thread>
 #include <iostream>
-
 #include "DefaultPath.h"
+#include "Observable.h"
+#include "ImageProcessor.h"
 
 #define ENTER_KEY 0xd
 #define ESC_KEY 0x1b
@@ -13,7 +14,7 @@
 using namespace cv;
 using namespace std;
 
-class Video
+class Video : public Observable<String>
 {
 private:
 	Mat frame;

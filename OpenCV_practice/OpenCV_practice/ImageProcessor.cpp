@@ -1,5 +1,8 @@
 #include "ImageProcessor.h"
-ImageProcessor::ImageProcessor(){}
+
+ImageProcessor::ImageProcessor(){
+	//video.registerObserver(this);
+}
 
 bool ImageProcessor::detectAndDrawChessboardCorners(String img_name)
 {
