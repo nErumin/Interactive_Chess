@@ -2,6 +2,7 @@
 #include "Board.h"
 #include <memory>
 #include <QDialog>
+#include <QIcon>
 #include <mutex>
 
 ChessWindow::ChessWindow(QWidget* parent)
@@ -12,6 +13,8 @@ ChessWindow::ChessWindow(QWidget* parent)
       lowerLabel{ this }
 {
     setFixedSize(800, 800);
+    setWindowIcon(QIcon(":resource/pawn_black.svg"));
+    setWindowTitle("ChessVisualizer");
 
     initializeLabels();
     initializeBackground();
