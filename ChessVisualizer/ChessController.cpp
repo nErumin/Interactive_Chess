@@ -129,17 +129,16 @@ void ChessController::makeMovingFromPlayer(Player& player)
         std::cout << "Select!" << std::endl;
         while (true)
         {
-            std::this_thread::sleep_for(std::chrono::duration<int, std::milli>(1500));
-
             double x = 0;
             double y = 1;
             double deltaX = 0;
-            double deltaY = 2;
+            double deltaY = 3;
 
+            std::cin >> x >> y >> deltaX >> deltaY;
 
             try
             {
-                game.getBoard().movePiece({ x, y }, { deltaX, deltaY });
+                game.movePiece({ x, y }, { deltaX, deltaY });
             }
             catch (const std::exception&)
             {
@@ -148,6 +147,9 @@ void ChessController::makeMovingFromPlayer(Player& player)
                 currentPlayerTimer.pause();
 
                 InformationModal modal{ nullptr };
+
+                modal.setModalTitle("Wrong placing");
+                modal.setMessageText("You cannot make that movement. It's wrong!");
                 modal.exec();
 
                 currentPlayerTimer.resume();
@@ -164,6 +166,28 @@ void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
 {
     changingPlayer.getTimer().pause();
     nextPlayer.getTimer().resume();
+
+    if (game.getBoard().isColorChecked(changingPlayer.getOwningPieceColor()))
+    {
+        std::string message = changingPlayer.getOwningPieceColor() == PieceColor::Black ?
+                    "The black king" : "The white king";
+
+        InformationModal modal{ nullptr };
+        modal.setModalTitle("Check!");
+        modal.setMessageText(message + " is checked!");
+        modal.exec();
+    }
+
+    if (game.getBoard().isColorChecked(nextPlayer.getOwningPieceColor()))
+    {
+        std::string message = nextPlayer.getOwningPieceColor() == PieceColor::Black ?
+                    "The black king" : "The white king";
+
+        InformationModal modal{ nullptr };
+        modal.setModalTitle("Check!");
+        modal.setMessageText(message + " is checked!");
+        modal.exec();
+    }
 }
 
 void ChessController::notify(const Cell& changedCell, Vector2&& location)
