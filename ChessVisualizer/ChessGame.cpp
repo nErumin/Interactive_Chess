@@ -5,6 +5,7 @@
 #include "PlayerType.h"
 #include "NullPiece.h"
 #include <memory>
+#include "Vector2.h"
 
 ChessGame::ChessGame()
     : currentTurnPlayerIndex{ 0 }
@@ -45,6 +46,20 @@ Player& ChessGame::getCurrentPlayer() noexcept
 const Player& ChessGame::getCurrentPlayer() const noexcept
 {
     return *players[currentTurnPlayerIndex];
+}
+
+
+void ChessGame::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation)
+{
+    auto indices = normalizeToIntegerVector(pieceLocation);
+    auto selectedPieceColor = getBoard().getCell(indices.second, indices.first).getPiece()->getColor();
+
+    if (selectedPieceColor != getCurrentPlayer().getOwningPieceColor())
+    {
+        throw std::logic_error{ "not your piece" };
+    }
+
+    getBoard().movePiece(pieceLocation, deltaLocation);
 }
 
 void ChessGame::notify([[maybe_unused]] const Cell& cell, [[maybe_unused]] Vector2&& location)
