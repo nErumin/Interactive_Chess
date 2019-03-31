@@ -32,4 +32,10 @@ private:
     double rotationDegree;
 };
 
+template <typename T>
+inline constexpr bool isPieceTypeOf(const Piece* piece)
+{
+    return dynamic_cast<const T*>(piece) != nullptr;
+}
+
 #endif // PIECE_H

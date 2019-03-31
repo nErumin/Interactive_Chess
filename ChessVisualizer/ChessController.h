@@ -5,13 +5,13 @@
 #include "ChessWindow.h"
 #include "Observer.h"
 
-class ChessController : public Observer<Player&>,
+class ChessController : public Observer<Player&, Player&>,
                         public Observer<const Cell&, Vector2>
 {
 public:
     ChessController();
     void startChess();
-    void notify(Player& changedPlayer) override;
+    void notify(Player& changingPlayer, Player& nextPlayer) override;
     void notify(const Cell& changedCell, Vector2&& location) override;
 
     ~ChessController() override;

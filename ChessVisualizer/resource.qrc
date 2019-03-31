@@ -14,5 +14,6 @@
         <file>resource/rook_white.svg</file>
         <file>resource/board.png</file>
         <file>resource/board81.png</file>
+        <file>resource/information.png</file>
     </qresource>
 </RCC>

@@ -4,14 +4,28 @@
 #include "PieceColor.h"
 #include "PlayerType.h"
 #include "NullPiece.h"
+#include <memory>
+#include "Vector2.h"
 
 ChessGame::ChessGame()
     : currentTurnPlayerIndex{ 0 }
 {
-    players.emplace_back(PlayerType::Human, PieceColor::White);
-    players.emplace_back(PlayerType::Human, PieceColor::Black);
+    players.push_back(std::make_shared<Player>(PlayerType::Human, PieceColor::White));
+    players.push_back(std::make_shared<Player>(PlayerType::Human, PieceColor::Black));
 
     gameBoard.registerObserver(this);
+}
+
+std::vector<std::shared_ptr<Player>> ChessGame::getPlayers() const
+{
+    std::vector<std::shared_ptr<Player>> returnPlayers(players.size());
+
+    for (size_t i = 0; i < players.size(); ++i)
+    {
+        returnPlayers[i] = players[i];
+    }
+
+    return returnPlayers;
 }
 
 Board& ChessGame::getBoard() noexcept
@@ -26,21 +40,36 @@ const Board& ChessGame::getBoard() const noexcept
 
 Player& ChessGame::getCurrentPlayer() noexcept
 {
-    return players[currentTurnPlayerIndex];
+    return *players[currentTurnPlayerIndex];
 }
 
 const Player& ChessGame::getCurrentPlayer() const noexcept
 {
-    return players[currentTurnPlayerIndex];
+    return *players[currentTurnPlayerIndex];
+}
+
+
+void ChessGame::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation)
+{
+    auto indices = normalizeToIntegerVector(pieceLocation);
+    auto selectedPieceColor = getBoard().getCell(indices.second, indices.first).getPiece()->getColor();
+
+    if (selectedPieceColor != getCurrentPlayer().getOwningPieceColor())
+    {
+        throw std::logic_error{ "not your piece" };
+    }
+
+    getBoard().movePiece(pieceLocation, deltaLocation);
 }
 
 void ChessGame::notify([[maybe_unused]] const Cell& cell, [[maybe_unused]] Vector2&& location)
 {
     if (std::dynamic_pointer_cast<NullPiece>(cell.getPiece()) != nullptr)
     {
+        Player& changingPlayer = *players[currentTurnPlayerIndex];
         currentTurnPlayerIndex = (currentTurnPlayerIndex + 1) % players.size();
 
-        notifyToObservers(players[currentTurnPlayerIndex]);
+        notifyToObservers(changingPlayer, *players[currentTurnPlayerIndex]);
     }
 }
 

@@ -3,6 +3,7 @@
 
 #include "PlayerType.h"
 #include "PieceColor.h"
+#include "Timer.h"
 
 class Player final
 {
@@ -11,10 +12,11 @@ public:
 
     PlayerType getType() const noexcept;
     PieceColor getOwningPieceColor() const noexcept;
-
+    Timer& getTimer() noexcept;
 private:
     PlayerType type;
     PieceColor owningPieceColor;
+    Timer timer;
 };
 
 #endif // PLAYER_H

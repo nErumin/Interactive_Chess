@@ -12,6 +12,8 @@
 #include "Cell.h"
 #include "PieceColor.h"
 #include <algorithm>
+#include <cmath>
+#include "Piece.h"
 
 Board::Board()
     : boardCells{ boardSize, std::vector<Cell>(boardSize, Cell(sharedNullPiece)) }
@@ -41,7 +43,7 @@ void Board::initializeBoardCellPieces()
     boardCells[0][1].setPiece(std::make_shared<Knight>(PieceColor::Black));
     boardCells[0][2].setPiece(std::make_shared<Bishop>(PieceColor::Black));
     boardCells[0][3].setPiece(std::make_shared<Queen>(PieceColor::Black));
-    boardCells[0][4].setPiece(std::make_shared<King>(PieceColor::Black));
+    boardCells[3][4].setPiece(std::make_shared<King>(PieceColor::Black));
     boardCells[0][5].setPiece(std::make_shared<Bishop>(PieceColor::Black));
     boardCells[0][6].setPiece(std::make_shared<Knight>(PieceColor::Black));
     boardCells[0][7].setPiece(std::make_shared<Rook>(PieceColor::Black));
@@ -77,7 +79,7 @@ void Board::initializeBoardCellPieces()
     boardCells[7][1].setPiece(std::make_shared<Knight>(PieceColor::White));
     boardCells[7][2].setPiece(std::make_shared<Bishop>(PieceColor::White));
     boardCells[7][3].setPiece(std::make_shared<Queen>(PieceColor::White));
-    boardCells[7][4].setPiece(std::make_shared<King>(PieceColor::White));
+    boardCells[4][4].setPiece(std::make_shared<King>(PieceColor::White));
     boardCells[7][5].setPiece(std::make_shared<Bishop>(PieceColor::White));
     boardCells[7][6].setPiece(std::make_shared<Knight>(PieceColor::White));
     boardCells[7][7].setPiece(std::make_shared<Rook>(PieceColor::White));
@@ -125,17 +127,17 @@ std::vector<Vector2> Board::findPieceMovableLocations(const Vector2 pieceLocatio
 
     auto boundaryIterator = std::remove_if(movableLocations.begin(), movableLocations.end(), [this, &cell](const Vector2& location)
     {
-        if (location.x() < 0 ||
-            location.y() < 0 ||
-            location.x() >= boardSize ||
-            location.y() >= boardSize)
+        if (std::round(location.x()) < 0 ||
+            std::round(location.y()) < 0 ||
+            std::round(location.x()) >= boardSize ||
+            std::round(location.y()) >= boardSize)
         {
             return true;
         }
 
         const auto& checkedCell = getCell(location);
         return checkedCell.isPieceOnBoard() &&
-               checkedCell.getColor() == cell.getColor();
+               checkedCell.getPiece()->getColor() == cell.getPiece()->getColor();
     });
 
     movableLocations.erase(boundaryIterator, movableLocations.end());
@@ -149,7 +151,15 @@ void Board::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation)
     auto movableLocations = findPieceMovableLocations(pieceLocation);
     auto nextLocation = pieceLocation + deltaLocation;
 
-    if (std::find(movableLocations.cbegin(), movableLocations.cend(), nextLocation) == movableLocations.cend())
+    auto searchResult = std::find_if(movableLocations.cbegin(), movableLocations.cend(), [nextLocation](const Vector2& movableLocation)
+    {
+        return normalizeToIntegerVector(movableLocation) == normalizeToIntegerVector(nextLocation);
+    });
+
+    bool isKingBeChecked = isPieceTypeOf<King>(currentCell.getPiece().get()) &&
+                           isChecked(nextLocation);
+
+    if (searchResult == movableLocations.cend() || isKingBeChecked)
     {
         throw std::invalid_argument{ "cannot move to that location " };
     }
@@ -230,4 +240,94 @@ Cell& Board::getCell(size_t row, size_t column) noexcept
 const Cell& Board::getCell(size_t row, size_t column) const noexcept
 {
     return boardCells[row][column];
+}
+
+template <typename T>
+std::vector<Vector2> Board::findPieces() const
+{
+    std::vector<Vector2> pieceLocations;
+
+    for (size_t i = 0; i < boardCells.size(); ++i)
+    {
+        for (size_t j = 0; j < boardCells[i].size(); ++j)
+        {
+            if (std::dynamic_pointer_cast<T>(boardCells[i][j].getPiece()) != nullptr)
+            {
+                pieceLocations.push_back({ static_cast<double>(j), static_cast<double>(i) });
+            }
+        }
+    }
+
+    return pieceLocations;
+}
+
+bool Board::isColorChecked(PieceColor color) const
+{
+    Vector2 kingPieceLocation;
+
+    for (const auto& location : findPieces<King>())
+    {
+        auto indices = normalizeToIntegerVector(location);
+        if (boardCells[indices.second][indices.first].getPiece()->getColor() == color)
+        {
+            kingPieceLocation = location;
+        }
+    }
+
+    return isChecked(kingPieceLocation);
+}
+
+bool Board::isColorContainsPiece(const Vector2& targetLocation, const Vector2& pieceLocation) const
+{
+    const auto& tracerIndices = normalizeToIntegerVector(pieceLocation);
+    const auto& tracerPiece = boardCells[tracerIndices.second][tracerIndices.first].getPiece();
+
+    const auto& targetIndices = normalizeToIntegerVector(targetLocation);
+    const auto& targetPiece = boardCells[targetIndices.second][targetIndices.first].getPiece();
+
+    auto opponentColor = PieceColor::None;
+
+    switch (targetPiece->getColor())
+    {
+        case PieceColor::Black:
+            opponentColor = PieceColor::White;
+            break;
+        case PieceColor::White:
+            opponentColor = PieceColor::Black;
+            break;
+        default:
+            opponentColor = PieceColor::None;
+    }
+
+    if (tracerPiece->getColor() == opponentColor)
+    {
+        auto movableLocation = findPieceMovableLocations(pieceLocation);
+        auto foundResult = std::find_if(movableLocation.cbegin(), movableLocation.cend(), [&targetLocation](const Vector2& location)
+        {
+            return normalizeToIntegerVector(location) == normalizeToIntegerVector(targetLocation);
+        });
+
+        if (foundResult != movableLocation.cend())
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Board::isChecked(const Vector2& kingLocation) const
+{
+    for (size_t i = 0; i < boardCells.size(); ++i)
+    {
+        for (size_t j = 0; j < boardCells[i].size(); ++j)
+        {
+            if (isColorContainsPiece(kingLocation, { static_cast<double>(j), static_cast<double>(i) }))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }

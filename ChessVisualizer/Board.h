@@ -23,13 +23,20 @@ public:
 
     Cell& getCell(size_t row, size_t column) noexcept;
     const Cell& getCell(size_t row, size_t column) const noexcept;
+
+    template <typename T>
+    std::vector<Vector2> findPieces() const;
+
+    bool isColorContainsPiece(const Vector2& targetLocation, const Vector2& pieceLocation) const;
+    bool isColorChecked(PieceColor color) const;
+    bool isChecked(const Vector2& kingLocation) const;
 private:
     void initializeBoardCellColors();
     void initializeBoardCellPieces();
     std::vector<std::vector<PieceColor>> makeObstacleMap() const;
+    void PawnsFor(std::function<void (Pawn&, std::pair<size_t,size_t>)> handler) const;
 
 private:
-    void PawnsFor(std::function<void (Pawn&, std::pair<size_t,size_t>)> handler) const;
     const Cell& getCell(const Vector2& location) const;
     Cell& getCell(const Vector2& location);
 
