@@ -10,4 +10,4 @@ add_executable( ChessBoardRecognizer ${SOURCES} )
 
 target_link_libraries( ChessBoardRecognizer ${OpenCV_LIBS} )
 
-SET(GCC_COVERAGE_LINK_FLAGS "-lpthread")
+SET(CMAKE_CXX_FLAGS -pthread)
