@@ -11,6 +11,9 @@ class InformationModal : public QDialog
 {
 public:
     InformationModal(QWidget* parent);
+
+    void setMessageText(const std::string& text);
+    void setModalTitle(const std::string& title);
 private:
     QPushButton okButton;
     QLabel infoIconLabel;

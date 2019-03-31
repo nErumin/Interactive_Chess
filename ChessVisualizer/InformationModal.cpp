@@ -15,7 +15,7 @@ InformationModal::InformationModal(QWidget* parent)
     okButton.setText("OK");
 
     infoIconLabel.setGeometry(20, 15, 30, 30);
-    infoMessage.setGeometry(65, 20, 200, 70);
+    infoMessage.setGeometry(65, 20, 300, 70);
 
     QPixmap iconPixmap{ ":/resource/information.png" };
     infoIconLabel.setPixmap(iconPixmap.scaled(infoIconLabel.width(), infoIconLabel.height(), Qt::KeepAspectRatio));
@@ -24,4 +24,14 @@ InformationModal::InformationModal(QWidget* parent)
     infoMessage.setText("Empty");
 
     connect(&okButton, SIGNAL(clicked()), this, SLOT(close()));
+}
+
+void InformationModal::setMessageText(const std::string& text)
+{
+    infoMessage.setText(text.c_str());
+}
+
+void InformationModal::setModalTitle(const std::string& title)
+{
+    setWindowTitle(title.c_str());
 }
