@@ -1,8 +1,12 @@
+#include "ChessWindow.h"
+#include "ChessController.h"
 #include <QApplication>
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-    QApplication app{ argc, argv };
+    QApplication a(argc, argv);
+    ChessController e;
 
-    return app.exec();
+    e.startChess();
+    return a.exec();
 }
