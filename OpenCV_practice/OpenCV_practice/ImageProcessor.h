@@ -16,7 +16,6 @@ using namespace std;
 class ImageProcessor
 {
 private:
-	Mat img;
 	vector<Vector2> chessboard_corners;
 	vector<Vector2> chess_pieces;
 	vector<Point2f> center_positions;
