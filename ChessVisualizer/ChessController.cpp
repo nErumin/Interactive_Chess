@@ -100,11 +100,6 @@ void ChessController::startChess()
                 stringStream << "Remain Time: " << static_cast<size_t>(std::floor(leftTime)) << std::endl;
 
                 label.setText(stringStream.str().c_str());
-
-                QMetaObject::invokeMethod(&label, [&label, str = stringStream.str()]
-                {
-                    label.setText(str.c_str());
-                });
             }
         });
 

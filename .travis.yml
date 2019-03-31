@@ -41,10 +41,9 @@ jobs:
       - cmake .
       - make
   - stage: Qt
-    install:
-      - sudo add-apt-repository -y ppa:beineri/opt-qt-5.10.1-trusty
-      - sudo apt-get -qy update
-      - sudo apt-get install -qy qt5-qmake qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev libsqlite3-dev   
+    install: 
+      - sudo apt-get update
+      - sudo apt-get install qt5-qmake
     before_script:
       - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
       - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
@@ -53,6 +52,6 @@ jobs:
       - gcc -v && g++ -v
       - cd ChessVisualizer
     script:
-      - /opt/qt510/bin/qmake -project -Wall 
-      - /opt/qt510/bin/qmake -makefile -Wall ChessVisualizer.pro
+      - qmake -project -Wall 
+      - qmake -makefile -Wall ChessVisualizer.pro
       - make
