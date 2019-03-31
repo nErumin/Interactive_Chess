@@ -1,6 +1,7 @@
 #include <exception>
 #include <iterator>
 #include <algorithm>
+#include <type_traits>
 
 #include "Piece.h"
 #include "MovementStrategy.h"
