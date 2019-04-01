@@ -4,7 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include <thread>
 #include <iostream>
-#include "DefaultPath.h"
+#include "Directory.h"
 #include "Observable.h"
 #include "ImageProcessor.h"
 

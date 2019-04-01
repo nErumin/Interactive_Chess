@@ -148,11 +148,12 @@
     <ClCompile Include="ImageProcessor.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OpenCVController.cpp" />
+    <ClCompile Include="Directory.cpp" />
     <ClCompile Include="Vector2.cpp" />
     <ClCompile Include="Video.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DefaultPath.h" />
+    <ClInclude Include="Directory.h" />
     <ClInclude Include="ImageProcessor.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="Observer.h" />

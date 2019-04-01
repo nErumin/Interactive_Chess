@@ -7,8 +7,7 @@
 #include "Vector2.h"
 #include <vector>
 #include <iostream>
-
-#include "DefaultPath.h"
+#include "Directory.h"
 
 using namespace cv;
 using namespace std;

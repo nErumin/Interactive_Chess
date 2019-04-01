@@ -30,6 +30,9 @@
     <ClCompile Include="OpenCVController.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Directory.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Observer.h">
@@ -47,13 +50,13 @@
     <ClInclude Include="MathUtils.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="DefaultPath.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Observable.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="OpenCVController.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Directory.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
