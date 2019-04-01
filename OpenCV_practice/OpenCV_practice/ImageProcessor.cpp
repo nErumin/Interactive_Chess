@@ -3,7 +3,6 @@
 #include <thread>
 
 ImageProcessor::ImageProcessor(){
-	//video.registerObserver(this);
 }
 
 bool ImageProcessor::detectAndDrawChessboardCorners(String img_name)
@@ -11,7 +10,6 @@ bool ImageProcessor::detectAndDrawChessboardCorners(String img_name)
 	cout << "h3" << endl;
 	String filePath = DEFAULT_PATH + img_name;
 	Mat img = imread(filePath);
-	cv::namedWindow("test", cv::WINDOW_AUTOSIZE);
 	imshow("image", img);
 	//moveWindow("image", 40, 40);
 
@@ -33,12 +31,11 @@ bool ImageProcessor::detectAndDrawChessboardCorners(String img_name)
 
 		imshow("result", img);
 		moveWindow("result", img.cols / 2, 100);
-		fflush(stdin);
 		waitKey(0);
-		fflush(stdin);
 
-		using namespace std::chrono;
-		std::this_thread::sleep_for(duration<long long, std::milli>(3000));
+		destroyWindow("image"); //destroy the created window
+		destroyWindow("result"); //destroy the created window
+
 		return true;
 	}
 	else {
