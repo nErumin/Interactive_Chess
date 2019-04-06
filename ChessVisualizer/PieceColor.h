@@ -23,4 +23,17 @@ inline std::pair<PieceColor, PieceColor> pickRandomColorPair()
     }
 }
 
+inline PieceColor getEnemyColor(PieceColor pieceColor)
+{
+    switch (pieceColor)
+    {
+        case PieceColor::Black:
+            return PieceColor::White;
+        case PieceColor::White:
+            return PieceColor::Black;
+        default:
+            return PieceColor::None;
+    }
+}
+
 #endif
