@@ -11,7 +11,7 @@ enum class GameResult
     Lose = 4
 };
 
-std::string toLowerString(GameResult result)
+inline std::string toLowerString(GameResult result)
 {
     switch (result)
     {
