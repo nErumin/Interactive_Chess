@@ -8,8 +8,6 @@
 #include "Vector2.h"
 #include "MathUtils.h"
 
-#include <iostream>
-
 ChessGame::ChessGame()
     : currentTurnPlayerIndex{ pickRandomNumber<size_t>(0, 2) }
 {
@@ -19,8 +17,6 @@ ChessGame::ChessGame()
     players.push_back(std::make_shared<Player>(PlayerType::Robot, randomColors.second));
 
     gameBoard.initializeBoardCellPieces(randomColors.second, randomColors.first);
-
-    gameBoard.registerObserver(this);
 }
 
 std::vector<std::shared_ptr<Player>> ChessGame::getPlayers() const
@@ -69,18 +65,14 @@ void ChessGame::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocati
     getBoard().movePiece(pieceLocation, deltaLocation);
 }
 
-void ChessGame::notify([[maybe_unused]] const Cell& cell, [[maybe_unused]] Vector2&& location)
+void ChessGame::setToNextPlayer()
 {
-    if (std::dynamic_pointer_cast<NullPiece>(cell.getPiece()) != nullptr)
-    {
-        Player& changingPlayer = *players[currentTurnPlayerIndex];
-        currentTurnPlayerIndex = (currentTurnPlayerIndex + 1) % players.size();
+    Player& changingPlayer = *players[currentTurnPlayerIndex];
+    currentTurnPlayerIndex = (currentTurnPlayerIndex + 1) % players.size();
 
-        notifyToObservers(changingPlayer, *players[currentTurnPlayerIndex]);
-    }
+    notifyToObservers(changingPlayer, *players[currentTurnPlayerIndex]);
 }
 
 ChessGame::~ChessGame()
 {
-    gameBoard.unregisterObserver(this);
 }

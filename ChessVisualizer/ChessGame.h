@@ -13,8 +13,7 @@
 class Cell;
 struct Vector2;
 
-class ChessGame : public Observer<const Cell&, Vector2>,
-                  public Observable<Player&, Player&>
+class ChessGame : public Observable<Player&, Player&>
 {
 public:
     ChessGame();
@@ -25,8 +24,8 @@ public:
     std::vector<std::shared_ptr<Player>> getPlayers() const;
 
     void movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation);
+    void setToNextPlayer();
 
-    void notify(const Cell& cell, Vector2&& location) override;
     ~ChessGame() override;
 private:
     std::vector<std::shared_ptr<Player>> players;

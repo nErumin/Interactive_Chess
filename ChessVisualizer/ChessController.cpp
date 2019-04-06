@@ -8,6 +8,8 @@
 #include <memory>
 #include <iostream>
 #include <sstream>
+#include <future>
+#include <chrono>
 
 #include "InformationModal.h"
 #include "King.h"
@@ -16,6 +18,7 @@
 #include "Rook.h"
 #include "Knight.h"
 #include "Pawn.h"
+#include "NullPiece.h"
 
 QPixmap convertPieceToPixmap(const Piece* piecePtr)
 {
@@ -157,31 +160,26 @@ void ChessController::makeMovingFromPlayer(Player& player)
     }
 }
 
+inline void showDialogIfChecked(const Board& board, PieceColor pieceColor)
+{
+    if (board.isColorChecked(pieceColor))
+    {
+        std::string message = pieceColor == PieceColor::Black ?
+                    "The black king" : "The white king";
+
+        InformationModal modal{ nullptr };
+        modal.setModalTitle("Check!");
+        modal.setMessageText(message + " is checked!");
+        modal.exec();
+    }
+}
+
 void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
 {
     changingPlayer.getTimer().pause();
 
-    if (game.getBoard().isColorChecked(changingPlayer.getOwningPieceColor()))
-    {
-        std::string message = changingPlayer.getOwningPieceColor() == PieceColor::Black ?
-                    "The black king" : "The white king";
-
-        InformationModal modal{ nullptr };
-        modal.setModalTitle("Check!");
-        modal.setMessageText(message + " is checked!");
-        modal.exec();
-    }
-
-    if (game.getBoard().isColorChecked(nextPlayer.getOwningPieceColor()))
-    {
-        std::string message = nextPlayer.getOwningPieceColor() == PieceColor::Black ?
-                    "The black king" : "The white king";
-
-        InformationModal modal{ nullptr };
-        modal.setModalTitle("Check!");
-        modal.setMessageText(message + " is checked!");
-        modal.exec();
-    }
+    showDialogIfChecked(game.getBoard(), changingPlayer.getOwningPieceColor());
+    showDialogIfChecked(game.getBoard(), nextPlayer.getOwningPieceColor());
 
     nextPlayer.getTimer().resume();
 }
@@ -192,6 +190,11 @@ void ChessController::notify(const Cell& changedCell, Vector2&& location)
     auto normalized = normalizeToIntegerVector(location);
 
     window.getLabel(normalized.second, normalized.first).setPixmap(std::move(pixmap));
+
+    if (std::dynamic_pointer_cast<NullPiece>(changedCell.getPiece()) == nullptr)
+    {
+        game.setToNextPlayer();
+    }
 }
 
 ChessController::~ChessController()
