@@ -4,7 +4,6 @@
 #include "ImageProcessor.h"
 #include "Video.h"
 #include "Observer.h"
-#include "Directory.h"
 #include <thread>
 
 class OpenCVController : public Observer<String>
@@ -19,7 +18,6 @@ public:
 private:
 	ImageProcessor processor;
 	Video video;
-	Directory directory;
 };
 
 

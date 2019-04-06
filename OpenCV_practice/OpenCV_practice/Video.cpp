@@ -59,7 +59,7 @@ void Video::captureImage() {
 
 void Video::showImage(String image_name) {
 	
-	String filePath = Directory::PATH + "/" + image_name;
+	String filePath = image_name;
 	Mat image = imread(filePath);
 
 	// Check for failure

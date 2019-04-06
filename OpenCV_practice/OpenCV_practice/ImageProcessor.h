@@ -7,7 +7,6 @@
 #include "Vector2.h"
 #include <vector>
 #include <iostream>
-#include "Directory.h"
 
 using namespace cv;
 using namespace std;

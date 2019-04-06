@@ -8,7 +8,7 @@ ImageProcessor::ImageProcessor(){
 bool ImageProcessor::detectAndDrawChessboardCorners(String img_name)
 {
 	cout << "h3" << endl;
-	String filePath = Directory::PATH + "/" + img_name;
+	String filePath = img_name;
 	Mat img = imread(filePath);
 	imshow("image", img);
 	//moveWindow("image", 40, 40);
