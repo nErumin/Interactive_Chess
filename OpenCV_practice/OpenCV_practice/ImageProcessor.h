@@ -8,8 +8,6 @@
 #include <vector>
 #include <iostream>
 
-#include "DefaultPath.h"
-
 using namespace cv;
 using namespace std;
 
