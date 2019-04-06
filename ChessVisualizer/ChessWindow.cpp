@@ -4,11 +4,13 @@
 #include <QDialog>
 #include <QIcon>
 #include <mutex>
+#include <sstream>
 
 ChessWindow::ChessWindow(QWidget* parent)
     : QWidget(parent),
       labels{ boardSize, std::vector<std::shared_ptr<QLabel>>() },
-      backgroudLabel{ this },
+      windowLabel{ this },
+      chessBoardLabel{ this },
       upperLabel{ this },
       lowerLabel{ this }
 {
@@ -21,6 +23,8 @@ ChessWindow::ChessWindow(QWidget* parent)
 
     upperLabel.setGeometry(20, 50, 300, 30);
     lowerLabel.setGeometry(20, 750, 300, 30);
+    windowLabel.setGeometry(0, 0, 800, 800);
+
 }
 
 void ChessWindow::initializeLabels()
@@ -43,8 +47,8 @@ void ChessWindow::initializeLabels()
 
 void ChessWindow::initializeBackground()
 {
-    backgroudLabel.setGeometry(79, 79, 642, 644);
-    backgroudLabel.setPixmap(QPixmap(":resource/board81.png"));
+    chessBoardLabel.setGeometry(79, 79, 642, 644);
+    chessBoardLabel.setPixmap(QPixmap(":resource/board81.png"));
 }
 
 QLabel& ChessWindow::getLabel(size_t row, size_t column) noexcept
@@ -79,4 +83,19 @@ const QLabel& ChessWindow::getLowerLabel() const noexcept
 {
     std::lock_guard<std::mutex> guard{ resMutex };
     return lowerLabel;
+}
+
+void ChessWindow::setWindowColor(std::tuple<int, int, int, int> colorVector)
+{
+    std::ostringstream stream;
+
+    stream << "background-color: rgba(" << std::get<0>(colorVector) << ", " <<
+                                           std::get<1>(colorVector) << ", " <<
+                                           std::get<2>(colorVector) << ", " <<
+                                           std::get<3>(colorVector) << "% " << ");";
+
+    std::cout << stream.str() << std::endl;
+
+    windowLabel.setStyleSheet(stream.str().c_str());
+    windowLabel.raise();
 }

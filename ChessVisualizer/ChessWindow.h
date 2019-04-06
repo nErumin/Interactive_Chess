@@ -19,13 +19,17 @@ public:
     const QLabel& getUpperLabel() const noexcept;
     QLabel& getLowerLabel() noexcept;
     const QLabel& getLowerLabel() const noexcept;
+
+    void setWindowColor(std::tuple<int, int, int, int> colorVector);
 private:
     void initializeLabels();
     void initializeBackground();
 private:
     mutable std::mutex resMutex;
+
     std::vector<std::vector<std::shared_ptr<QLabel>>> labels;
-    QLabel backgroudLabel;
+    QLabel windowLabel;
+    QLabel chessBoardLabel;
     QLabel upperLabel;
     QLabel lowerLabel;
 };
