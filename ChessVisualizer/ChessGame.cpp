@@ -9,7 +9,8 @@
 #include "MathUtils.h"
 
 ChessGame::ChessGame()
-    : currentTurnPlayerIndex{ pickRandomNumber<size_t>(0, 2) }
+    : currentTurnPlayerIndex{ pickRandomNumber<size_t>(0, 2) },
+      result{ GameResult::None }
 {
     auto randomColors = pickRandomColorPair();
 
@@ -71,6 +72,16 @@ void ChessGame::setToNextPlayer()
     currentTurnPlayerIndex = (currentTurnPlayerIndex + 1) % players.size();
 
     notifyToObservers(changingPlayer, *players[currentTurnPlayerIndex]);
+}
+
+GameResult ChessGame::getGameResult() const noexcept
+{
+    return result;
+}
+
+void ChessGame::setGameResult(GameResult newResult) noexcept
+{
+    result = newResult;
 }
 
 ChessGame::~ChessGame()

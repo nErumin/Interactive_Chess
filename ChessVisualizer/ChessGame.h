@@ -7,6 +7,7 @@
 #include "Observer.h"
 #include "Observable.h"
 #include "PieceColor.h"
+#include "GameResult.h"
 
 #include <memory>
 
@@ -26,11 +27,16 @@ public:
     void movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation);
     void setToNextPlayer();
 
+    GameResult getGameResult() const noexcept;
+    void setGameResult(GameResult newResult) noexcept;
+
     ~ChessGame() override;
 private:
     std::vector<std::shared_ptr<Player>> players;
     size_t currentTurnPlayerIndex;
     Board gameBoard;
+
+    GameResult result;
 };
 
 
