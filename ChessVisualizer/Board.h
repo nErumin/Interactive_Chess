@@ -30,9 +30,10 @@ public:
     bool isColorContainsPiece(const Vector2& targetLocation, const Vector2& pieceLocation) const;
     bool isColorChecked(PieceColor color) const;
     bool isChecked(const Vector2& kingLocation) const;
+
+    void initializeBoardCellPieces(PieceColor topPieceColor, PieceColor bottomPieceColor);
 private:
     void initializeBoardCellColors();
-    void initializeBoardCellPieces();
     std::vector<std::vector<PieceColor>> makeObstacleMap() const;
     void PawnsFor(std::function<void (Pawn&, std::pair<size_t,size_t>)> handler) const;
 

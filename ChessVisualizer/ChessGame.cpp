@@ -6,12 +6,19 @@
 #include "NullPiece.h"
 #include <memory>
 #include "Vector2.h"
+#include "MathUtils.h"
+
+#include <iostream>
 
 ChessGame::ChessGame()
-    : currentTurnPlayerIndex{ 0 }
+    : currentTurnPlayerIndex{ pickRandomNumber<size_t>(0, 2) }
 {
-    players.push_back(std::make_shared<Player>(PlayerType::Human, PieceColor::White));
-    players.push_back(std::make_shared<Player>(PlayerType::Human, PieceColor::Black));
+    auto randomColors = pickRandomColorPair();
+
+    players.push_back(std::make_shared<Player>(PlayerType::Human, randomColors.first));
+    players.push_back(std::make_shared<Player>(PlayerType::Robot, randomColors.second));
+
+    gameBoard.initializeBoardCellPieces(randomColors.second, randomColors.first);
 
     gameBoard.registerObserver(this);
 }
