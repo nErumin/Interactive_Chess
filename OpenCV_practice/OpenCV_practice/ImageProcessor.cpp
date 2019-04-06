@@ -2,14 +2,18 @@
 #include <chrono>
 #include <thread>
 
-ImageProcessor::ImageProcessor(){
+ImageProcessor::ImageProcessor() {
+	
+}
+
+void ImageProcessor::recognizeMovement() {
+	// to do
+	notifyToObservers(Vector2(1.0, 2.0));
 }
 
 bool ImageProcessor::detectAndDrawChessboardCorners(String img_name)
 {
-	cout << "h3" << endl;
-	String filePath = img_name;
-	Mat img = imread(filePath);
+	Mat img = imread(img_name);
 	imshow("image", img);
 	//moveWindow("image", 40, 40);
 
@@ -18,15 +22,11 @@ bool ImageProcessor::detectAndDrawChessboardCorners(String img_name)
 	cvtColor(img, gray, COLOR_BGR2GRAY);//source image
 	vector<Point2f> corners; //this will be filled by the detected corners
 	
-	//CALIB_CB_FAST_CHECK saves a lot of time on images
-	//that do not contain any chessboard corners
 	bool patternfound = findChessboardCorners(gray, patternsize, corners,
 		CALIB_CB_ADAPTIVE_THRESH + CALIB_CB_NORMALIZE_IMAGE
 		+ CALIB_CB_FAST_CHECK);
 	if (patternfound) {
-		
 		ImageProcessor::mean_distance = calculateMeanDistanceOfCorners(corners);
-
 		drawChessboardCorners(img, patternsize, Mat(corners), patternfound);
 
 		imshow("result", img);
@@ -35,7 +35,6 @@ bool ImageProcessor::detectAndDrawChessboardCorners(String img_name)
 
 		destroyWindow("image"); //destroy the created window
 		destroyWindow("result"); //destroy the created window
-
 		return true;
 	}
 	else {

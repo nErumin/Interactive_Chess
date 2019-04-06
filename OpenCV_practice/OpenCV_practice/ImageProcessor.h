@@ -5,13 +5,14 @@
 #include "opencv2/highgui.hpp"
 #include "opencv2/calib3d.hpp"
 #include "Vector2.h"
+#include "Observable.h"
 #include <vector>
 #include <iostream>
 
 using namespace cv;
 using namespace std;
 
-class ImageProcessor
+class ImageProcessor : public Observable<Vector2>
 {
 private:
 	vector<Vector2> chessboard_corners;
@@ -20,10 +21,11 @@ private:
 	Point2f mean_distance;
 	Point2f calculateMeanDistanceOfCorners(vector<Point2f> corners);
 	vector<Point2f> calculateCenterPositionsOfCells(vector<Point2f> corners);
-
 public:
 	ImageProcessor();
 	~ImageProcessor() = default;
 	bool detectAndDrawChessboardCorners(String img_name);
+	void recognizeMovement();
 };
+
 #endif
