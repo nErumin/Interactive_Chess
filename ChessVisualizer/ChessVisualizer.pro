@@ -58,7 +58,8 @@ HEADERS += \
     ChessController.h \
     ChessWindow.h \
     Timer.h \
-    InformationModal.h
+    InformationModal.h \
+    GameResult.h
 
 FORMS +=
 

@@ -11,6 +11,8 @@
 #include <future>
 #include <chrono>
 
+#include <QApplication>
+#include <cstdlib>
 #include "InformationModal.h"
 #include "King.h"
 #include "Queen.h"
@@ -106,15 +108,20 @@ void ChessController::startChess()
             }
         });
 
-        player->getTimer().setFinishedHandler([]
+        player->getTimer().setFinishedHandler([playerType = player->getType(), this]
         {
-            std::cout << "Timer Finished!" << std::endl;
+            auto result = playerType == PlayerType::Human ?
+                        GameResult::Lose :
+                        GameResult::Win;
+
+            std::cout << "Timer Finished! Result = " << toLowerString(result) << std::endl;
+
+            game.setGameResult(result);
         });
 
-        player->getTimer().start(10.0);
+        player->getTimer().start(5.0);
         player->getTimer().pause();
     }
-
    game.getCurrentPlayer().getTimer().resume();
    makeMovingFromPlayer(game.getCurrentPlayer());
 }
@@ -184,8 +191,42 @@ void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
     nextPlayer.getTimer().resume();
 }
 
+inline void showGameFinishedDialog(ChessWindow& window, GameResult result)
+{
+    window.setWindowColor({ 0, 0, 0, 75 });
+
+    InformationModal dialog{ nullptr };
+    std::ostringstream stream;
+
+    auto resultMessage = toLowerString(result);
+
+    if (result == GameResult::Draw)
+    {
+        resultMessage[0] = static_cast<char>(toupper(resultMessage[0]));
+        stream << resultMessage << "!";
+    }
+    else
+    {
+        stream << "You " << resultMessage << "!";
+    }
+
+    dialog.setModalTitle("Game Finished");
+    dialog.setMessageText(stream.str());
+    dialog.exec();
+
+    QMetaObject::invokeMethod(QApplication::instance(), "quit", Qt::QueuedConnection);
+}
+
 void ChessController::notify(const Cell& changedCell, Vector2&& location)
 {
+    if (game.getGameResult() != GameResult::None)
+    {
+        showGameFinishedDialog(window, game.getGameResult());
+        game.getBoard().unregisterObserver(this);
+
+        return;
+    }
+
     auto pixmap = convertPieceToPixmap(changedCell.getPiece().get());
     auto normalized = normalizeToIntegerVector(location);
 
