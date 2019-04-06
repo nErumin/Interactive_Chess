@@ -13,8 +13,8 @@ Vector2 operator-(const Vector2& lhs, const Vector2& rhs)
 
 bool operator==(const Vector2& lhs, const Vector2& rhs)
 {
-    return (std::abs(lhs.x() - rhs.x()) < 0.0000001) &&
-           (std::abs(lhs.y() - rhs.y()) < 0.0000001);
+    return (std::abs(lhs.x() - rhs.x()) < 0.0001) &&
+           (std::abs(lhs.y() - rhs.y()) < 0.0001);
 }
 
 Vector2::Vector2()
