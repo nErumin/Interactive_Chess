@@ -18,7 +18,6 @@ public:
 private:
 	ImageProcessor processor;
 	Video video;
-
 };
 
 

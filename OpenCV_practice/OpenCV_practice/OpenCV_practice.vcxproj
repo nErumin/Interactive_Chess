@@ -152,7 +152,6 @@
     <ClCompile Include="Video.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DefaultPath.h" />
     <ClInclude Include="ImageProcessor.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="Observer.h" />
