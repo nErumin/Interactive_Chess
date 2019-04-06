@@ -7,7 +7,7 @@
 class LShapedMovementStrategy : public MovementStrategy
 {
 public:
-    explicit LShapedMovementStrategy(PolarCoordinate bodyDirection, PolarCoordinate edgeDirection);
+    explicit LShapedMovementStrategy(PolarCoordinate bodyDirection, PolarCoordinate edgeDirection, bool strategyPermeable = true);
     ObstacleMovablePair movableLocationsUsingObstacles(const Vector2& centerLocation, std::vector<std::deque<bool>> obstacleMap) const noexcept override;
 
     std::vector<Vector2> movableLocations(const Vector2& centerLocation) const noexcept override;

@@ -26,8 +26,9 @@ inline Vector2 discritizePolarCoordinate(const PolarCoordinate& polarCoordinate)
     return { deltaX, deltaY };
 }
 
-LineMovementStrategy::LineMovementStrategy(std::initializer_list<PolarCoordinate> usedDirections)
-    : directions(usedDirections)
+LineMovementStrategy::LineMovementStrategy(std::initializer_list<PolarCoordinate> usedDirections, bool strategyPermeable)
+    : MovementStrategy(strategyPermeable),
+      directions(usedDirections)
 {
 }
 

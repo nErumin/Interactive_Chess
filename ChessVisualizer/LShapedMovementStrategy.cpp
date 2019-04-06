@@ -1,8 +1,9 @@
 #include "LShapedMovementStrategy.h"
 #include "Vector2.h"
 
-LShapedMovementStrategy::LShapedMovementStrategy(PolarCoordinate bodyDirection, PolarCoordinate edgeDirection)
-    : body{ std::move(bodyDirection) },
+LShapedMovementStrategy::LShapedMovementStrategy(PolarCoordinate bodyDirection, PolarCoordinate edgeDirection, bool strategyPermeable)
+    : MovementStrategy(strategyPermeable),
+      body{ std::move(bodyDirection) },
       edge{ std::move(edgeDirection) }
 {
 
