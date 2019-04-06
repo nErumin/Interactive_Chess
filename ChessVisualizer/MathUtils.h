@@ -22,7 +22,7 @@ T pickRandomNumber(T minInclusive, T maxExclusive)
     static thread_local std::default_random_engine engine{ device() };
     static thread_local TDistribution distribution;
 
-    return distribution(engine, TDistribution::param_type(minInclusive, maxExclusive - 1));
+    return distribution(engine, typename TDistribution::param_type(minInclusive, maxExclusive - 1));
 }
 
 #endif // MATHUTILS_H
