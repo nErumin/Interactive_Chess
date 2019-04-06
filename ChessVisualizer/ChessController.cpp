@@ -160,7 +160,6 @@ void ChessController::makeMovingFromPlayer(Player& player)
 void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
 {
     changingPlayer.getTimer().pause();
-    nextPlayer.getTimer().resume();
 
     if (game.getBoard().isColorChecked(changingPlayer.getOwningPieceColor()))
     {
@@ -183,6 +182,8 @@ void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
         modal.setMessageText(message + " is checked!");
         modal.exec();
     }
+
+    nextPlayer.getTimer().resume();
 }
 
 void ChessController::notify(const Cell& changedCell, Vector2&& location)
