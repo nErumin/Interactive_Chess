@@ -88,7 +88,7 @@ void ChessController::startChess()
     // set timers and register tick events
     for (const auto& player : game.getPlayers())
     {
-        auto& label = player->getOwningPieceColor() == PieceColor::Black ?
+        auto& label = player->getOwningPieceColor() == game.getBoard().getTopPieceColor() ?
                     window.getUpperLabel() :
                     window.getLowerLabel();
 

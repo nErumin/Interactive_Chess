@@ -39,32 +39,35 @@ void Board::initializeBoardCellColors()
 
 void Board::initializeBoardCellPieces(PieceColor topPieceColor, PieceColor bottomPieceColor)
 {
-    boardCells[0][0].setPiece(std::make_shared<Rook>(topPieceColor));
-    boardCells[0][1].setPiece(std::make_shared<Knight>(topPieceColor));
-    boardCells[0][2].setPiece(std::make_shared<Bishop>(topPieceColor));
-    boardCells[0][3].setPiece(std::make_shared<Queen>(topPieceColor));
-    boardCells[3][4].setPiece(std::make_shared<King>(topPieceColor));
-    boardCells[0][5].setPiece(std::make_shared<Bishop>(topPieceColor));
-    boardCells[0][6].setPiece(std::make_shared<Knight>(topPieceColor));
-    boardCells[0][7].setPiece(std::make_shared<Rook>(topPieceColor));
+    pieceColors.first = topPieceColor;
+    pieceColors.second = bottomPieceColor;
 
-    boardCells[1][0].setPiece(std::make_shared<Pawn>(topPieceColor));
-    boardCells[1][1].setPiece(std::make_shared<Pawn>(topPieceColor));
-    boardCells[1][2].setPiece(std::make_shared<Pawn>(topPieceColor));
-    boardCells[1][3].setPiece(std::make_shared<Pawn>(topPieceColor));
-    boardCells[1][4].setPiece(std::make_shared<Pawn>(topPieceColor));
-    boardCells[1][5].setPiece(std::make_shared<Pawn>(topPieceColor));
-    boardCells[1][6].setPiece(std::make_shared<Pawn>(topPieceColor));
-    boardCells[1][7].setPiece(std::make_shared<Pawn>(topPieceColor));
+    boardCells[0][0].setPiece(std::make_shared<Rook>(pieceColors.first));
+    boardCells[0][1].setPiece(std::make_shared<Knight>(pieceColors.first));
+    boardCells[0][2].setPiece(std::make_shared<Bishop>(pieceColors.first));
+    boardCells[0][3].setPiece(std::make_shared<Queen>(pieceColors.first));
+    boardCells[0][4].setPiece(std::make_shared<King>(pieceColors.first));
+    boardCells[0][5].setPiece(std::make_shared<Bishop>(pieceColors.first));
+    boardCells[0][6].setPiece(std::make_shared<Knight>(pieceColors.first));
+    boardCells[0][7].setPiece(std::make_shared<Rook>(pieceColors.first));
 
-    boardCells[6][0].setPiece(std::make_shared<Pawn>(bottomPieceColor));
-    boardCells[6][1].setPiece(std::make_shared<Pawn>(bottomPieceColor));
-    boardCells[6][2].setPiece(std::make_shared<Pawn>(bottomPieceColor));
-    boardCells[6][3].setPiece(std::make_shared<Pawn>(bottomPieceColor));
-    boardCells[6][4].setPiece(std::make_shared<Pawn>(bottomPieceColor));
-    boardCells[6][5].setPiece(std::make_shared<Pawn>(bottomPieceColor));
-    boardCells[6][6].setPiece(std::make_shared<Pawn>(bottomPieceColor));
-    boardCells[6][7].setPiece(std::make_shared<Pawn>(bottomPieceColor));
+    boardCells[1][0].setPiece(std::make_shared<Pawn>(pieceColors.first));
+    boardCells[1][1].setPiece(std::make_shared<Pawn>(pieceColors.first));
+    boardCells[1][2].setPiece(std::make_shared<Pawn>(pieceColors.first));
+    boardCells[1][3].setPiece(std::make_shared<Pawn>(pieceColors.first));
+    boardCells[1][4].setPiece(std::make_shared<Pawn>(pieceColors.first));
+    boardCells[1][5].setPiece(std::make_shared<Pawn>(pieceColors.first));
+    boardCells[1][6].setPiece(std::make_shared<Pawn>(pieceColors.first));
+    boardCells[1][7].setPiece(std::make_shared<Pawn>(pieceColors.first));
+
+    boardCells[6][0].setPiece(std::make_shared<Pawn>(pieceColors.second));
+    boardCells[6][1].setPiece(std::make_shared<Pawn>(pieceColors.second));
+    boardCells[6][2].setPiece(std::make_shared<Pawn>(pieceColors.second));
+    boardCells[6][3].setPiece(std::make_shared<Pawn>(pieceColors.second));
+    boardCells[6][4].setPiece(std::make_shared<Pawn>(pieceColors.second));
+    boardCells[6][5].setPiece(std::make_shared<Pawn>(pieceColors.second));
+    boardCells[6][6].setPiece(std::make_shared<Pawn>(pieceColors.second));
+    boardCells[6][7].setPiece(std::make_shared<Pawn>(pieceColors.second));
 
     std::dynamic_pointer_cast<Pawn>(boardCells[6][0].getPiece())->setRotationDegree(180.0);
     std::dynamic_pointer_cast<Pawn>(boardCells[6][1].getPiece())->setRotationDegree(180.0);
@@ -75,14 +78,24 @@ void Board::initializeBoardCellPieces(PieceColor topPieceColor, PieceColor botto
     std::dynamic_pointer_cast<Pawn>(boardCells[6][6].getPiece())->setRotationDegree(180.0);
     std::dynamic_pointer_cast<Pawn>(boardCells[6][7].getPiece())->setRotationDegree(180.0);
 
-    boardCells[7][0].setPiece(std::make_shared<Rook>(bottomPieceColor));
-    boardCells[7][1].setPiece(std::make_shared<Knight>(bottomPieceColor));
-    boardCells[7][2].setPiece(std::make_shared<Bishop>(bottomPieceColor));
-    boardCells[7][3].setPiece(std::make_shared<Queen>(bottomPieceColor));
-    boardCells[4][4].setPiece(std::make_shared<King>(bottomPieceColor));
-    boardCells[7][5].setPiece(std::make_shared<Bishop>(bottomPieceColor));
-    boardCells[7][6].setPiece(std::make_shared<Knight>(bottomPieceColor));
-    boardCells[7][7].setPiece(std::make_shared<Rook>(bottomPieceColor));
+    boardCells[7][0].setPiece(std::make_shared<Rook>(pieceColors.second));
+    boardCells[7][1].setPiece(std::make_shared<Knight>(pieceColors.second));
+    boardCells[7][2].setPiece(std::make_shared<Bishop>(pieceColors.second));
+    boardCells[7][3].setPiece(std::make_shared<Queen>(pieceColors.second));
+    boardCells[7][4].setPiece(std::make_shared<King>(pieceColors.second));
+    boardCells[7][5].setPiece(std::make_shared<Bishop>(pieceColors.second));
+    boardCells[7][6].setPiece(std::make_shared<Knight>(pieceColors.second));
+    boardCells[7][7].setPiece(std::make_shared<Rook>(pieceColors.second));
+}
+
+PieceColor Board::getTopPieceColor() const noexcept
+{
+    return pieceColors.first;
+}
+
+PieceColor Board::getBottomPieceColor() const noexcept
+{
+    return pieceColors.second;
 }
 
 Cell& Board::getCell(const Vector2& location)

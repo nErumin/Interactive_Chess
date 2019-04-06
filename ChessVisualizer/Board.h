@@ -32,6 +32,8 @@ public:
     bool isChecked(const Vector2& kingLocation) const;
 
     void initializeBoardCellPieces(PieceColor topPieceColor, PieceColor bottomPieceColor);
+    PieceColor getTopPieceColor() const noexcept;
+    PieceColor getBottomPieceColor() const noexcept;
 private:
     void initializeBoardCellColors();
     std::vector<std::vector<PieceColor>> makeObstacleMap() const;
@@ -42,6 +44,7 @@ private:
     Cell& getCell(const Vector2& location);
 
     std::vector<std::vector<Cell>> boardCells;
+    std::pair<PieceColor, PieceColor> pieceColors;
 };
 
 #endif // BOARD_H
