@@ -94,7 +94,7 @@ void ChessController::startChess()
                     window.getUpperLabel() :
                     window.getLowerLabel();
 
-        label.setText("Remain Time: 10");
+        label.setText("");
 
         player->getTimer().setTickHandler([&label](double leftTime)
         {
@@ -181,14 +181,22 @@ inline void showDialogIfChecked(const Board& board, PieceColor pieceColor)
     }
 }
 
-void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
+inline void showDialogIfStaleMated(ChessGame& game)
 {
-    changingPlayer.getTimer().pause();
+    auto& board = game.getBoard();
 
-    showDialogIfChecked(game.getBoard(), changingPlayer.getOwningPieceColor());
-    showDialogIfChecked(game.getBoard(), nextPlayer.getOwningPieceColor());
+    if (board.isStaleMated(PieceColor::Black) ||
+        board.isStaleMated(PieceColor::White))
+    {
+        game.setGameResult(GameResult::Draw);
 
-    nextPlayer.getTimer().resume();
+        InformationModal modal{ nullptr };
+
+        modal.setModalTitle("Stalemated");
+        modal.setMessageText("Stalemated!");
+
+        modal.exec();
+    }
 }
 
 inline void showGameFinishedDialog(ChessWindow& window, GameResult result)
@@ -215,6 +223,25 @@ inline void showGameFinishedDialog(ChessWindow& window, GameResult result)
     dialog.exec();
 
     QMetaObject::invokeMethod(QApplication::instance(), "quit", Qt::QueuedConnection);
+}
+
+void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
+{
+    changingPlayer.getTimer().pause();
+
+    showDialogIfChecked(game.getBoard(), changingPlayer.getOwningPieceColor());
+    showDialogIfChecked(game.getBoard(), nextPlayer.getOwningPieceColor());
+    showDialogIfStaleMated(game);
+
+    if (game.getGameResult() != GameResult::None)
+    {
+        showGameFinishedDialog(window, game.getGameResult());
+        game.getBoard().unregisterObserver(this);
+
+        return;
+    }
+
+    nextPlayer.getTimer().resume();
 }
 
 void ChessController::notify(const Cell& changedCell, Vector2&& location)

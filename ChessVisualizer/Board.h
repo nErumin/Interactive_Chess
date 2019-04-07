@@ -18,7 +18,7 @@ class Board final : public Observable<const Cell&, Vector2>
 public:
     Board();
 
-    std::vector<Vector2> findPieceMovableLocations(const Vector2 pieceLocation) const;
+    std::vector<Vector2> findPieceMovableLocations(const Vector2 pieceLocation, PieceColor colorThreshold) const;
     void movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation);
 
     Cell& getCell(size_t row, size_t column) noexcept;
@@ -27,9 +27,11 @@ public:
     template <typename T>
     std::vector<Vector2> findPieces() const;
 
-    bool isColorContainsPiece(const Vector2& targetLocation, const Vector2& pieceLocation) const;
+    bool isPieceTracedByOther(const Vector2& targetLocation, const Vector2& pieceLocation) const;
+    bool isPieceTracedByOtherSimulated(const Vector2& targetLocation, const Vector2& pieceLocation, PieceColor targetColor) const;
     bool isColorChecked(PieceColor color) const;
     bool isChecked(const Vector2& kingLocation) const;
+    bool isStaleMated(PieceColor color) const;
 
     void initializeBoardCellPieces(PieceColor topPieceColor, PieceColor bottomPieceColor);
     PieceColor getTopPieceColor() const noexcept;
