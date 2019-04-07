@@ -52,6 +52,17 @@ const Player& ChessGame::getCurrentPlayer() const noexcept
     return *players[currentTurnPlayerIndex];
 }
 
+Player& ChessGame::getNextPlayer() noexcept
+{
+    size_t nextPlayerIndex = (currentTurnPlayerIndex + 1) % players.size();
+    return *players[nextPlayerIndex];
+}
+
+const Player& ChessGame::getNextPlayer() const noexcept
+{
+    size_t nextPlayerIndex = (currentTurnPlayerIndex + 1) % players.size();
+    return *players[nextPlayerIndex];
+}
 
 void ChessGame::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation)
 {

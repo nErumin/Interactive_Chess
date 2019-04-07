@@ -22,6 +22,9 @@ public:
     const Board& getBoard() const noexcept;
     Player& getCurrentPlayer() noexcept;
     const Player& getCurrentPlayer() const noexcept;
+    Player& getNextPlayer() noexcept;
+    const Player& getNextPlayer() const noexcept;
+
     std::vector<std::shared_ptr<Player>> getPlayers() const;
 
     void movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation);

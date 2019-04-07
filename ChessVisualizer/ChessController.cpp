@@ -249,6 +249,7 @@ inline void showGameFinishedDialog(ChessWindow& window, GameResult result)
     dialog.setMessageText(stream.str());
     dialog.exec();
 
+    std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 1500 });
     QMetaObject::invokeMethod(QApplication::instance(), "quit", Qt::QueuedConnection);
 }
 
@@ -263,6 +264,9 @@ void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
 
     if (game.getGameResult() != GameResult::None)
     {
+        changingPlayer.getTimer().stop();
+        nextPlayer.getTimer().stop();
+
         showGameFinishedDialog(window, game.getGameResult());
         game.getBoard().unregisterObserver(this);
 
