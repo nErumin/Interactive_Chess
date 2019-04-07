@@ -1,6 +1,12 @@
 #include "Vector2.h"
 #include <cmath>
 
+
+bool operator<(const Vector2& lhs, const Vector2& rhs)
+{
+    return lhs.magitude() < rhs.magitude();
+}
+
 Vector2 operator+(const Vector2& lhs, const Vector2& rhs)
 {
     return { lhs.x() + rhs.x(), lhs.y() + rhs.y() };

@@ -8,6 +8,9 @@ enum class PieceColor;
 class NullPiece : public Piece
 {
 public:
+
+    size_t getPriority() const noexcept override { return 0; }
+
     NullPiece() = default;
     ~NullPiece() override = default;
 protected:

@@ -17,6 +17,7 @@ public:
     ~ChessController() override;
 private:
     void makeMovingFromPlayer(Player& player);
+    void startTurn();
 
     ChessGame game;
     ChessWindow window;

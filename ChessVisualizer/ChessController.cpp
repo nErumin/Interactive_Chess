@@ -21,6 +21,7 @@
 #include "Knight.h"
 #include "Pawn.h"
 #include "NullPiece.h"
+#include "BoardUtility.h"
 
 QPixmap convertPieceToPixmap(const Piece* piecePtr)
 {
@@ -104,7 +105,9 @@ void ChessController::startChess()
                 std::ostringstream stringStream;
                 stringStream << "Remain Time: " << static_cast<size_t>(std::floor(leftTime)) << std::endl;
 
-                label.setText(stringStream.str().c_str());
+                QMetaObject::invokeMethod(&label, "setText", Qt::QueuedConnection, Q_ARG(QString, stringStream.str().c_str()));
+                //label.setText(stringStream.str().c_str());
+
             }
         });
 
@@ -119,19 +122,37 @@ void ChessController::startChess()
             game.setGameResult(result);
         });
 
-        player->getTimer().start(5.0);
+        player->getTimer().start(50.0);
         player->getTimer().pause();
     }
+
    game.getCurrentPlayer().getTimer().resume();
-   makeMovingFromPlayer(game.getCurrentPlayer());
+   startTurn();
 }
 
+void ChessController::startTurn()
+{
+    std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 1000 });
+
+    bool isPassive = pickRandomNumber(0, 2) == 0;
+    auto picked = randomPickPieceMoving(game.getBoard(), game.getCurrentPlayer().getOwningPieceColor(), isPassive);
+
+    game.movePiece(picked.first, picked.second);
+}
 
 void ChessController::makeMovingFromPlayer(Player& player)
 {
     if (player.getType() == PlayerType::Human)
     {
         std::cout << "Select!" << std::endl;
+
+        bool isPassive = pickRandomNumber(0, 2) == 0;
+        auto picked = randomPickPieceMoving(game.getBoard(), player.getOwningPieceColor(), isPassive);
+
+        std::cout << "Picked" << std::endl;
+        std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 1000 });
+        game.movePiece(picked.first, picked.second);
+        /*
         while (true)
         {
             double x = 0;
@@ -164,6 +185,16 @@ void ChessController::makeMovingFromPlayer(Player& player)
 
             break;
         }
+        */
+    }
+    else if (player.getType() == PlayerType::Robot)
+    {
+        bool isPassive = pickRandomNumber(0, 2) == 0;
+        auto picked = randomPickPieceMoving(game.getBoard(), player.getOwningPieceColor(), isPassive);
+
+        std::cout << "Picked" << std::endl;
+        std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 1000 });
+        game.movePiece(picked.first, picked.second);
     }
 }
 
@@ -235,6 +266,7 @@ inline void showGameFinishedDialog(ChessWindow& window, GameResult result)
 
     auto resultMessage = toLowerString(result);
 
+    QApplication::postEvent(QApplication::instance(), nullptr);
     if (result == GameResult::Draw)
     {
         resultMessage[0] = static_cast<char>(toupper(resultMessage[0]));

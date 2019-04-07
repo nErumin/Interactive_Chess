@@ -25,6 +25,7 @@ public:
     void setColor(PieceColor newColor) noexcept;
     void setMovementStratgies(std::vector<std::unique_ptr<MovementStrategy>>&& newStrategies);
 
+    virtual size_t getPriority() const noexcept = 0;
     virtual ~Piece();
 protected:
     virtual bool isStrategyAcceptable(const std::unique_ptr<MovementStrategy>& strategy) const noexcept = 0;
