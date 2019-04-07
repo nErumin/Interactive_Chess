@@ -389,3 +389,13 @@ bool Board::isStaleMated(PieceColor pieceColor) const
                 != opponentPieceMovableLocations.end();
     });
 }
+
+bool Board::isKingDead(PieceColor color) const
+{
+    auto kings = findPieces<King>();
+
+    return std::all_of(kings.cbegin(), kings.cend(), [color, this](const Vector2& kingLocation)
+    {
+        return getCell(kingLocation).getPiece()->getColor() != color;
+    });
+}

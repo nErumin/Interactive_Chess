@@ -199,6 +199,33 @@ inline void showDialogIfStaleMated(ChessGame& game)
     }
 }
 
+inline void showDialogIfKingDead(ChessGame& game)
+{
+    auto& board = game.getBoard();
+    auto currentPlayerColor = game.getCurrentPlayer().getOwningPieceColor();
+    auto humanColor = game.getCurrentPlayer().getType() == PlayerType::Human ?
+                currentPlayerColor :
+                getEnemyColor(currentPlayerColor);
+
+    InformationModal dialog{ nullptr };
+    dialog.setModalTitle("King dead!");
+
+    if (board.isKingDead(humanColor))
+    {
+        game.setGameResult(GameResult::Lose);
+
+        dialog.setMessageText("Your king is dead!");
+        dialog.exec();
+    }
+    else if (board.isKingDead(getEnemyColor(humanColor)))
+    {
+        game.setGameResult(GameResult::Win);
+
+        dialog.setMessageText("The robot's king is dead!");
+        dialog.exec();
+    }
+}
+
 inline void showGameFinishedDialog(ChessWindow& window, GameResult result)
 {
     window.setWindowColor({ 0, 0, 0, 75 });
@@ -232,6 +259,7 @@ void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
     showDialogIfChecked(game.getBoard(), changingPlayer.getOwningPieceColor());
     showDialogIfChecked(game.getBoard(), nextPlayer.getOwningPieceColor());
     showDialogIfStaleMated(game);
+    showDialogIfKingDead(game);
 
     if (game.getGameResult() != GameResult::None)
     {
