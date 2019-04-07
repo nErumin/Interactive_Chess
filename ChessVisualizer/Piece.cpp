@@ -33,7 +33,9 @@ std::vector<Vector2> Piece::movableLocations(const Vector2& pieceLocation) const
     return locations;
 }
 
-std::vector<Vector2> Piece::movableLocationsUsingObstacles(const Vector2& pieceLocation, const std::vector<std::vector<PieceColor>>& obstacleMap) const
+std::vector<Vector2> Piece::movableLocationsUsingObstacles(const Vector2& pieceLocation,
+                                                           const std::vector<std::vector<PieceColor>>& obstacleMap,
+                                                           PieceColor obstacleThreshold) const
 {
     std::vector<Vector2> locations;
 
@@ -62,10 +64,10 @@ std::vector<Vector2> Piece::movableLocationsUsingObstacles(const Vector2& pieceL
         if (strategy->isPermeable())
         {
             std::copy_if(obstacleMovablesPair.first.begin(), obstacleMovablesPair.first.end(), std::back_inserter(locations),
-                         [this, &obstacleMap](const Vector2& obstacleLocation)
+                         [&obstacleMap, obstacleThreshold](const Vector2& obstacleLocation)
             {
                 auto normalized = normalizeToIntegerVector(obstacleLocation);
-                return obstacleMap[normalized.first][normalized.second] != getColor();
+                return (obstacleMap[normalized.first][normalized.second] & obstacleThreshold) == PieceColor::None;
             });
         }
     }
