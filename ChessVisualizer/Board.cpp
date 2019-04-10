@@ -300,6 +300,22 @@ bool Board::isColorChecked(PieceColor color) const
     return isChecked(kingPieceLocation);
 }
 
+bool Board::isPieceTracedByOpponent(const Vector2& targetLocation) const
+{
+    for (size_t i = 0; i < boardCells.size(); ++i)
+    {
+        for (size_t j = 0; j < boardCells[i].size(); ++j)
+        {
+            if (isPieceTracedByOther(targetLocation, { static_cast<double>(j), static_cast<double>(i) }))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 bool Board::isPieceTracedByOther(const Vector2& targetLocation, const Vector2& pieceLocation) const
 {
     const auto& targetIndices = normalizeToIntegerVector(targetLocation);
@@ -334,18 +350,7 @@ bool Board::isPieceTracedByOtherSimulated(const Vector2& targetLocation, const V
 
 bool Board::isChecked(const Vector2& kingLocation) const
 {
-    for (size_t i = 0; i < boardCells.size(); ++i)
-    {
-        for (size_t j = 0; j < boardCells[i].size(); ++j)
-        {
-            if (isPieceTracedByOther(kingLocation, { static_cast<double>(j), static_cast<double>(i) }))
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
+    return isPieceTracedByOpponent(kingLocation);
 }
 
 bool Board::isStaleMated(PieceColor pieceColor) const

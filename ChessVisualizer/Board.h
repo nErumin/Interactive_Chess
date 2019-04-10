@@ -29,10 +29,10 @@ public:
     template <typename T>
     std::vector<Vector2> findPieces() const;
 
+    bool isPieceTracedByOpponent(const Vector2& targetLocation) const;
     bool isPieceTracedByOther(const Vector2& targetLocation, const Vector2& pieceLocation) const;
     bool isPieceTracedByOtherSimulated(const Vector2& targetLocation, const Vector2& pieceLocation, PieceColor targetColor) const;
     bool isKingDead(PieceColor color) const;
-    bool isColorContainsPiece(const Vector2& targetLocation, const Vector2& pieceLocation) const;
     bool isColorChecked(PieceColor color) const;
     bool isChecked(const Vector2& kingLocation) const;
     bool isStaleMated(PieceColor color) const;
