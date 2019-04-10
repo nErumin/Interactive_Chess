@@ -1,6 +1,7 @@
 #ifndef VECTOR2_H
 #define VECTOR2_H
 
+#include <iostream>
 #include <utility>
 #include "MathUtils.h"
 
@@ -27,6 +28,8 @@ bool operator<(const Vector2& lhs, const Vector2& rhs);
 Vector2 operator+(const Vector2& lhs, const Vector2& rhs);
 Vector2 operator-(const Vector2& lhs, const Vector2& rhs);
 bool operator==(const Vector2& lhs, const Vector2& rhs);
+
+std::ostream& operator<<(std::ostream& stream, const Vector2& vec);
 
 inline std::pair<size_t, size_t> normalizeToIntegerVector(const Vector2& vec)
 {

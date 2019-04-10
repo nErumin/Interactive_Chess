@@ -1,10 +1,15 @@
 #include "Vector2.h"
 #include <cmath>
 
+std::ostream& operator<<(std::ostream& stream, const Vector2& vec)
+{
+    stream << "(" << vec.x() << ", " << vec.y() << ")";
+    return stream;
+}
 
 bool operator<(const Vector2& lhs, const Vector2& rhs)
 {
-    return lhs.magitude() < rhs.magitude();
+    return (lhs.magitude() < rhs.magitude());
 }
 
 Vector2 operator+(const Vector2& lhs, const Vector2& rhs)
