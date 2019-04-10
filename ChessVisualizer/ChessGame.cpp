@@ -9,13 +9,16 @@
 #include "MathUtils.h"
 
 ChessGame::ChessGame()
-    : currentTurnPlayerIndex{ pickRandomNumber<size_t>(0, 2) },
-      result{ GameResult::None }
+    : result{ GameResult::None }
 {
     auto randomColors = pickRandomColorPair();
 
     players.push_back(std::make_shared<Player>(PlayerType::Human, randomColors.first));
     players.push_back(std::make_shared<Player>(PlayerType::Robot, randomColors.second));
+
+    currentTurnPlayerIndex = players.at(0)->getOwningPieceColor() == PieceColor::White ?
+                0 :
+                1;
 
     gameBoard.initializeBoardCellPieces(randomColors.second, randomColors.first);
 }
