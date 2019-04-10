@@ -187,11 +187,16 @@ void Board::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation)
         currentCell.setPiece(targetCell.getPiece());
         targetCell.setPiece(originalTargetPiece);
 
+        std::cout << "Oops! A king cannot move to checked locations." << std::endl;
         throw std::invalid_argument{ "cannot move to that location " };
     }
 
     if (searchResult == movableLocations.cend())
     {
+        currentCell.setPiece(targetCell.getPiece());
+        targetCell.setPiece(originalTargetPiece);
+
+        std::cout << "Invalid movement" << std::endl;
         throw std::invalid_argument{ "cannot move to that location " };
     }
 

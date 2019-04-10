@@ -11,7 +11,7 @@
 
 inline std::pair<Vector2, Vector2> randomPickPieceMoving(const Board& board, PieceColor playerColor, bool isPassivePick)
 {
-    std::map<Vector2, std::vector<Vector2>> movablePieces;
+    std::vector<std::pair<Vector2, std::vector<Vector2>>> movablePieces;
     std::vector<Vector2> opponentLocations;
 
     // find movable pieces, then map them to movable locations.
@@ -29,7 +29,7 @@ inline std::pair<Vector2, Vector2> randomPickPieceMoving(const Board& board, Pie
 
                 if (movableLocations.size() > 0)
                 {
-                    movablePieces[locationVector] = std::move(movableLocations);
+                    movablePieces.emplace_back(locationVector, std::move(movableLocations));
                 }
             }
             else if (piecePtr->getColor() == getEnemyColor(playerColor))
