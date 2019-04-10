@@ -106,8 +106,6 @@ void ChessController::startChess()
                 stringStream << "Remain Time: " << static_cast<size_t>(std::floor(leftTime)) << std::endl;
 
                 QMetaObject::invokeMethod(&label, "setText", Qt::QueuedConnection, Q_ARG(QString, stringStream.str().c_str()));
-                //label.setText(stringStream.str().c_str());
-
             }
         });
 
@@ -132,70 +130,12 @@ void ChessController::startChess()
 
 void ChessController::startTurn()
 {
-    std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 1000 });
+    std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 500 });
 
-    bool isPassive = pickRandomNumber(0, 2) == 0;
+    bool isPassive = pickRandomNumber(0, 10) < 5;
     auto picked = randomPickPieceMoving(game.getBoard(), game.getCurrentPlayer().getOwningPieceColor(), isPassive);
 
     game.movePiece(picked.first, picked.second);
-}
-
-void ChessController::makeMovingFromPlayer(Player& player)
-{
-    if (player.getType() == PlayerType::Human)
-    {
-        std::cout << "Select!" << std::endl;
-
-        bool isPassive = pickRandomNumber(0, 2) == 0;
-        auto picked = randomPickPieceMoving(game.getBoard(), player.getOwningPieceColor(), isPassive);
-
-        std::cout << "Picked" << std::endl;
-        std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 1000 });
-        game.movePiece(picked.first, picked.second);
-        /*
-        while (true)
-        {
-            double x = 0;
-            double y = 1;
-            double deltaX = 0;
-            double deltaY = 3;
-
-            std::cin >> x >> y >> deltaX >> deltaY;
-
-            try
-            {
-                game.movePiece({ x, y }, { deltaX, deltaY });
-            }
-            catch (const std::exception&)
-            {
-                auto& currentPlayerTimer = game.getCurrentPlayer().getTimer();
-
-                currentPlayerTimer.pause();
-
-                InformationModal modal{ nullptr };
-
-                modal.setModalTitle("Wrong placing");
-                modal.setMessageText("You cannot make that movement. It's wrong!");
-                modal.exec();
-
-                currentPlayerTimer.resume();
-
-                continue;
-            }
-
-            break;
-        }
-        */
-    }
-    else if (player.getType() == PlayerType::Robot)
-    {
-        bool isPassive = pickRandomNumber(0, 2) == 0;
-        auto picked = randomPickPieceMoving(game.getBoard(), player.getOwningPieceColor(), isPassive);
-
-        std::cout << "Picked" << std::endl;
-        std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 1000 });
-        game.movePiece(picked.first, picked.second);
-    }
 }
 
 inline void showDialogIfChecked(const Board& board, PieceColor pieceColor)
@@ -266,7 +206,6 @@ inline void showGameFinishedDialog(ChessWindow& window, GameResult result)
 
     auto resultMessage = toLowerString(result);
 
-    QApplication::postEvent(QApplication::instance(), nullptr);
     if (result == GameResult::Draw)
     {
         resultMessage[0] = static_cast<char>(toupper(resultMessage[0]));
@@ -281,8 +220,14 @@ inline void showGameFinishedDialog(ChessWindow& window, GameResult result)
     dialog.setMessageText(stream.str());
     dialog.exec();
 
-    std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 1500 });
+    std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 3000 });
     QMetaObject::invokeMethod(QApplication::instance(), "quit", Qt::QueuedConnection);
+}
+
+void ChessController::finalize()
+{
+    game.getCurrentPlayer().getTimer().stop();
+    game.getNextPlayer().getTimer().stop();
 }
 
 void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
@@ -296,8 +241,7 @@ void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
 
     if (game.getGameResult() != GameResult::None)
     {
-        changingPlayer.getTimer().stop();
-        nextPlayer.getTimer().stop();
+        finalize();
 
         showGameFinishedDialog(window, game.getGameResult());
         game.getBoard().unregisterObserver(this);
@@ -306,12 +250,24 @@ void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
     }
 
     nextPlayer.getTimer().resume();
+
+    std::thread([this]
+    {
+        std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 1000 });
+
+        QMetaObject::invokeMethod(QApplication::instance(), [this]
+        {
+            startTurn();
+        }, Qt::QueuedConnection);
+    }).detach();
 }
 
 void ChessController::notify(const Cell& changedCell, Vector2&& location)
 {
     if (game.getGameResult() != GameResult::None)
     {
+        finalize();
+
         showGameFinishedDialog(window, game.getGameResult());
         game.getBoard().unregisterObserver(this);
 

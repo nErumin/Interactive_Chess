@@ -13,6 +13,7 @@ public:
     void startChess();
     void notify(Player& changingPlayer, Player& nextPlayer) override;
     void notify(const Cell& changedCell, Vector2&& location) override;
+    void finalize();
 
     ~ChessController() override;
 private:
