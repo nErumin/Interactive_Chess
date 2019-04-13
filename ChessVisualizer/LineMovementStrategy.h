@@ -10,7 +10,7 @@ struct PolarCoordinate;
 class LineMovementStrategy : public MovementStrategy
 {
 public:
-    explicit LineMovementStrategy(std::initializer_list<PolarCoordinate> usedDirections);
+    explicit LineMovementStrategy(std::initializer_list<PolarCoordinate> usedDirections, bool strategyPermeable = true);
     std::vector<Vector2> movableLocations(const Vector2& centerLocation) const noexcept override;
     ObstacleMovablePair movableLocationsUsingObstacles(const Vector2& centerLocation, std::vector<std::deque<bool>> obstacleMap) const noexcept override;
 

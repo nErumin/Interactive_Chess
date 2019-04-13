@@ -20,7 +20,7 @@ void Pawn::reconstructStrategy()
     };
 
     std::vector<std::unique_ptr<MovementStrategy>> strategies;
-    strategies.emplace_back(std::make_unique<LineMovementStrategy>(std::move(polarList)));
+    strategies.emplace_back(std::make_unique<LineMovementStrategy>(std::move(polarList), false));
 
     if ((diagonalMask & PawnDiagonalMask::Left) != PawnDiagonalMask::None)
     {

@@ -35,6 +35,7 @@ public:
 
     PawnDiagonalMask getMask() const noexcept;
 
+    size_t getPriority() const noexcept override { return 3; }
     void setRotationDegree(double newDegree) noexcept override;
     void setPawnMoved(bool isMoved) noexcept;
     void markDiagnoalMovable(PawnDiagonalMask mask) noexcept;
