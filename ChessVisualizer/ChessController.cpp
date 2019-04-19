@@ -23,6 +23,8 @@
 #include "NullPiece.h"
 #include "BoardUtility.h"
 
+constexpr double initialTimerTime = 12000.0;
+
 QPixmap convertPieceToPixmap(const Piece* piecePtr)
 {
     std::string pixmapName;
@@ -120,7 +122,7 @@ void ChessController::startChess()
             game.setGameResult(result);
         });
 
-        player->getTimer().start(50.0);
+        player->getTimer().start(initialTimerTime);
         player->getTimer().pause();
     }
 
@@ -132,10 +134,33 @@ void ChessController::startTurn()
 {
     std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 500 });
 
-    bool isPassive = pickRandomNumber(0, 10) < 5;
-    auto picked = randomPickPieceMoving(game.getBoard(), game.getCurrentPlayer().getOwningPieceColor(), isPassive);
+    if (game.getCurrentPlayer().getType() == PlayerType::None)
+    {
+        while (true)
+        {
+            try
+            {
+                double x, y, deltaX, deltaY;
 
-    game.movePiece(picked.first, picked.second);
+                std::cout << "Choose (x, y), Delta (x, y)" << std::endl;
+                std::cin >> x >> y >> deltaX >> deltaY;
+
+                game.movePiece({ x, y }, { deltaX, deltaY });
+                break;
+            }
+            catch (const std::exception& e)
+            {
+                std::cout << e.what() << std::endl;
+            }
+        }
+    }
+    else
+    {
+        bool isPassive = pickRandomNumber(0, 10) < 5;
+        auto picked = randomPickPieceMoving(game.getBoard(), game.getCurrentPlayer().getOwningPieceColor(), isPassive);
+
+        game.movePiece(picked.first, picked.second);
+    }
 }
 
 inline void showDialogIfChecked(const Board& board, PieceColor pieceColor)
