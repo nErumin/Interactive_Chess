@@ -9,6 +9,10 @@
 *.pro*
 !*.pro
 
+# Boost include + lib
+NetworkLibrary/include/
+NetworkLibrary/lib/
+
 ### User ###
 *.jpg
 
