@@ -21,9 +21,15 @@
     <ClCompile Include="Address.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="SocketWrapper.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Address.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketWrapper.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>
