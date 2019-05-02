@@ -123,10 +123,12 @@
   <ItemGroup>
     <ClCompile Include="Address.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="SocketConnection.cpp" />
     <ClCompile Include="SocketWrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Address.h" />
+    <ClInclude Include="SocketConnection.h" />
     <ClInclude Include="SocketWrapper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
