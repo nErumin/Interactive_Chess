@@ -18,10 +18,12 @@ std::string TransmissionService::receive(size_t maximumBytesReceived)
 {
     try
     {
-        std::vector<char> receivedData(maximumBytesReceived);
+        std::string receivedData(maximumBytesReceived, (char) 0);
         auto& socket = ConnectionInternals::wrapper(connectionRef).socket();
+        
+        size_t receivedLength = socket.read_some(boost::asio::buffer(receivedData));
+        receivedData.resize(receivedLength);
 
-        socket.read_some(boost::asio::buffer(receivedData));
         return { receivedData.begin(), receivedData.end() };
     }
     catch (const boost::system::system_error& error)
