@@ -2,6 +2,8 @@
 #include "Address.h"
 #include "SocketConnection.h"
 #include "SocketWrapper.h"
+#include "ErrorCode.h"
+#include "NetworkError.h"
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -31,7 +33,7 @@ public:
         }
         catch (const boost::system::system_error& error)
         {
-            throw std::runtime_error{ "connection failed" };
+            throw NetworkError{ ErrorCode::ConnectFailed, error.code().message() };
         }
     }
 private:

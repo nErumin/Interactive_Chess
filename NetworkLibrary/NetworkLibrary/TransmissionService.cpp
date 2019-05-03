@@ -2,6 +2,8 @@
 #include "SocketConnection.h"
 #include "SocketWrapper.h"
 #include "ConnectionInternals.h"
+#include "ErrorCode.h"
+#include "NetworkError.h"
 
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/write.hpp>
@@ -28,7 +30,11 @@ std::string TransmissionService::receive(size_t maximumBytesReceived)
     }
     catch (const boost::system::system_error& error)
     {
-        throw std::runtime_error{ "receiption failed" };
+        ErrorCode code = error.code() == boost::asio::error::eof ?
+                         ErrorCode::Disconnected :
+                         ErrorCode::ReceiveFailed;
+
+        throw NetworkError{ code, error.code().message() };
     }
 }
 
@@ -42,6 +48,10 @@ void TransmissionService::send(std::string data)
     }
     catch (const boost::system::system_error& error)
     {
-        throw std::runtime_error{ "sending failed" };
+        ErrorCode code = error.code() == boost::asio::error::eof ?
+                         ErrorCode::Disconnected :
+                         ErrorCode::SendFailed;
+
+        throw NetworkError{ code, error.code().message() };
     }
 }

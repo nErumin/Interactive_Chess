@@ -2,6 +2,8 @@
 #include "Address.h"
 #include "SocketConnection.h"
 #include "SocketWrapper.h"
+#include "ErrorCode.h"
+#include "NetworkError.h"
 
 #include <boost/asio/placeholders.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -32,9 +34,9 @@ public:
         {
             clientListener.listen(clientBackLog);
         }
-        catch (const boost::system::system_error&)
+        catch (const boost::system::system_error& error)
         {
-            throw std::runtime_error{ "listening failed" };
+            throw NetworkError{ ErrorCode::ListenFailed, error.code().message() };
         }
     }
 
@@ -63,7 +65,7 @@ private:
     {
         if (errorCode)
         {
-            auto exceptionPtr = boost::copy_exception(std::runtime_error("acceptance failed"));
+            auto exceptionPtr = boost::copy_exception(NetworkError(ErrorCode::AcceptFailed, errorCode.message()));
             promise->set_exception(exceptionPtr);
         }
 

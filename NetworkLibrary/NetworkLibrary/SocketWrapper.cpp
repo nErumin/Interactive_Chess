@@ -1,4 +1,6 @@
 #include "SocketWrapper.h"
+#include "ErrorCode.h"
+#include "NetworkError.h"
 #include <iostream>
 
 using Network::SocketWrapper;
@@ -47,8 +49,8 @@ void SocketWrapper::disconnect()
         socket().shutdown(ShutdownType::shutdown_both);
         socket().close();
     }
-    catch (const boost::system::system_error&)
+    catch (const boost::system::system_error& error)
     {
-        throw std::runtime_error{ "disconnection failed" };
+        throw NetworkError{ ErrorCode::DisconnectFailed, error.code().message() };
     }
 }
