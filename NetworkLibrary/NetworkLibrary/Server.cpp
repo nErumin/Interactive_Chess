@@ -25,8 +25,8 @@ public:
     }
 
     ServerImpl(Address serverAddress, int clientBackLog)
-        : service{},
-          clientListener{ service, tcp::endpoint(tcp::v4(), serverAddress.port()) }
+        : servicePtr{ std::make_shared<boost::asio::io_service>() },
+          clientListener{ *servicePtr, tcp::endpoint(tcp::v4(), serverAddress.port()) }
     {
         try
         {
@@ -40,7 +40,7 @@ public:
 
     boost::unique_future<SocketConnection> startAccept()
     {
-        auto acceptedSocketPtr = std::make_shared<tcp::socket>(service);
+        auto acceptedSocketPtr = std::make_shared<tcp::socket>(*servicePtr);
         auto promise = std::make_shared<AcceptancePromise>();
 
         auto acceptanceHandler = 
@@ -53,8 +53,8 @@ public:
 
     void runTask()
     {
-        service.run();
-        service.reset();
+        servicePtr->run();
+        servicePtr->reset();
     }
 private:
     void acceptClient(std::shared_ptr<AcceptancePromise> promise,
@@ -67,13 +67,13 @@ private:
             promise->set_exception(exceptionPtr);
         }
 
-        SocketConnection newConnection{ SocketWrapper(std::move(*socketPtr)) };
+        SocketConnection newConnection{ SocketWrapper(std::move(*socketPtr), servicePtr) };
 
         promise->set_value(std::move(newConnection));
     }
 
 private:
-    io_service service;
+    std::shared_ptr<io_service> servicePtr;
     tcp::acceptor clientListener;
 };
 
