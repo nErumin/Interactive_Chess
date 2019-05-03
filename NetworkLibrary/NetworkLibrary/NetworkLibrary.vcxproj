@@ -127,6 +127,7 @@
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="SocketConnection.cpp" />
     <ClCompile Include="SocketWrapper.cpp" />
+    <ClCompile Include="TransmissionService.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Address.h" />
@@ -135,6 +136,7 @@
     <ClInclude Include="Server.h" />
     <ClInclude Include="SocketConnection.h" />
     <ClInclude Include="SocketWrapper.h" />
+    <ClInclude Include="TransmissionService.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
