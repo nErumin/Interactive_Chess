@@ -13,7 +13,7 @@ namespace Network
     public:
         static constexpr int ListeningBackLog = 5;
 
-        Server(Address serverAddress);
+        explicit Server(Address serverAddress);
         Server(const Server& copyingServer) = delete;
         Server(Server&& movingServer);
 

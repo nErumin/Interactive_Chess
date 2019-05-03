@@ -11,7 +11,7 @@ namespace Network
     public:
         using BaseSocket = boost::asio::ip::tcp::socket;
         
-        SocketWrapper(BaseSocket wrappingSocket);
+        explicit SocketWrapper(BaseSocket wrappingSocket);
     public:
         BaseSocket& socket() noexcept;
         const BaseSocket& socket() const noexcept;

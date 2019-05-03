@@ -11,7 +11,7 @@ namespace Network
     {
         friend struct ConnectionInternals;
     public:
-        SocketConnection(SocketWrapper wrapper);
+        explicit SocketConnection(SocketWrapper wrapper);
         SocketConnection(const SocketConnection& copyingConnection) = delete;
         SocketConnection(SocketConnection&& movingConnection);
 
