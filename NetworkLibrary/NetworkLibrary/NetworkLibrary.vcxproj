@@ -124,6 +124,7 @@
     <ClCompile Include="Address.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="NetworkError.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="SocketConnection.cpp" />
     <ClCompile Include="SocketWrapper.cpp" />
@@ -133,6 +134,8 @@
     <ClInclude Include="Address.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="ConnectionInternals.h" />
+    <ClInclude Include="ErrorCode.h" />
+    <ClInclude Include="NetworkError.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="SocketConnection.h" />
     <ClInclude Include="SocketWrapper.h" />
