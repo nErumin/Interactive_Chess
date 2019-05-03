@@ -16,15 +16,5 @@ SocketConnection::~SocketConnection() = default;
 
 void SocketConnection::disconnect()
 {
-    using ShutdownType = boost::asio::socket_base::shutdown_type;
-
-    try
-    {
-        socketWrapper->socket().shutdown(ShutdownType::shutdown_both);
-        socketWrapper->socket().close();
-    }
-    catch (const boost::system::system_error&)
-    {
-        throw std::runtime_error{ "disconnection failed" };
-    }
+    socketWrapper->disconnect();
 }
