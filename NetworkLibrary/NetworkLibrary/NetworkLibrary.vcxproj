@@ -129,6 +129,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Address.h" />
+    <ClInclude Include="ConnectionInternals.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="SocketConnection.h" />
     <ClInclude Include="SocketWrapper.h" />
