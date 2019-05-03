@@ -61,9 +61,9 @@ private:
                       std::shared_ptr<tcp::socket> socketPtr, 
                       const boost::system::error_code& errorCode)
     {
-        if (errorCode.failed())
+        if (errorCode)
         {
-            auto exceptionPtr = std::make_exception_ptr(std::runtime_error("acceptance failed"));
+            auto exceptionPtr = boost::copy_exception(std::runtime_error("acceptance failed"));
             promise->set_exception(exceptionPtr);
         }
 
