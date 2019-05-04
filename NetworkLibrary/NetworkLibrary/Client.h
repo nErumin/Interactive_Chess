@@ -1,6 +1,9 @@
+#pragma warning(disable: 4251)
+
 #ifndef _NET_LIBRARY_CLIENT_
 #define _NET_LIBRARY_CLIENT_
 
+#include "LibraryAPI.h"
 #include <memory>
 
 namespace Network
@@ -8,7 +11,7 @@ namespace Network
     struct Address;
     class SocketConnection;
 
-    class Client final
+    class NETWORK_API Client final
     {
     public:
         explicit Client(Address serverAddress);

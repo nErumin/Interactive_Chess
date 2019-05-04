@@ -1,6 +1,7 @@
 #ifndef _NET_LIBRARY_TRANSPORT_SERVICE_
 #define _NET_LIBRARY_TRANSPORT_SERVICE_
 
+#include "LibraryAPI.h"
 #include <string>
 #include <memory>
 
@@ -8,7 +9,7 @@ namespace Network
 {
     class SocketConnection;
 
-    class TransmissionService
+    class NETWORK_API TransmissionService
     {
     public:
         explicit TransmissionService(SocketConnection& connection);

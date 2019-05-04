@@ -9,7 +9,9 @@ message("Boost Library Path: ${Boost_LIBRARIES}")
 message("Boost Include Header Path: ${Boost_INCLUDE_DIR}")
 
 aux_source_directory( ${CMAKE_CURRENT_SOURCE_DIR} SOURCES )
-add_executable( NetworkLibrary ${SOURCES} )
+add_library( NetworkLibrary SHARED ${SOURCES} )
+
 add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
+add_definitions(-DNETWORKLIBRARY_EXPORTS)
 
 target_link_libraries( NetworkLibrary ${Boost_LIBRARIES} )

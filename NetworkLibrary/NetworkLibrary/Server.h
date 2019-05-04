@@ -1,6 +1,9 @@
+#pragma warning(disable: 4251)
+
 #ifndef _NET_LIBRARY_SERVER_
 #define _NET_LIBRARY_SERVER_
 
+#include "LibraryAPI.h"
 #include <memory>
 
 namespace Network
@@ -8,7 +11,7 @@ namespace Network
     struct Address;
     class SocketConnection;
 
-    class Server final
+    class NETWORK_API Server final
     {
     public:
         static constexpr int ListeningBackLog = 5;

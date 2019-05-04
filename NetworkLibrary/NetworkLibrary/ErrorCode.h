@@ -1,9 +1,11 @@
 #ifndef _NET_LIBRARY_ERROR_CODE_
 #define _NET_LIBRARY_ERROR_CODE_
 
+#include "LibraryAPI.h"
+
 namespace Network
 {
-    enum class ErrorCode
+    enum class NETWORK_API ErrorCode
     {
         Disconnected = 1,
         ConnectFailed = 2,
