@@ -4,6 +4,7 @@
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/calib3d.hpp"
+#include "opencv2/imgcodecs.hpp"
 #include "Vector2.h"
 #include "Observable.h"
 #include <vector>
@@ -21,6 +22,9 @@ private:
 	Point2f mean_distance;
 	Point2f calculateMeanDistanceOfCorners(vector<Point2f> corners);
 	vector<Point2f> calculateCenterPositionsOfCells(vector<Point2f> corners);
+
+	Mat thresholdImage(Mat image);
+
 public:
 	ImageProcessor();
 	~ImageProcessor() = default;

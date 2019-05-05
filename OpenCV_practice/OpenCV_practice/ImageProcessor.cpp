@@ -6,6 +6,31 @@ ImageProcessor::ImageProcessor() {
 	
 }
 
+Mat ImageProcessor::thresholdImage(Mat image) {
+	Mat input_gray_image = imread("test.jpg", IMREAD_GRAYSCALE);
+
+	namedWindow("입력 이미지", WINDOW_AUTOSIZE);
+	namedWindow("otsu 이미지", WINDOW_AUTOSIZE);
+	namedWindow("adaptive 이미지", WINDOW_AUTOSIZE);
+
+	Mat result_otsu_image;
+	Mat result_adaptive_image;
+	//이진화를 한다.
+
+	threshold(input_gray_image, result_otsu_image, 0, 255, THRESH_BINARY | THRESH_OTSU);
+	adaptiveThreshold(input_gray_image, result_adaptive_image, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 5, 10);
+
+	imshow("이진화된 이미지", result_otsu_image);
+	imshow("otsu 이미지", result_adaptive_image);
+	imshow("adaptive 이미지", input_gray_image);
+
+	//아무키나 누를 때 까지 대기한다.
+	waitKey(0);
+	return result_otsu_image;
+}
+
+
+
 void ImageProcessor::recognizeMovement() {
 	// to do
 	notifyToObservers(Vector2(1.0, 2.0));
