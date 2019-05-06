@@ -8,7 +8,7 @@ Video::Video()
 void Video::takeVideo(int deviceId) {
 
 	int apiId = cv::CAP_ANY;      // 0 = autodetect default API
-	cap.open(deviceId + apiId);	  // open selected camera using selected API
+	cap.open(1 + apiId);	  // open selected camera using selected API
 	
 	// check if we succeeded
 	if (!cap.isOpened()) {

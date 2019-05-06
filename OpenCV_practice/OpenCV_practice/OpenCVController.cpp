@@ -23,5 +23,5 @@ void OpenCVController::startVideo() {
 
 void OpenCVController::startImageProcessor(String img_name) {
 	cout << img_name << endl;
-	processor.detectAndDrawChessboardCorners("chess_picture.jpg");
+	processor.detectAndDrawChessboardCorners(img_name);
 }
