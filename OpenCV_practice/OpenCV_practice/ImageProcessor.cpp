@@ -11,23 +11,44 @@ Mat ImageProcessor::thresholdImage(Mat image) {
 
 	namedWindow("입력 이미지", WINDOW_AUTOSIZE);
 	namedWindow("otsu 이미지", WINDOW_AUTOSIZE);
-	namedWindow("adaptive 이미지", WINDOW_AUTOSIZE);
-
+	
 	Mat result_otsu_image;
-	Mat result_adaptive_image;
 	//이진화를 한다.
-
 	threshold(input_gray_image, result_otsu_image, 0, 255, THRESH_BINARY | THRESH_OTSU);
-	adaptiveThreshold(input_gray_image, result_adaptive_image, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 5, 10);
-
-	imshow("이진화된 이미지", result_otsu_image);
-	imshow("otsu 이미지", result_adaptive_image);
-	imshow("adaptive 이미지", input_gray_image);
+	imshow("Gray 이미지", input_gray_image);
+	imshow("OTSU 이미지", result_otsu_image);
 
 	//아무키나 누를 때 까지 대기한다.
 	waitKey(0);
 	return result_otsu_image;
 }
+
+Mat ImageProcessor::findBiggestBlob(Mat image) {
+	int largest_area = 0;
+	int largest_contour_index = 0;
+	
+	vector< vector<Point> > contours; // Vector for storing contour
+	vector<Vec4i> hierarchy;
+
+	findContours(image, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE); // Find the contours in the image
+
+	for (int i = 0; i < contours.size(); i++) {// iterate through each contour. 
+		double a = contourArea(contours[i], false);  //  Find the area of contour
+		if (a > largest_area) {
+			largest_area = a;
+			largest_contour_index = i;                //Store the index of largest contour
+			//bounding_rect=boundingRect(contours[i]); // Find the bounding rectangle for biggest contour
+		}
+	}
+
+	Mat contoursImage = Mat::zeros(matImage.size(), CV_8UC3);;
+	drawContours(contoursImage, contours, largest_contour_index, Scalar(255), FILLED, 8, hierarchy); // Draw the largest contour using previously stored index.
+	return contoursImage;
+}
+
+
+
+
 
 
 

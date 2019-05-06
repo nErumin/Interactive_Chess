@@ -24,7 +24,7 @@ private:
 	vector<Point2f> calculateCenterPositionsOfCells(vector<Point2f> corners);
 
 	Mat thresholdImage(Mat image);
-
+	Mat findBiggestBlob(Mat image);
 public:
 	ImageProcessor();
 	~ImageProcessor() = default;
