@@ -41,12 +41,58 @@ Mat ImageProcessor::findBiggestBlob(Mat image) {
 		}
 	}
 
-	Mat contoursImage = Mat::zeros(matImage.size(), CV_8UC3);;
+	Mat contoursImage = Mat::zeros(image.size(), CV_8UC3);;
 	drawContours(contoursImage, contours, largest_contour_index, Scalar(255), FILLED, 8, hierarchy); // Draw the largest contour using previously stored index.
 	return contoursImage;
 }
 
+vector<Vec2f> ImageProcessor::findIntersection(vector<Vec2f> lines) {
+	vector<Vec2f> points;
 
+	vector<Vec2f> lines1, lines2;
+	lines1.push_back(lines[0]);
+	for (vector<Vec2f>::iterator i = lines.begin() + 1; i != lines.end(); i++) {
+		if (abs(lines1[0][1] - (*i)[1]) < 0.1) lines1.push_back((*i));
+		else lines2.push_back((*i));
+	}
+
+	for (vector<Vec2f>::iterator i = lines1.begin(); i != lines1.end(); i++) {
+		for (vector<Vec2f>::iterator j = lines2.begin(); j != lines2.end(); j++) {
+			Vec2f point;
+			double a = cos((*i)[1]), b = sin((*i)[1]), c = (*i)[0];
+			double m = cos((*j)[1]), n = sin((*j)[1]), p = (*j)[0];
+			point[0] = (p * b - n * c) / (m * b - n * a);
+			point[1] = (p * a - m * c) / (n * a - m * b);
+			points.push_back(point);
+			std::cout << "point: (" << point[0] << "," << point[1] << ")\n";
+		}
+	}
+	return points;
+}
+
+vector<Vec2f> ImageProcessor::findEdge(vector<Vec2f> points) {
+	vector<Vec2f> edges;
+	Vec2f point[4];
+	for (int i = 0; i < 4; i++) point[i] = points[0];
+	for (vector<Vec2f>::iterator i = points.begin() + 1; i != points.end(); i++) {
+		float x = (*i)[0], y = (*i)[1];
+		float check = x + y;
+		if (point[0][0] + point[0][1] > x + y) {
+			point[0] = *i;
+		}
+		if (point[1][0] * (-1) + point[1][1] > x * (-1) + y) {
+			point[1] = *i;
+		}
+		if (point[2][0] + point[2][1] * (-1) > x + y * (-1)) {
+			point[2] = *i;
+		}
+		if (point[3][0] * (-1) + point[3][1] * (-1) > x * (-1) + y * (-1)) {
+			point[3] = *i;
+		}
+	}
+	for (int i = 0; i < 4; i++) edges.push_back(point[i]);
+	return edges;
+}
 
 
 

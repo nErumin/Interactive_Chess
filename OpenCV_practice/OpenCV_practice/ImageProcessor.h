@@ -25,6 +25,9 @@ private:
 
 	Mat thresholdImage(Mat image);
 	Mat findBiggestBlob(Mat image);
+	vector<Vec2f> findIntersection(vector<Vec2f> lines);
+	vector<Vec2f> findEdge(vector<Vec2f> points);
+
 public:
 	ImageProcessor();
 	~ImageProcessor() = default;
