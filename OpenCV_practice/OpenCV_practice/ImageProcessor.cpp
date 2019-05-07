@@ -46,7 +46,7 @@ Mat ImageProcessor::findBiggestBlob(Mat image) {
 	return contoursImage;
 }
 
-vector<Point2f> findIntersection(vector<Vec2f> lines) {
+vector<Point2f> ImageProcessor::findIntersection(vector<Vec2f> lines) {
 	vector<Point2f> points;
 
 	vector<Vec2f> lines1, lines2;
@@ -70,7 +70,7 @@ vector<Point2f> findIntersection(vector<Vec2f> lines) {
 	return points;
 }
 
-vector<Point2f> findEdge(vector<Point2f> points) {
+vector<Point2f> ImageProcessor::findEdge(vector<Point2f> points) {
 	vector<Point2f> edges;
 	Point point[4];
 	for (int i = 0; i < 4; i++) point[i] = points[0];
@@ -94,6 +94,28 @@ vector<Point2f> findEdge(vector<Point2f> points) {
 	return edges;
 }
 
+vector<Point2f> ImageProcessor::calculateCorners(vector<Point2f> edges) {
+	vector<Point2f> corners;
+
+	Point2f d[4];
+	int order_a[4] = { 1, 2, 3, 3 };
+	int order_b[4] = { 0, 0, 1, 2 };
+
+	for (int i = 0; i < 4; i++) d[i] = (edges[order_a[i]] - edges[order_b[i]]) / 8; // 0, 1
+
+	for (int i = 0; i <= 8; i++) {
+		Point2f point[2];
+		point[0] = edges[0] + d[1] * i;
+		point[1] = edges[1] + d[2] * i;
+
+		Point2f tempd = (point[1] - point[0]) / 8;
+		for (int j = 0; j <= 8; j++) {
+			corners.push_back(point[0] + tempd * j);
+		}
+	}
+
+	return corners;
+}
 
 
 
