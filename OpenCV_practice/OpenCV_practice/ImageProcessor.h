@@ -25,10 +25,11 @@ private:
 
 	Mat thresholdImage(Mat image);
 	Mat findBiggestBlob(Mat image);
-	vector<Point2f> findIntersection(vector<Vec2f> lines);
+	vector<Point2f> findIntersection(vector<Vec2f> lines, int max_x, int max_y);
 	vector<Point2f> findEdge(vector<Point2f> points);
 	vector<Point2f> calculateCorners(vector<Point2f> edges);
 	vector<vector<Point2f>> findBlocks(vector<Point2f> corners);
+	vector<vector<Point2f>> findChessboardBlocks(String title);
 
 public:
 	ImageProcessor();

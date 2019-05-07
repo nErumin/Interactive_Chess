@@ -46,14 +46,17 @@ Mat ImageProcessor::findBiggestBlob(Mat image) {
 	return contoursImage;
 }
 
-vector<Point2f> ImageProcessor::findIntersection(vector<Vec2f> lines) {
+vector<Point2f> ImageProcessor::findIntersection(vector<Vec2f> lines, int max_x, int max_y) {
 	vector<Point2f> points;
 
 	vector<Vec2f> lines1, lines2;
 	lines1.push_back(lines[0]);
-	for (vector<Vec2f>::iterator i = lines.begin() + 1; i != lines.end(); i++) {
-		if (abs(lines1[0][1] - (*i)[1]) < 0.1) lines1.push_back((*i));
-		else lines2.push_back((*i));
+
+	for (vector<Vec2f>::iterator it = lines.begin(); it != lines.end(); it++) {
+		float rho = (*it)[0];   // 첫 번째 요소는 rho 거리
+		float theta = (*it)[1]; // 두 번째 요소는 델타 각도
+		if (theta < PI / 4. || theta > 3.*PI / 4.) lines1.push_back((*it)); // 수직 행
+		else lines2.push_back((*it)); // 수평 행
 	}
 
 	for (vector<Vec2f>::iterator i = lines1.begin(); i != lines1.end(); i++) {
@@ -63,7 +66,8 @@ vector<Point2f> ImageProcessor::findIntersection(vector<Vec2f> lines) {
 			double m = cos((*j)[1]), n = sin((*j)[1]), p = (*j)[0];
 			point.x = (p * b - n * c) / (m * b - n * a);
 			point.y = (p * a - m * c) / (n * a - m * b);
-			points.push_back(point);
+
+			if (point.x > 0 && point.y > 0 && point.x < max_x && point.y < max_y) points.push_back(point);
 			std::cout << "point: (" << point.x << "," << point.y << ")\n";
 		}
 	}
@@ -137,6 +141,60 @@ vector<vector<Point2f>> ImageProcessor::findBlocks(vector<Point2f> corners) {
 	return blocks;
 }
 
+vector<vector<Point2f>> ImageProcessor::findChessboardBlocks(String title) {
+	Mat input_gray_image = imread(title, IMREAD_GRAYSCALE);
+
+	Mat result_otsu_image;
+	//이진화를 한다.
+
+	threshold(input_gray_image, result_otsu_image, 0, 255, THRESH_BINARY | THRESH_OTSU);
+
+	Mat biggestBlob = findBiggestBlob(result_otsu_image);
+
+	cv::Mat contours;
+	cv::Canny(biggestBlob, contours, 125, 350);
+
+	// 선 감지 위한 허프 변환
+	std::vector<cv::Vec2f> lines;
+	cv::HoughLines(contours, lines, 1, PI / 180, 180);  // 투표(vote) 최대 개수
+
+	 // 선 그리기
+	cv::Mat result(contours.rows, contours.cols, CV_8U, cv::Scalar(255));
+
+	// 선 벡터를 반복해 선 그리기
+	std::vector<cv::Vec2f>::const_iterator it = lines.begin();
+	while (it != lines.end()) {
+		float rho = (*it)[0];   // 첫 번째 요소는 rho 거리
+		float theta = (*it)[1]; // 두 번째 요소는 델타 각도
+		if (theta < PI / 4. || theta > 3.*PI / 4.) { // 수직 행
+			cv::Point pt1(rho / cos(theta), 0); // 첫 행에서 해당 선의 교차점   
+			cv::Point pt2((rho - result.rows*sin(theta)) / cos(theta), result.rows);
+			// 마지막 행에서 해당 선의 교차점
+			cv::line(input_gray_image, pt1, pt2, cv::Scalar(255), 1); // 하얀 선으로 그리기
+
+		}
+		else { // 수평 행
+			cv::Point pt1(0, rho / sin(theta)); // 첫 번째 열에서 해당 선의 교차점  
+			cv::Point pt2(result.cols, (rho - result.cols*cos(theta)) / sin(theta));
+			// 마지막 열에서 해당 선의 교차점
+			cv::line(input_gray_image, pt1, pt2, cv::Scalar(255), 1); // 하얀 선으로 그리기
+		}
+		++it;
+	}
+
+	//###############################################################
+	//find intersection
+	vector<Point2f> intersections = findIntersection(lines, input_gray_image.cols, input_gray_image.rows);
+	vector<Point2f> edges = findEdge(intersections);
+
+	for (int i = 0; i < 4; i++) circle(input_gray_image, Point(edges[i]), 5, Scalar(255), 1, 8, 0);
+
+	vector<Point2f> corners = calculateCorners(edges);
+	for (vector<Point2f>::iterator i = corners.begin(); i != corners.end(); i++) circle(input_gray_image, Point((*i)), 5, Scalar(255), 1, 8, 0);
+
+	vector<vector<Point2f>> blocks = findBlocks(corners);
+	return blocks;
+}
 
 
 
