@@ -117,6 +117,25 @@ vector<Point2f> ImageProcessor::calculateCorners(vector<Point2f> edges) {
 	return corners;
 }
 
+vector<vector<Point2f>> ImageProcessor::findBlocks(vector<Point2f> corners) {
+	vector<vector<Point2f>> blocks;
+
+	vector<Point2f> block;
+
+	for (int i = 0; i < 8; i++) {
+		int index = 9 * i;
+		for (int j = 0; j < 8; j++) {
+			block.push_back(corners[index + j]);
+			block.push_back(corners[index + j + 1]);
+			block.push_back(corners[index + j + 9]);
+			block.push_back(corners[index + j + 10]);
+
+			blocks.push_back(std::move(block));
+		}
+	}
+
+	return blocks;
+}
 
 
 
