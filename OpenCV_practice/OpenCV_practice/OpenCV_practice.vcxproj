@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Block.cpp" />
     <ClCompile Include="ImageProcessor.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OpenCVController.cpp" />
@@ -152,6 +153,7 @@
     <ClCompile Include="Video.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Block.h" />
     <ClInclude Include="ImageProcessor.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="Observer.h" />
