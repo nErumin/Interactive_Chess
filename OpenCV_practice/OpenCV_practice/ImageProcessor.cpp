@@ -46,8 +46,8 @@ Mat ImageProcessor::findBiggestBlob(Mat image) {
 	return contoursImage;
 }
 
-vector<Point> ImageProcessor::findIntersection(vector<Vec2f> lines) {
-	vector<Point> points;
+vector<Point2f> findIntersection(vector<Vec2f> lines) {
+	vector<Point2f> points;
 
 	vector<Vec2f> lines1, lines2;
 	lines1.push_back(lines[0]);
@@ -58,7 +58,7 @@ vector<Point> ImageProcessor::findIntersection(vector<Vec2f> lines) {
 
 	for (vector<Vec2f>::iterator i = lines1.begin(); i != lines1.end(); i++) {
 		for (vector<Vec2f>::iterator j = lines2.begin(); j != lines2.end(); j++) {
-			Point point;
+			Point2f point;
 			double a = cos((*i)[1]), b = sin((*i)[1]), c = (*i)[0];
 			double m = cos((*j)[1]), n = sin((*j)[1]), p = (*j)[0];
 			point.x = (p * b - n * c) / (m * b - n * a);
@@ -70,11 +70,11 @@ vector<Point> ImageProcessor::findIntersection(vector<Vec2f> lines) {
 	return points;
 }
 
-vector<Point> ImageProcessor::findEdge(vector<Point> points) {
-	vector<Point> edges;
+vector<Point2f> findEdge(vector<Point2f> points) {
+	vector<Point2f> edges;
 	Point point[4];
 	for (int i = 0; i < 4; i++) point[i] = points[0];
-	for (vector<Point>::iterator i = points.begin() + 1; i != points.end(); i++) {
+	for (vector<Point2f>::iterator i = points.begin() + 1; i != points.end(); i++) {
 		float x = (*i).x, y = (*i).y;
 		float check = x + y;
 		if (point[0].x + point[0].y > x + y) {
@@ -93,6 +93,7 @@ vector<Point> ImageProcessor::findEdge(vector<Point> points) {
 	for (int i = 0; i < 4; i++) edges.push_back(point[i]);
 	return edges;
 }
+
 
 
 
