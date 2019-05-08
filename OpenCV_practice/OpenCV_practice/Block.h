@@ -6,24 +6,24 @@
 
 using namespace cv;
 using namespace std;
+
 struct Block
 {
 public:
 	Block();
 	Block(int index, vector<Point2f> points);
 	
-	void setPoints(vector<Point2f>) noexcept;
-	void setIndex(int index) noexcept;
-	void setIsInObject(bool flag) noexcept;
+	void setPoints(vector<Point2f>);
+	void setIndex(int index);
+	void setIsInObject(bool flag);
 
-	int getIndex() noexcept;
-	vector<Point2f> getPoints() noexcept;
-	bool haveObject() noexcept;
+	int getIndex();
+	vector<Point2f> getPoints();
+	bool haveObject();
 
 private:
 	vector<Point2f> points;
 	int index;
-	bool isInObject;
+	bool isInObject = false;
 };
-
 #endif
