@@ -169,7 +169,7 @@ vector<Block> ImageProcessor::findChessboardBlocks(String title) {
 	return blocks;
 }
 
-vector<Block> ImageProcessor::findChessObject(vector<Block> blocks, String title, int color) {
+vector<Block> ImageProcessor::findColorObject(vector<Block> blocks, String title, int color) {
 	Mat image = imread(title);
 	imshow("원본이미지", image);
 
@@ -210,13 +210,34 @@ vector<Block> ImageProcessor::findChessObject(vector<Block> blocks, String title
 		}
 		printf("%d, %d\n", index++, count);
 
-		if (count > 80) objects.push_back(*iter);
+		if (count > 80) {
+			(*iter).setIsInObject(true);
+			objects.push_back(*iter);
+		}
 	}
 	waitKey(0);
 
 	return objects;
 }
 
+vector<Block> ImageProcessor::findChessObject(vector<Block> blocks, String title) {
+	vector<Block> w_objects = findColorObject(blocks, title, WHITE);
+	vector<Block> b_objects = findColorObject(blocks, title, BLACK);
+
+	vector<Block> objects = w_objects;
+	objects.insert(objects.end(), b_objects.begin(), b_objects.end());
+	Mat image = imread(title);
+
+	for (vector<Block>::iterator iter = objects.begin(); iter != objects.end(); iter++) {
+		for (int i = 0; i < 4; i++) circle(image, Point((*iter).getPoints()[i]), 5, Scalar(255), 1, 8, 0);
+	}
+
+	cv::namedWindow("Detected edge point");
+	cv::imshow("Detected edge point", image);
+
+	waitKey(0);
+	return objects;
+}
 
 
 void ImageProcessor::recognizeMovement() {
