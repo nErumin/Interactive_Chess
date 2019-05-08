@@ -7,11 +7,17 @@
 #include "opencv2/imgcodecs.hpp"
 #include "Vector2.h"
 #include "Observable.h"
+#include "Block.h"
 #include <vector>
 #include <iostream>
 
 using namespace cv;
 using namespace std;
+
+#define PI 3.1415926
+
+#define WHITE 0
+#define BLACK 1
 
 class ImageProcessor : public Observable<Vector2>
 {
@@ -28,14 +34,15 @@ private:
 	vector<Point2f> findIntersection(vector<Vec2f> lines, int max_x, int max_y);
 	vector<Point2f> findEdge(vector<Point2f> points);
 	vector<Point2f> calculateCorners(vector<Point2f> edges);
-	vector<vector<Point2f>> findBlocks(vector<Point2f> corners);
-	vector<vector<Point2f>> findChessboardBlocks(String title);
-
+	vector<Block> findBlocks(vector<Point2f> corners);
+	
 public:
 	ImageProcessor();
 	~ImageProcessor() = default;
 	bool detectAndDrawChessboardCorners(String img_name);
 	void recognizeMovement();
+	vector<Block> findChessboardBlocks(String title);
+	vector<Block> findChessObject(vector<Block> blocks, String title, int color);
 };
 
 #endif

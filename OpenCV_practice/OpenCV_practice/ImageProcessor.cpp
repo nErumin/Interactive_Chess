@@ -121,11 +121,11 @@ vector<Point2f> ImageProcessor::calculateCorners(vector<Point2f> edges) {
 	return corners;
 }
 
-vector<vector<Point2f>> ImageProcessor::findBlocks(vector<Point2f> corners) {
-	vector<vector<Point2f>> blocks;
+vector<Block> ImageProcessor::findBlocks(vector<Point2f> corners) {
+	vector<Block> blocks;
 
+	int count = 0;
 	vector<Point2f> block;
-
 	for (int i = 0; i < 8; i++) {
 		int index = 9 * i;
 		for (int j = 0; j < 8; j++) {
@@ -134,56 +134,29 @@ vector<vector<Point2f>> ImageProcessor::findBlocks(vector<Point2f> corners) {
 			block.push_back(corners[index + j + 9]);
 			block.push_back(corners[index + j + 10]);
 
-			blocks.push_back(std::move(block));
+			blocks.push_back(Block(count, block));
+			block.clear();
+			count++;
 		}
 	}
-
 	return blocks;
 }
 
-vector<vector<Point2f>> ImageProcessor::findChessboardBlocks(String title) {
+vector<Block> ImageProcessor::findChessboardBlocks(String title) {
 	Mat input_gray_image = imread(title, IMREAD_GRAYSCALE);
 
 	Mat result_otsu_image;
-	//이진화를 한다.
-
 	threshold(input_gray_image, result_otsu_image, 0, 255, THRESH_BINARY | THRESH_OTSU);
-
+	
 	Mat biggestBlob = findBiggestBlob(result_otsu_image);
 
-	cv::Mat contours;
-	cv::Canny(biggestBlob, contours, 125, 350);
+	Mat contours;
+	Canny(biggestBlob, contours, 125, 350);
 
 	// 선 감지 위한 허프 변환
-	std::vector<cv::Vec2f> lines;
-	cv::HoughLines(contours, lines, 1, PI / 180, 180);  // 투표(vote) 최대 개수
+	vector<cv::Vec2f> lines;
+	HoughLines(contours, lines, 1, PI / 180, 180);  // 투표(vote) 최대 개수
 
-	 // 선 그리기
-	cv::Mat result(contours.rows, contours.cols, CV_8U, cv::Scalar(255));
-
-	// 선 벡터를 반복해 선 그리기
-	std::vector<cv::Vec2f>::const_iterator it = lines.begin();
-	while (it != lines.end()) {
-		float rho = (*it)[0];   // 첫 번째 요소는 rho 거리
-		float theta = (*it)[1]; // 두 번째 요소는 델타 각도
-		if (theta < PI / 4. || theta > 3.*PI / 4.) { // 수직 행
-			cv::Point pt1(rho / cos(theta), 0); // 첫 행에서 해당 선의 교차점   
-			cv::Point pt2((rho - result.rows*sin(theta)) / cos(theta), result.rows);
-			// 마지막 행에서 해당 선의 교차점
-			cv::line(input_gray_image, pt1, pt2, cv::Scalar(255), 1); // 하얀 선으로 그리기
-
-		}
-		else { // 수평 행
-			cv::Point pt1(0, rho / sin(theta)); // 첫 번째 열에서 해당 선의 교차점  
-			cv::Point pt2(result.cols, (rho - result.cols*cos(theta)) / sin(theta));
-			// 마지막 열에서 해당 선의 교차점
-			cv::line(input_gray_image, pt1, pt2, cv::Scalar(255), 1); // 하얀 선으로 그리기
-		}
-		++it;
-	}
-
-	//###############################################################
-	//find intersection
 	vector<Point2f> intersections = findIntersection(lines, input_gray_image.cols, input_gray_image.rows);
 	vector<Point2f> edges = findEdge(intersections);
 
@@ -192,10 +165,57 @@ vector<vector<Point2f>> ImageProcessor::findChessboardBlocks(String title) {
 	vector<Point2f> corners = calculateCorners(edges);
 	for (vector<Point2f>::iterator i = corners.begin(); i != corners.end(); i++) circle(input_gray_image, Point((*i)), 5, Scalar(255), 1, 8, 0);
 
-	vector<vector<Point2f>> blocks = findBlocks(corners);
+	vector<Block> blocks = findBlocks(corners);
 	return blocks;
 }
 
+vector<Block> ImageProcessor::findChessObject(vector<Block> blocks, String title, int color) {
+	Mat image = imread(title);
+	imshow("원본이미지", image);
+
+	Mat threshold_image;
+	Mat point_image;
+
+	if (color == 0) {
+		threshold(image, threshold_image, 240, 255, THRESH_BINARY);
+		threshold(image, point_image, 240, 255, THRESH_BINARY);
+	}
+	else {
+		threshold(image, threshold_image, 20, 255, THRESH_BINARY_INV);
+		threshold(image, point_image, 20, 255, THRESH_BINARY_INV);
+	}
+	imshow("threshold 이미지", threshold_image);
+
+	vector<Block> objects;
+
+	int index = 0;
+	for (vector<Block>::iterator iter = blocks.begin(); iter != blocks.end(); iter++) {
+		float x_h, x_l, y_h, y_l;
+		Block block = *iter;
+		vector<Point2f> points = block.getPoints();
+		x_l = points.at(0).x < points.at(2).x ? points.at(0).x : points.at(2).x;
+		x_h = points.at(1).x < points.at(3).x ? points.at(1).x : points.at(3).x;
+		y_l = points.at(0).y < points.at(1).y ? points.at(0).y : points.at(1).y;
+		y_h = points.at(2).y < points.at(3).y ? points.at(2).y : points.at(3).y;
+
+		int count = 0;
+		for (int x = x_l; x < x_h; x++) {
+			for (int y = y_l; y < y_h; y++) {
+				int color = threshold_image.at<Vec3b>(y, x)[0];
+				if (color != 0) {
+					count++;
+					circle(point_image, Point(x, y), 5, Scalar(255), 1, 8, 0);
+				}
+			}
+		}
+		printf("%d, %d\n", index++, count);
+
+		if (count > 80) objects.push_back(*iter);
+	}
+	waitKey(0);
+
+	return objects;
+}
 
 
 
