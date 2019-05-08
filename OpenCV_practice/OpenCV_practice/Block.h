@@ -12,14 +12,14 @@ struct Block
 public:
 	Block();
 	Block(int index, vector<Point2f> points);
+	Block(int index, vector<Point2f> points, bool flag);
 	
 	void setPoints(vector<Point2f>);
 	void setIndex(int index);
 	void setIsInObject(bool flag);
-
 	int getIndex();
 	vector<Point2f> getPoints();
-	bool haveObject();
+	bool isHaveObject();
 
 private:
 	vector<Point2f> points;
