@@ -17,11 +17,12 @@ void OpenCVController::notify(Vector2&& location) {
 	// response to chess system
 }
 
-void OpenCVController::startVideo() {
-	video.takeVideo(0);
+void OpenCVController::startVideo(int id) {
+	video.takeVideo(id);
 }
 
 void OpenCVController::startImageProcessor(String img_name) {
 	cout << img_name << endl;
-	processor.detectAndDrawChessboardCorners(img_name);
+	if (processor.isFirst()) processor.initialize(img_name);
+	else processor.recognizeMovement(img_name);
 }

@@ -12,7 +12,7 @@ class OpenCVController : public Observer<String>,
 {
 public:
 	OpenCVController();
-	void startVideo();
+	void startVideo(int id);
 	void startImageProcessor(String img_name);
 	void notify(String&& img_name) override;
 	void notify(Vector2&& location) override;

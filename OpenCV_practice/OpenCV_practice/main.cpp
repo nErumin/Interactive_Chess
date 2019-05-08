@@ -1,10 +1,8 @@
-#include "ImageProcessor.h"
+#include "OpenCVController.h"
 
 int main() {
-	ImageProcessor ip;
-	String title = "test2.jpg";
-	vector<Block> blocks = ip.findChessboardBlocks(title);
-	vector<Block> objects = ip.findChessObject(blocks, title);
+	OpenCVController controller;
+	controller.startVideo(1);
 
 	return 0;
 }

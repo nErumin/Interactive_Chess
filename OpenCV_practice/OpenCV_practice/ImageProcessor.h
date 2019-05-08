@@ -22,13 +22,8 @@ using namespace std;
 class ImageProcessor : public Observable<Vector2>
 {
 private:
-	vector<Vector2> chessboard_corners;
-	vector<Vector2> chess_pieces;
-	vector<Point2f> center_positions;
-	Point2f mean_distance;
-	Point2f calculateMeanDistanceOfCorners(vector<Point2f> corners);
-	vector<Point2f> calculateCenterPositionsOfCells(vector<Point2f> corners);
-
+	vector<Block> blocks;
+	vector<Block> pieces;
 	Mat thresholdImage(Mat image);
 	Mat findBiggestBlob(Mat image);
 	vector<Point2f> findIntersection(vector<Vec2f> lines, int max_x, int max_y);
@@ -36,14 +31,14 @@ private:
 	vector<Point2f> calculateCorners(vector<Point2f> edges);
 	vector<Block> findBlocks(vector<Point2f> corners);
 	vector<Block> findColorObject(vector<Block> blocks, String title, int color);
+	vector<Block> findChessboardBlocks(String title);
+	vector<Block> findChessObject(vector<Block> blocks, String title);
 
 public:
 	ImageProcessor();
 	~ImageProcessor() = default;
-	bool detectAndDrawChessboardCorners(String img_name);
-	void recognizeMovement();
-	vector<Block> findChessboardBlocks(String title);
-	vector<Block> findChessObject(vector<Block> blocks, String title);
+	bool isFirst();
+	void initialize(String title);
+	void recognizeMovement(String title);
 };
-
 #endif
