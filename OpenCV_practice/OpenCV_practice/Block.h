@@ -17,6 +17,8 @@ public:
 	void setPoints(vector<Point2f>);
 	void setIndex(int index);
 	void setIsInObject(bool flag);
+	void setCenterPoint();
+	Point2f getCenterPoint();
 	int getIndex();
 	vector<Point2f> getPoints();
 	bool isHaveObject();
@@ -24,6 +26,7 @@ public:
 private:
 	vector<Point2f> points;
 	int index;
+	Point2f center_point;
 	bool isInObject = false;
 };
 #endif
