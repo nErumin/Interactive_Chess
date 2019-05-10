@@ -190,43 +190,43 @@ void drawPointsInImage(Mat image, vector<Point2f> points, String title) {
 vector<Block> ImageProcessor::findChessboardBlocks(String title) {
 	//read image with gray scale
 	Mat input_gray_image = imread(title, IMREAD_GRAYSCALE);
-	imshow("gray", input_gray_image);
+	//imshow("gray", input_gray_image);
 
 	//threshold colors
 	Mat threshold_image = thresholdImage(input_gray_image);
-	imshow("threshold", threshold_image);
+	//imshow("threshold", threshold_image);
 
 	//find biggest area in image
 	Mat biggestBlob = findBiggestBlob(threshold_image);
-	imshow("biggest Blob", biggestBlob);
+	//imshow("biggest Blob", biggestBlob);
 
 	//Canny algo for finding contours;
 	Mat contours;
 	Canny(biggestBlob, contours, 125, 350);
-	imshow("canny", contours);
+	//imshow("canny", contours);
 
 	//Hough transformation for finding lines
 	vector<Vec2f> lines;
 	HoughLines(contours, lines, 1, PI / 180, 120);  // 투표(vote) 최대 개수
-	drawLinesInImage(input_gray_image, contours, lines);
+	//drawLinesInImage(input_gray_image, contours, lines);
 
 	//find intersections
 	vector<Point2f> intersections = findIntersection(lines, input_gray_image.cols, input_gray_image.rows);
 	
 	//find edge points
 	vector<Point2f> edges = findEdge(intersections);
-	drawPointsInImage(input_gray_image, edges, "edges");
+	//drawPointsInImage(input_gray_image, edges, "edges");
 
 	//adjust edge points
 	vector<Point2f> adjust_edges = adjustEdgePosition(edges);
-	drawPointsInImage(input_gray_image, adjust_edges, "adjust_edges");
+	//drawPointsInImage(input_gray_image, adjust_edges, "adjust_edges");
 
 	//find all corners in chessboard
 	vector<Point2f> corners = calculateCorners(adjust_edges);
-	drawPointsInImage(input_gray_image, corners, "corners");
+	//drawPointsInImage(input_gray_image, corners, "corners");
 
-	waitKey(0);
-	destroyAllWindows();
+	//waitKey(0);
+	//destroyAllWindows();
 
 	//find all blocks in chessboard
 	vector<Block> blocks = findBlocks(corners);
@@ -235,7 +235,7 @@ vector<Block> ImageProcessor::findChessboardBlocks(String title) {
 
 vector<Block> ImageProcessor::findColorObject(String title, int color) {
 	Mat image = imread(title);
-	imshow("origin", image);
+	//imshow("origin", image);
 
 	Mat threshold_image;
 	//Mat point_image;
@@ -275,7 +275,7 @@ vector<Block> ImageProcessor::findColorObject(String title, int color) {
 				}
 			}
 		}
-		printf("%d, %d\n", index++, count);
+		//printf("%d, %d\n", index++, count);
 
 		if (count > 50) {
 			(*iter).setIsInObject(true);
@@ -283,9 +283,9 @@ vector<Block> ImageProcessor::findColorObject(String title, int color) {
 		}
 	}
 
-	imshow("threshold", threshold_image);
+	//imshow("threshold", threshold_image);
 	//imshow("finding point", point_image);
-	waitKey(0);
+	//waitKey(0);
 
 	return objects;
 }
@@ -302,11 +302,11 @@ vector<Block> ImageProcessor::findChessObject(String title) {
 		circle(image, Point((*iter).getCenterPoint()), 5, Scalar(255), 1, 8, 0);
 	}
 
-	namedWindow("Detected edge point");
-	imshow("Detected edge point", image);
+	//namedWindow("Detected edge point");
+	//imshow("Detected edge point", image);
 
-	waitKey(0);
-	destroyAllWindows();
+	//waitKey(0);
+	//destroyAllWindows();
 	return objects;
 }
 
