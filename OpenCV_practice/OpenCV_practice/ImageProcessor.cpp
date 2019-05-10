@@ -7,20 +7,12 @@ ImageProcessor::ImageProcessor() {
 }
 
 Mat ImageProcessor::thresholdImage(Mat image) {
-	Mat input_gray_image = imread("test.jpg", IMREAD_GRAYSCALE);
-
-	namedWindow("입력 이미지", WINDOW_AUTOSIZE);
-	namedWindow("otsu 이미지", WINDOW_AUTOSIZE);
-	
-	Mat result_otsu_image;
+	Mat threshold_image;
 	//이진화를 한다.
-	threshold(input_gray_image, result_otsu_image, 0, 255, THRESH_BINARY | THRESH_OTSU);
-	imshow("Gray 이미지", input_gray_image);
-	imshow("OTSU 이미지", result_otsu_image);
+	//threshold(image, threshold_image, 0, 255, THRESH_BINARY | THRESH_OTSU);
+	adaptiveThreshold(image, threshold_image, 101, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 101, 20);
 
-	//아무키나 누를 때 까지 대기한다.
-	waitKey(0);
-	return result_otsu_image;
+	return threshold_image;
 }
 
 Mat ImageProcessor::findBiggestBlob(Mat image) {
@@ -68,7 +60,7 @@ vector<Point2f> ImageProcessor::findIntersection(vector<Vec2f> lines, int max_x,
 			point.y = (p * a - m * c) / (n * a - m * b);
 
 			if (point.x > 0 && point.y > 0 && point.x < max_x && point.y < max_y) points.push_back(point);
-			std::cout << "point: (" << point.x << "," << point.y << ")\n";
+			cout << "point: (" << point.x << "," << point.y << ")\n";
 		}
 	}
 	return points;
@@ -77,25 +69,46 @@ vector<Point2f> ImageProcessor::findIntersection(vector<Vec2f> lines, int max_x,
 vector<Point2f> ImageProcessor::findEdge(vector<Point2f> points) {
 	vector<Point2f> edges;
 	Point point[4];
-	for (int i = 0; i < 4; i++) point[i] = points[0];
-	for (vector<Point2f>::iterator i = points.begin() + 1; i != points.end(); i++) {
-		float x = (*i).x, y = (*i).y;
-		float check = x + y;
-		if (point[0].x + point[0].y > x + y) {
-			point[0] = *i;
+	float scaler = 0.9;
+	if (points.size() != 0) {
+		for (int i = 0; i < 4; i++) point[i] = points[0];
+		for (vector<Point2f>::iterator i = points.begin() + 1; i != points.end(); i++) {
+			float x = (*i).x, y = (*i).y;
+			float check = x + y;
+			if (point[3].x * (-1) + point[3].y * (-1) > x * (-1) + y * (-1)) {
+				point[3] = *i;
+			}
+			if (point[1].x * (-1) + point[1].y > x * (-1) + y) {
+				point[1] = *i;
+			}
+			if (point[2].x + point[2].y * (-1) > x + y * (-1)) {
+				point[2] = *i;
+			}
+			if (point[0].x + point[0].y > x + y) {
+				point[0] = *i;
+			}
 		}
-		if (point[1].x * (-1) + point[1].y > x * (-1) + y) {
-			point[1] = *i;
-		}
-		if (point[2].x + point[2].y * (-1) > x + y * (-1)) {
-			point[2] = *i;
-		}
-		if (point[3].x * (-1) + point[3].y * (-1) > x * (-1) + y * (-1)) {
-			point[3] = *i;
-		}
+		for (int i = 0; i < 4; i++) edges.push_back(point[i]);
 	}
-	for (int i = 0; i < 4; i++) edges.push_back(point[i]);
 	return edges;
+}
+
+vector<Point2f> adjustEdgePosition(vector<Point2f> edges) {
+	const float scaler = 0.07;
+	float dx[2] = { (edges[1].x - edges[0].x) * scaler, (edges[3].x - edges[2].x) * scaler };
+	float dy[2] = { (edges[2].y - edges[0].y) * scaler, (edges[3].y - edges[1].y) * scaler };
+
+	const int order[2][4] = { {0, 0, 1, 1}, {0, 1, 0, 1} };
+	const bool sub[2][4] = { {false, true, false, true}, {false, false, true, true} };
+	
+	vector<Point2f> adjust_edges;
+	for (int i = 0; i < 4; i++) {
+		float tdx = dx[order[0][i]], tdy = dy[order[1][i]];
+		if (sub[0][i]) tdx *= -1;
+		if (sub[1][i]) tdy *= -1;
+		adjust_edges.push_back(Point2f(edges[i].x + tdx, edges[i].y + tdy));
+	}
+	return adjust_edges;
 }
 
 vector<Point2f> ImageProcessor::calculateCorners(vector<Point2f> edges) {
@@ -142,29 +155,77 @@ vector<Block> ImageProcessor::findBlocks(vector<Point2f> corners) {
 	return blocks;
 }
 
+void drawLinesInImage(Mat image, Mat contours, vector<Vec2f> lines) {
+	Mat result(contours.rows, contours.cols, CV_8U, cv::Scalar(255));
+
+	// 선 벡터를 반복해 선 그리기
+	vector<Vec2f>::const_iterator it = lines.begin();
+	while (it != lines.end()) {
+		float rho = (*it)[0];   // 첫 번째 요소는 rho 거리
+		float theta = (*it)[1]; // 두 번째 요소는 델타 각도
+		if (theta < PI / 4. || theta > 3.*PI / 4.) { // 수직 행
+			Point pt1(rho / cos(theta), 0); // 첫 행에서 해당 선의 교차점   
+			Point pt2((rho - result.rows*sin(theta)) / cos(theta), result.rows);
+			// 마지막 행에서 해당 선의 교차점
+			line(image, pt1, pt2, cv::Scalar(255), 1); // 하얀 선으로 그리기
+		}
+		else { // 수평 행
+			Point pt1(0, rho / sin(theta)); // 첫 번째 열에서 해당 선의 교차점  
+			Point pt2(result.cols, (rho - result.cols*cos(theta)) / sin(theta));
+			// 마지막 열에서 해당 선의 교차점
+			line(image, pt1, pt2, cv::Scalar(255), 1); // 하얀 선으로 그리기
+		}
+		++it;
+	}
+	imshow("lines", image);
+}
+
+void drawPointsInImage(Mat image, vector<Point2f> points, String title) {
+	for (vector<Point2f>::iterator i = points.begin(); i != points.end(); i++) circle(image, Point((*i)), 5, Scalar(255), 1, 8, 0);
+	imshow(title, image);
+}
 vector<Block> ImageProcessor::findChessboardBlocks(String title) {
+	//read image with gray scale
 	Mat input_gray_image = imread(title, IMREAD_GRAYSCALE);
+	//imshow("gray", input_gray_image);
 
-	Mat result_otsu_image;
-	threshold(input_gray_image, result_otsu_image, 0, 255, THRESH_BINARY | THRESH_OTSU);
-	
-	Mat biggestBlob = findBiggestBlob(result_otsu_image);
+	//threshold colors
+	Mat threshold_image = thresholdImage(input_gray_image);
+	//imshow("threshold", threshold_image);
 
+	//find biggest area in image
+	Mat biggestBlob = findBiggestBlob(threshold_image);
+	//imshow("biggest Blob", biggestBlob);
+
+	//Canny algo for finding contours;
 	Mat contours;
 	Canny(biggestBlob, contours, 125, 350);
+	//imshow("canny", contours);
 
-	// 선 감지 위한 허프 변환
-	vector<cv::Vec2f> lines;
-	HoughLines(contours, lines, 1, PI / 180, 180);  // 투표(vote) 최대 개수
+	//Hough transformation for finding lines
+	vector<Vec2f> lines;
+	HoughLines(contours, lines, 1, PI / 180, 120);  // 투표(vote) 최대 개수
+	//drawLinesInImage(input_gray_image, contours, lines);
 
+	//find intersections
 	vector<Point2f> intersections = findIntersection(lines, input_gray_image.cols, input_gray_image.rows);
+	
+	//find edge points
 	vector<Point2f> edges = findEdge(intersections);
+	//drawPointsInImage(input_gray_image, edges, "edges");
 
-	for (int i = 0; i < 4; i++) circle(input_gray_image, Point(edges[i]), 5, Scalar(255), 1, 8, 0);
+	//adjust edge points
+	vector<Point2f> adjust_edges = adjustEdgePosition(edges);
+	//drawPointsInImage(input_gray_image, adjust_edges, "adjust_edges");
 
-	vector<Point2f> corners = calculateCorners(edges);
-	for (vector<Point2f>::iterator i = corners.begin(); i != corners.end(); i++) circle(input_gray_image, Point((*i)), 5, Scalar(255), 1, 8, 0);
+	//find all corners in chessboard
+	vector<Point2f> corners = calculateCorners(adjust_edges);
+	//drawPointsInImage(input_gray_image, corners, "corners");
 
+	//waitKey(0);
+	//destroyAllWindows();
+
+	//find all blocks in chessboard
 	vector<Block> blocks = findBlocks(corners);
 	return blocks;
 }
@@ -176,7 +237,7 @@ vector<Block> ImageProcessor::findColorObject(vector<Block> blocks, String title
 	Mat threshold_image;
 	Mat point_image;
 
-	if (color == 0) {
+	if (color == WHITE) {
 		threshold(image, threshold_image, 240, 255, THRESH_BINARY);
 		threshold(image, point_image, 240, 255, THRESH_BINARY);
 	}
@@ -210,7 +271,7 @@ vector<Block> ImageProcessor::findColorObject(vector<Block> blocks, String title
 		}
 		printf("%d, %d\n", index++, count);
 
-		if (count > 80) {
+		if (count > 100) {
 			(*iter).setIsInObject(true);
 			objects.push_back(*iter);
 		}
@@ -221,7 +282,7 @@ vector<Block> ImageProcessor::findColorObject(vector<Block> blocks, String title
 }
 
 vector<Block> ImageProcessor::findChessObject(vector<Block> blocks, String title) {
-	vector<Block> w_objects = findColorObject(blocks, title, WHITE);
+	vector<Block> w_objects;// = findColorObject(blocks, title, WHITE);
 	vector<Block> b_objects = findColorObject(blocks, title, BLACK);
 
 	vector<Block> objects = w_objects;
@@ -236,6 +297,7 @@ vector<Block> ImageProcessor::findChessObject(vector<Block> blocks, String title
 	cv::imshow("Detected edge point", image);
 
 	waitKey(0);
+	destroyAllWindows();
 	return objects;
 }
 
