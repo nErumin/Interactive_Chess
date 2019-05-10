@@ -24,16 +24,18 @@ class ImageProcessor : public Observable<Vector2>
 private:
 	vector<Block> blocks;
 	vector<Block> pieces;
+	int average_black[3], average_white[3];
+
 	Mat thresholdImage(Mat image);
 	Mat findBiggestBlob(Mat image);
 	vector<Point2f> findIntersection(vector<Vec2f> lines, int max_x, int max_y);
 	vector<Point2f> findEdge(vector<Point2f> points);
 	vector<Point2f> calculateCorners(vector<Point2f> edges);
 	vector<Block> findBlocks(vector<Point2f> corners);
-	vector<Block> findColorObject(vector<Block> blocks, String title, int color);
+	vector<Block> findColorObject(String title, int color);
 	vector<Block> findChessboardBlocks(String title);
-	vector<Block> findChessObject(vector<Block> blocks, String title);
-
+	vector<Block> findChessObject(String title);
+	void setAverageColor(String title);
 public:
 	ImageProcessor();
 	~ImageProcessor() = default;
