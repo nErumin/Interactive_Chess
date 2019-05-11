@@ -20,7 +20,23 @@ jobs:
  include:
   - stage: Network
     install:
-      - sudo apt-get install libboost-all-dev
+      - sudo add-apt-repository --yes ppa:mhier/libboost-latest
+      - sudo apt-get update
+      - sudo apt-get install libboost1.68-dev
+      
+      - sudo rm -r /usr/local/cmake-3.9.2/bin/
+      - mkdir ./cmake_build
+      - cd cmake_build
+      - wget https://github.com/Kitware/CMake/releases/download/v3.14.3/cmake-3.14.3-Linux-x86_64.sh
+      - chmod +x ./cmake-3.14.3-Linux-x86_64.sh
+      
+      - sudo mkdir /opt/cmake
+      - sudo sh cmake-3.14.3-Linux-x86_64.sh --skip-license --prefix=/opt/cmake
+      - sudo ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
+      
+      - which cmake
+      - cmake --version
+      - cd ..
     before_script:
       - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
       - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
