@@ -51,6 +51,10 @@ jobs:
     install:
       - sudo apt-get install build-essential
       - sudo apt-get install libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+
+      - sudo add-apt-repository --yes ppa:mhier/libboost-latest
+      - sudo apt-get update
+      - sudo apt-get install libboost1.68-dev
     before_script:
       - bash build_opencv.sh
       - cd opencv/build/
