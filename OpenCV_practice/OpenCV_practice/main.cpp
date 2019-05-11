@@ -2,10 +2,9 @@
 #include <chrono>
 
 int main() {
-	/*
-	OpenCVController controller;
-	controller.startVideo(1);
-	*/
+	//OpenCVController controller;
+	//controller.startVideo(1);
+	
 	
 	ImageProcessor ip;
 	String img_name = "test.jpg";
@@ -17,5 +16,6 @@ int main() {
 	
 	chrono::duration<double> sec = chrono::system_clock::now() - start;
 	cout << "elapsed time : " << sec.count() << endl;
+	
 	return 0;
 }

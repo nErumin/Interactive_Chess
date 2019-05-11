@@ -8,7 +8,7 @@ ImageProcessor::ImageProcessor() {
 
 Mat ImageProcessor::thresholdImage(Mat image) {
 	Mat threshold_image;
-	//이진화를 한다.
+
 	//threshold(image, threshold_image, 0, 255, THRESH_BINARY | THRESH_OTSU);
 	adaptiveThreshold(image, threshold_image, 101, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 101, 20);
 
@@ -183,7 +183,7 @@ void drawLinesInImage(Mat image, Mat contours, vector<Vec2f> lines) {
 }
 
 void drawPointsInImage(Mat image, vector<Point2f> points, String title) {
-	for (vector<Point2f>::iterator i = points.begin(); i != points.end(); i++) circle(image, Point((*i)), 5, Scalar(255), 1, 8, 0);
+	for (vector<Point2f>::iterator i = points.begin(); i != points.end(); i++) circle(image, Point((*i)), 5, Scalar(0), FILLED, 8, 0);
 	imshow(title, image);
 }
 
@@ -218,28 +218,41 @@ vector<Block> ImageProcessor::findChessboardBlocks(String title) {
 	vector<Vec2f> lines;
 	HoughLines(contours, lines, 1, PI / 180, 120);  // 투표(vote) 최대 개수
 #if TEST == 1
-	drawLinesInImage(input_gray_image, contours, lines);
+	Mat lines_image;
+	input_gray_image.copyTo(lines_image);
+	drawLinesInImage(lines_image, contours, lines);
 #endif
 
 	//find intersections
 	vector<Point2f> intersections = findIntersection(lines, input_gray_image.cols, input_gray_image.rows);
-	
+#if TEST == 1
+	Mat intersections_image;
+	lines_image.copyTo(intersections_image);
+	drawPointsInImage(intersections_image, intersections, "intersections");
+#endif	
+
 	//find edge points
 	vector<Point2f> edges = findEdge(intersections);
 #if TEST == 1
-	drawPointsInImage(input_gray_image, edges, "edges");
+	Mat edges_image;
+	input_gray_image.copyTo(edges_image);
+	drawPointsInImage(edges_image, edges, "edges");
 #endif
 
 	//adjust edge points
 	vector<Point2f> adjust_edges = adjustEdgePosition(edges);
 #if TEST == 1
-	drawPointsInImage(input_gray_image, adjust_edges, "adjust_edges");
+	Mat adjust_image;
+	edges_image.copyTo(adjust_image);
+	drawPointsInImage(adjust_image, adjust_edges, "adjust_edges");
 #endif
 
 	//find all corners in chessboard
 	vector<Point2f> corners = calculateCorners(adjust_edges);
 #if TEST == 1
-	drawPointsInImage(input_gray_image, corners, "corners");
+	Mat corners_image;
+	input_gray_image.copyTo(corners_image);
+	drawPointsInImage(corners_image, corners, "corners");
 
 	waitKey(0);
 	destroyAllWindows();
@@ -252,6 +265,7 @@ vector<Block> ImageProcessor::findChessboardBlocks(String title) {
 
 vector<Block> ImageProcessor::findColorObject(String title, int color) {
 	Mat image = imread(title);
+
 #if TEST == 1
 	imshow("origin", image);
 #endif
@@ -259,6 +273,11 @@ vector<Block> ImageProcessor::findColorObject(String title, int color) {
 	Mat threshold_image;
 	Mat point_image;
 	int sub = -10, add = 15;
+	/*
+	inRange(image, Scalar(150, 0, 0), Scalar(255, 150, 150), threshold_image);
+	inRange(image, Scalar(150, 0, 0), Scalar(255, 150, 150), point_image);
+	*/
+	
 	if (color == WHITE) {
 		inRange(image, Scalar(average_black[0] + sub, average_black[1] + sub, average_black[2] + sub), Scalar(average_black[0] + add, average_black[1] + add, average_black[2] + add), threshold_image);
 #if TEST == 1
@@ -275,7 +294,7 @@ vector<Block> ImageProcessor::findColorObject(String title, int color) {
 		//threshold(image, threshold_image, 20, 255, THRESH_BINARY_INV);
 		//threshold(image, point_image, 20, 255, THRESH_BINARY_INV);
 	}
-
+	
 	vector<Block> objects;
 
 	int index = 0;
@@ -304,11 +323,12 @@ vector<Block> ImageProcessor::findColorObject(String title, int color) {
 		printf("%d, %d\n", index++, count);
 #endif
 
-		if (count > 50) {
+		if (count > 1) {
 			(*iter).setIsInObject(true);
 			objects.push_back(*iter);
 		}
 	}
+
 #if TEST == 1
 	imshow("threshold", threshold_image);
 	imshow("finding point", point_image);
@@ -327,7 +347,7 @@ vector<Block> ImageProcessor::findChessObject(String title) {
 	Mat image = imread(title);
 
 	for (vector<Block>::iterator iter = objects.begin(); iter != objects.end(); iter++) {
-		circle(image, Point((*iter).getCenterPoint()), 5, Scalar(255), 1, 8, 0);
+		circle(image, Point((*iter).getCenterPoint()), 5, Scalar(150), 1, 8, 0);
 	}
 
 #if TEST == 1
