@@ -15,7 +15,9 @@ public:
     explicit Piece(PieceColor color = PieceColor::None);
 
     std::vector<Vector2> movableLocations(const Vector2& pieceLocation) const;
-    std::vector<Vector2> movableLocationsUsingObstacles(const Vector2& pieceLocation, const std::vector<std::vector<PieceColor>>& obstacleMap) const;
+    std::vector<Vector2> movableLocationsUsingObstacles(const Vector2& pieceLocation,
+                                                        const std::vector<std::vector<PieceColor>>& obstacleMap,
+                                                        PieceColor obstacleThreshold) const;
     double getRotationDegree() const noexcept;
     PieceColor getColor() const noexcept;
 
@@ -23,6 +25,7 @@ public:
     void setColor(PieceColor newColor) noexcept;
     void setMovementStratgies(std::vector<std::unique_ptr<MovementStrategy>>&& newStrategies);
 
+    virtual size_t getPriority() const noexcept = 0;
     virtual ~Piece();
 protected:
     virtual bool isStrategyAcceptable(const std::unique_ptr<MovementStrategy>& strategy) const noexcept = 0;

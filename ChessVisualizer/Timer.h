@@ -1,6 +1,7 @@
 #ifndef TIMER_H
 #define TIMER_H
 
+#include <mutex>
 #include <functional>
 #include "Observable.h"
 
@@ -29,6 +30,7 @@ private:
     void setRunning(bool running);
     void setPaused(bool paused);
 private:
+    mutable std::mutex resMutex;
     bool running = false;
     bool paused = false;
 

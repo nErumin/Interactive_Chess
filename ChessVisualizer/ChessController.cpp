@@ -8,7 +8,11 @@
 #include <memory>
 #include <iostream>
 #include <sstream>
+#include <future>
+#include <chrono>
 
+#include <QApplication>
+#include <cstdlib>
 #include "InformationModal.h"
 #include "King.h"
 #include "Queen.h"
@@ -16,6 +20,8 @@
 #include "Rook.h"
 #include "Knight.h"
 #include "Pawn.h"
+#include "NullPiece.h"
+#include "BoardUtility.h"
 
 QPixmap convertPieceToPixmap(const Piece* piecePtr)
 {
@@ -85,11 +91,11 @@ void ChessController::startChess()
     // set timers and register tick events
     for (const auto& player : game.getPlayers())
     {
-        auto& label = player->getOwningPieceColor() == PieceColor::Black ?
+        auto& label = player->getOwningPieceColor() == game.getBoard().getTopPieceColor() ?
                     window.getUpperLabel() :
                     window.getLowerLabel();
 
-        label.setText("Remain Time: 10");
+        label.setText("");
 
         player->getTimer().setTickHandler([&label](double leftTime)
         {
@@ -99,98 +105,184 @@ void ChessController::startChess()
                 std::ostringstream stringStream;
                 stringStream << "Remain Time: " << static_cast<size_t>(std::floor(leftTime)) << std::endl;
 
-                label.setText(stringStream.str().c_str());
+                QMetaObject::invokeMethod(&label, "setText", Qt::QueuedConnection, Q_ARG(QString, stringStream.str().c_str()));
             }
         });
 
-        player->getTimer().setFinishedHandler([]
+        player->getTimer().setFinishedHandler([playerType = player->getType(), this]
         {
-            std::cout << "Timer Finished!" << std::endl;
+            auto result = playerType == PlayerType::Human ?
+                        GameResult::Lose :
+                        GameResult::Win;
+
+            std::cout << "Timer Finished! Result = " << toLowerString(result) << std::endl;
+
+            game.setGameResult(result);
         });
 
-        player->getTimer().start(10.0);
+        player->getTimer().start(50.0);
         player->getTimer().pause();
     }
 
    game.getCurrentPlayer().getTimer().resume();
-   makeMovingFromPlayer(game.getCurrentPlayer());
+   startTurn();
 }
 
-
-void ChessController::makeMovingFromPlayer(Player& player)
+void ChessController::startTurn()
 {
-    if (player.getType() == PlayerType::Human)
+    std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 500 });
+
+    bool isPassive = pickRandomNumber(0, 10) < 5;
+    auto picked = randomPickPieceMoving(game.getBoard(), game.getCurrentPlayer().getOwningPieceColor(), isPassive);
+
+    game.movePiece(picked.first, picked.second);
+}
+
+inline void showDialogIfChecked(const Board& board, PieceColor pieceColor)
+{
+    if (board.isColorChecked(pieceColor))
     {
-        std::cout << "Select!" << std::endl;
-        while (true)
-        {
-            double x = 0;
-            double y = 1;
-            double deltaX = 0;
-            double deltaY = 3;
+        std::string message = pieceColor == PieceColor::Black ?
+                    "The black king" : "The white king";
 
-            std::cin >> x >> y >> deltaX >> deltaY;
-
-            try
-            {
-                game.movePiece({ x, y }, { deltaX, deltaY });
-            }
-            catch (const std::exception&)
-            {
-                auto& currentPlayerTimer = game.getCurrentPlayer().getTimer();
-
-                currentPlayerTimer.pause();
-
-                InformationModal modal{ nullptr };
-
-                modal.setModalTitle("Wrong placing");
-                modal.setMessageText("You cannot make that movement. It's wrong!");
-                modal.exec();
-
-                currentPlayerTimer.resume();
-
-                continue;
-            }
-
-            break;
-        }
+        InformationModal modal{ nullptr };
+        modal.setModalTitle("Check!");
+        modal.setMessageText(message + " is checked!");
+        modal.exec();
     }
+}
+
+inline void showDialogIfStaleMated(ChessGame& game)
+{
+    auto& board = game.getBoard();
+
+    if (board.isStaleMated(PieceColor::Black) ||
+        board.isStaleMated(PieceColor::White))
+    {
+        game.setGameResult(GameResult::Draw);
+
+        InformationModal modal{ nullptr };
+
+        modal.setModalTitle("Stalemated");
+        modal.setMessageText("Stalemated!");
+
+        modal.exec();
+    }
+}
+
+inline void showDialogIfKingDead(ChessGame& game)
+{
+    auto& board = game.getBoard();
+    auto currentPlayerColor = game.getCurrentPlayer().getOwningPieceColor();
+    auto humanColor = game.getCurrentPlayer().getType() == PlayerType::Human ?
+                currentPlayerColor :
+                getEnemyColor(currentPlayerColor);
+
+    InformationModal dialog{ nullptr };
+    dialog.setModalTitle("King dead!");
+
+    if (board.isKingDead(humanColor))
+    {
+        game.setGameResult(GameResult::Lose);
+
+        dialog.setMessageText("Your king is dead!");
+        dialog.exec();
+    }
+    else if (board.isKingDead(getEnemyColor(humanColor)))
+    {
+        game.setGameResult(GameResult::Win);
+
+        dialog.setMessageText("The robot's king is dead!");
+        dialog.exec();
+    }
+}
+
+inline void showGameFinishedDialog(ChessWindow& window, GameResult result)
+{
+    window.setWindowColor({ 0, 0, 0, 75 });
+
+    InformationModal dialog{ nullptr };
+    std::ostringstream stream;
+
+    auto resultMessage = toLowerString(result);
+
+    if (result == GameResult::Draw)
+    {
+        resultMessage[0] = static_cast<char>(toupper(resultMessage[0]));
+        stream << resultMessage << "!";
+    }
+    else
+    {
+        stream << "You " << resultMessage << "!";
+    }
+
+    dialog.setModalTitle("Game Finished");
+    dialog.setMessageText(stream.str());
+    dialog.exec();
+
+    std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 3000 });
+    QMetaObject::invokeMethod(QApplication::instance(), "quit", Qt::QueuedConnection);
+}
+
+void ChessController::finalize()
+{
+    game.getCurrentPlayer().getTimer().stop();
+    game.getNextPlayer().getTimer().stop();
 }
 
 void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
 {
     changingPlayer.getTimer().pause();
+
+    showDialogIfChecked(game.getBoard(), changingPlayer.getOwningPieceColor());
+    showDialogIfChecked(game.getBoard(), nextPlayer.getOwningPieceColor());
+    showDialogIfStaleMated(game);
+    showDialogIfKingDead(game);
+
+    if (game.getGameResult() != GameResult::None)
+    {
+        finalize();
+
+        showGameFinishedDialog(window, game.getGameResult());
+        game.getBoard().unregisterObserver(this);
+
+        return;
+    }
+
     nextPlayer.getTimer().resume();
 
-    if (game.getBoard().isColorChecked(changingPlayer.getOwningPieceColor()))
+    std::thread([this]
     {
-        std::string message = changingPlayer.getOwningPieceColor() == PieceColor::Black ?
-                    "The black king" : "The white king";
+        std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 1000 });
 
-        InformationModal modal{ nullptr };
-        modal.setModalTitle("Check!");
-        modal.setMessageText(message + " is checked!");
-        modal.exec();
-    }
-
-    if (game.getBoard().isColorChecked(nextPlayer.getOwningPieceColor()))
-    {
-        std::string message = nextPlayer.getOwningPieceColor() == PieceColor::Black ?
-                    "The black king" : "The white king";
-
-        InformationModal modal{ nullptr };
-        modal.setModalTitle("Check!");
-        modal.setMessageText(message + " is checked!");
-        modal.exec();
-    }
+        QMetaObject::invokeMethod(QApplication::instance(), [this]
+        {
+            startTurn();
+        }, Qt::QueuedConnection);
+    }).detach();
 }
 
 void ChessController::notify(const Cell& changedCell, Vector2&& location)
 {
+    if (game.getGameResult() != GameResult::None)
+    {
+        finalize();
+
+        showGameFinishedDialog(window, game.getGameResult());
+        game.getBoard().unregisterObserver(this);
+
+        return;
+    }
+
     auto pixmap = convertPieceToPixmap(changedCell.getPiece().get());
     auto normalized = normalizeToIntegerVector(location);
 
     window.getLabel(normalized.second, normalized.first).setPixmap(std::move(pixmap));
+
+    if (std::dynamic_pointer_cast<NullPiece>(changedCell.getPiece()) == nullptr)
+    {
+        game.setToNextPlayer();
+    }
 }
 
 ChessController::~ChessController()

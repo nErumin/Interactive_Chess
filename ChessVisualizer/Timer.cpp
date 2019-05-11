@@ -75,30 +75,36 @@ void Timer::stop()
 
 bool Timer::isStopped() const
 {
+    std::lock_guard<std::mutex> guard{ resMutex };
     return !running && !paused;
 }
 
 bool Timer::isPaused() const
 {
+    std::lock_guard<std::mutex> guard{ resMutex };
     return running && paused;
 }
 
 void Timer::setRunning(bool running)
 {
+    std::lock_guard<std::mutex> guard{ resMutex };
     this->running = running;
 }
 
 void Timer::setPaused(bool paused)
 {
+    std::lock_guard<std::mutex> guard{ resMutex };
     this->paused = paused;
 }
 
 void Timer::setTickHandler(ArgEventHandler<double> tickHandler)
 {
+    std::lock_guard<std::mutex> guard{ resMutex };
     tickFunctor = std::move(tickHandler);
 }
 
 void Timer::setFinishedHandler(EventHandler finishedHandler)
 {
+    std::lock_guard<std::mutex> guard{ resMutex };
     finishedFunctor = std::move(finishedHandler);
 }
