@@ -1,3 +1,9 @@
+/*
+ * Reference
+ * http://emanual.robotis.com/docs/en/parts/controller/opencr10/
+ * LED Blink example
+ */
+
 int led_pin = 13;
 int led_pin_user[4] = { BDPIN_LED_USER_1, BDPIN_LED_USER_2, BDPIN_LED_USER_3, BDPIN_LED_USER_4 };
 
