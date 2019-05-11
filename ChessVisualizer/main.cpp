@@ -4,9 +4,12 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    ChessController e;
+    QApplication application(argc, argv);
+    ChessController controller;
 
-    e.startChess();
-    return a.exec();
+    controller.startChess();
+    application.exec();
+
+    controller.finalize();
+    return 0;
 }

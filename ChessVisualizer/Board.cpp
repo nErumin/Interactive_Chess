@@ -14,12 +14,13 @@
 #include <algorithm>
 #include <cmath>
 #include "Piece.h"
+#include "MathUtils.h"
+#include <map>
 
 Board::Board()
     : boardCells{ boardSize, std::vector<Cell>(boardSize, Cell(sharedNullPiece)) }
 {
     initializeBoardCellColors();
-    initializeBoardCellPieces();
 }
 
 void Board::initializeBoardCellColors()
@@ -37,34 +38,37 @@ void Board::initializeBoardCellColors()
     }
 }
 
-void Board::initializeBoardCellPieces()
+void Board::initializeBoardCellPieces(PieceColor topPieceColor, PieceColor bottomPieceColor)
 {
-    boardCells[0][0].setPiece(std::make_shared<Rook>(PieceColor::Black));
-    boardCells[0][1].setPiece(std::make_shared<Knight>(PieceColor::Black));
-    boardCells[0][2].setPiece(std::make_shared<Bishop>(PieceColor::Black));
-    boardCells[0][3].setPiece(std::make_shared<Queen>(PieceColor::Black));
-    boardCells[3][4].setPiece(std::make_shared<King>(PieceColor::Black));
-    boardCells[0][5].setPiece(std::make_shared<Bishop>(PieceColor::Black));
-    boardCells[0][6].setPiece(std::make_shared<Knight>(PieceColor::Black));
-    boardCells[0][7].setPiece(std::make_shared<Rook>(PieceColor::Black));
+    pieceColors.first = topPieceColor;
+    pieceColors.second = bottomPieceColor;
 
-    boardCells[1][0].setPiece(std::make_shared<Pawn>(PieceColor::Black));
-    boardCells[1][1].setPiece(std::make_shared<Pawn>(PieceColor::Black));
-    boardCells[1][2].setPiece(std::make_shared<Pawn>(PieceColor::Black));
-    boardCells[1][3].setPiece(std::make_shared<Pawn>(PieceColor::Black));
-    boardCells[1][4].setPiece(std::make_shared<Pawn>(PieceColor::Black));
-    boardCells[1][5].setPiece(std::make_shared<Pawn>(PieceColor::Black));
-    boardCells[1][6].setPiece(std::make_shared<Pawn>(PieceColor::Black));
-    boardCells[1][7].setPiece(std::make_shared<Pawn>(PieceColor::Black));
+    boardCells[0][0].setPiece(std::make_shared<Rook>(pieceColors.first));
+    boardCells[0][1].setPiece(std::make_shared<Knight>(pieceColors.first));
+    boardCells[0][2].setPiece(std::make_shared<Bishop>(pieceColors.first));
+    boardCells[0][3].setPiece(std::make_shared<Queen>(pieceColors.first));
+    boardCells[0][4].setPiece(std::make_shared<King>(pieceColors.first));
+    boardCells[0][5].setPiece(std::make_shared<Bishop>(pieceColors.first));
+    boardCells[0][6].setPiece(std::make_shared<Knight>(pieceColors.first));
+    boardCells[0][7].setPiece(std::make_shared<Rook>(pieceColors.first));
 
-    boardCells[6][0].setPiece(std::make_shared<Pawn>(PieceColor::White));
-    boardCells[6][1].setPiece(std::make_shared<Pawn>(PieceColor::White));
-    boardCells[6][2].setPiece(std::make_shared<Pawn>(PieceColor::White));
-    boardCells[6][3].setPiece(std::make_shared<Pawn>(PieceColor::White));
-    boardCells[6][4].setPiece(std::make_shared<Pawn>(PieceColor::White));
-    boardCells[6][5].setPiece(std::make_shared<Pawn>(PieceColor::White));
-    boardCells[6][6].setPiece(std::make_shared<Pawn>(PieceColor::White));
-    boardCells[6][7].setPiece(std::make_shared<Pawn>(PieceColor::White));
+    boardCells[1][0].setPiece(std::make_shared<Pawn>(pieceColors.first));
+    boardCells[1][1].setPiece(std::make_shared<Pawn>(pieceColors.first));
+    boardCells[1][2].setPiece(std::make_shared<Pawn>(pieceColors.first));
+    boardCells[1][3].setPiece(std::make_shared<Pawn>(pieceColors.first));
+    boardCells[1][4].setPiece(std::make_shared<Pawn>(pieceColors.first));
+    boardCells[1][5].setPiece(std::make_shared<Pawn>(pieceColors.first));
+    boardCells[1][6].setPiece(std::make_shared<Pawn>(pieceColors.first));
+    boardCells[1][7].setPiece(std::make_shared<Pawn>(pieceColors.first));
+
+    boardCells[6][0].setPiece(std::make_shared<Pawn>(pieceColors.second));
+    boardCells[6][1].setPiece(std::make_shared<Pawn>(pieceColors.second));
+    boardCells[6][2].setPiece(std::make_shared<Pawn>(pieceColors.second));
+    boardCells[6][3].setPiece(std::make_shared<Pawn>(pieceColors.second));
+    boardCells[6][4].setPiece(std::make_shared<Pawn>(pieceColors.second));
+    boardCells[6][5].setPiece(std::make_shared<Pawn>(pieceColors.second));
+    boardCells[6][6].setPiece(std::make_shared<Pawn>(pieceColors.second));
+    boardCells[6][7].setPiece(std::make_shared<Pawn>(pieceColors.second));
 
     std::dynamic_pointer_cast<Pawn>(boardCells[6][0].getPiece())->setRotationDegree(180.0);
     std::dynamic_pointer_cast<Pawn>(boardCells[6][1].getPiece())->setRotationDegree(180.0);
@@ -75,14 +79,24 @@ void Board::initializeBoardCellPieces()
     std::dynamic_pointer_cast<Pawn>(boardCells[6][6].getPiece())->setRotationDegree(180.0);
     std::dynamic_pointer_cast<Pawn>(boardCells[6][7].getPiece())->setRotationDegree(180.0);
 
-    boardCells[7][0].setPiece(std::make_shared<Rook>(PieceColor::White));
-    boardCells[7][1].setPiece(std::make_shared<Knight>(PieceColor::White));
-    boardCells[7][2].setPiece(std::make_shared<Bishop>(PieceColor::White));
-    boardCells[7][3].setPiece(std::make_shared<Queen>(PieceColor::White));
-    boardCells[4][4].setPiece(std::make_shared<King>(PieceColor::White));
-    boardCells[7][5].setPiece(std::make_shared<Bishop>(PieceColor::White));
-    boardCells[7][6].setPiece(std::make_shared<Knight>(PieceColor::White));
-    boardCells[7][7].setPiece(std::make_shared<Rook>(PieceColor::White));
+    boardCells[7][0].setPiece(std::make_shared<Rook>(pieceColors.second));
+    boardCells[7][1].setPiece(std::make_shared<Knight>(pieceColors.second));
+    boardCells[7][2].setPiece(std::make_shared<Bishop>(pieceColors.second));
+    boardCells[7][3].setPiece(std::make_shared<Queen>(pieceColors.second));
+    boardCells[7][4].setPiece(std::make_shared<King>(pieceColors.second));
+    boardCells[7][5].setPiece(std::make_shared<Bishop>(pieceColors.second));
+    boardCells[7][6].setPiece(std::make_shared<Knight>(pieceColors.second));
+    boardCells[7][7].setPiece(std::make_shared<Rook>(pieceColors.second));
+}
+
+PieceColor Board::getTopPieceColor() const noexcept
+{
+    return pieceColors.first;
+}
+
+PieceColor Board::getBottomPieceColor() const noexcept
+{
+    return pieceColors.second;
 }
 
 Cell& Board::getCell(const Vector2& location)
@@ -114,7 +128,7 @@ std::vector<std::vector<PieceColor>> Board::makeObstacleMap() const
     return obstacleMap;
 }
 
-std::vector<Vector2> Board::findPieceMovableLocations(const Vector2 pieceLocation) const
+std::vector<Vector2> Board::findPieceMovableLocations(const Vector2 pieceLocation, PieceColor colorThreshold) const
 {
     const auto& cell = getCell(pieceLocation);
 
@@ -123,9 +137,9 @@ std::vector<Vector2> Board::findPieceMovableLocations(const Vector2 pieceLocatio
         return {};
     }
 
-    auto movableLocations = cell.getPiece()->movableLocationsUsingObstacles(pieceLocation, makeObstacleMap());
+    auto movableLocations = cell.getPiece()->movableLocationsUsingObstacles(pieceLocation, makeObstacleMap(), colorThreshold);
 
-    auto boundaryIterator = std::remove_if(movableLocations.begin(), movableLocations.end(), [this, &cell](const Vector2& location)
+    auto boundaryIterator = std::remove_if(movableLocations.begin(), movableLocations.end(), [](const Vector2& location)
     {
         if (std::round(location.x()) < 0 ||
             std::round(location.y()) < 0 ||
@@ -135,9 +149,7 @@ std::vector<Vector2> Board::findPieceMovableLocations(const Vector2 pieceLocatio
             return true;
         }
 
-        const auto& checkedCell = getCell(location);
-        return checkedCell.isPieceOnBoard() &&
-               checkedCell.getPiece()->getColor() == cell.getPiece()->getColor();
+        return false;
     });
 
     movableLocations.erase(boundaryIterator, movableLocations.end());
@@ -148,7 +160,7 @@ std::vector<Vector2> Board::findPieceMovableLocations(const Vector2 pieceLocatio
 void Board::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation)
 {
     auto& currentCell = getCell(pieceLocation);
-    auto movableLocations = findPieceMovableLocations(pieceLocation);
+    auto movableLocations = findPieceMovableLocations(pieceLocation, currentCell.getPiece()->getColor());
     auto nextLocation = pieceLocation + deltaLocation;
 
     auto searchResult = std::find_if(movableLocations.cbegin(), movableLocations.cend(), [nextLocation](const Vector2& movableLocation)
@@ -156,18 +168,11 @@ void Board::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation)
         return normalizeToIntegerVector(movableLocation) == normalizeToIntegerVector(nextLocation);
     });
 
-    bool isKingBeChecked = isPieceTypeOf<King>(currentCell.getPiece().get()) &&
-                           isChecked(nextLocation);
-
-    if (searchResult == movableLocations.cend() || isKingBeChecked)
-    {
-        throw std::invalid_argument{ "cannot move to that location " };
-    }
-
     auto& targetCell = getCell(nextLocation);
 
     // decide its movement will remove the opponent's piece.
     auto nextCurrentCellPiecePtr = targetCell.getPiece();
+    auto originalTargetPiece = targetCell.getPiece();
 
     if (targetCell.getPiece()->getColor() != PieceColor::None)
     {
@@ -176,6 +181,24 @@ void Board::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation)
 
     targetCell.setPiece(currentCell.getPiece());
     currentCell.setPiece(nextCurrentCellPiecePtr);
+
+    if (isPieceTypeOf<King>(targetCell.getPiece().get()) && isChecked(nextLocation))
+    {
+        currentCell.setPiece(targetCell.getPiece());
+        targetCell.setPiece(originalTargetPiece);
+
+        std::cout << "Oops! A king cannot move to checked locations." << std::endl;
+        throw std::invalid_argument{ "cannot move to that location " };
+    }
+
+    if (searchResult == movableLocations.cend())
+    {
+        currentCell.setPiece(targetCell.getPiece());
+        targetCell.setPiece(originalTargetPiece);
+
+        std::cout << "Invalid movement" << std::endl;
+        throw std::invalid_argument{ "cannot move to that location " };
+    }
 
     // must be checked when a pawn is moved.
     if (auto pawnPiece = std::dynamic_pointer_cast<Pawn>(targetCell.getPiece()); pawnPiece != nullptr)
@@ -277,31 +300,40 @@ bool Board::isColorChecked(PieceColor color) const
     return isChecked(kingPieceLocation);
 }
 
-bool Board::isColorContainsPiece(const Vector2& targetLocation, const Vector2& pieceLocation) const
+bool Board::isPieceTracedByOpponent(const Vector2& targetLocation) const
+{
+    for (size_t i = 0; i < boardCells.size(); ++i)
+    {
+        for (size_t j = 0; j < boardCells[i].size(); ++j)
+        {
+            if (isPieceTracedByOther(targetLocation, { static_cast<double>(j), static_cast<double>(i) }))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool Board::isPieceTracedByOther(const Vector2& targetLocation, const Vector2& pieceLocation) const
+{
+    const auto& targetIndices = normalizeToIntegerVector(targetLocation);
+    const auto& targetPiece = boardCells[targetIndices.second][targetIndices.first].getPiece();
+
+    return isPieceTracedByOtherSimulated(targetLocation, pieceLocation, targetPiece->getColor());
+}
+
+bool Board::isPieceTracedByOtherSimulated(const Vector2& targetLocation, const Vector2& pieceLocation, PieceColor targetColor) const
 {
     const auto& tracerIndices = normalizeToIntegerVector(pieceLocation);
     const auto& tracerPiece = boardCells[tracerIndices.second][tracerIndices.first].getPiece();
 
-    const auto& targetIndices = normalizeToIntegerVector(targetLocation);
-    const auto& targetPiece = boardCells[targetIndices.second][targetIndices.first].getPiece();
-
-    auto opponentColor = PieceColor::None;
-
-    switch (targetPiece->getColor())
-    {
-        case PieceColor::Black:
-            opponentColor = PieceColor::White;
-            break;
-        case PieceColor::White:
-            opponentColor = PieceColor::Black;
-            break;
-        default:
-            opponentColor = PieceColor::None;
-    }
+    auto opponentColor = getEnemyColor(targetColor);
 
     if (tracerPiece->getColor() == opponentColor)
     {
-        auto movableLocation = findPieceMovableLocations(pieceLocation);
+        auto movableLocation = findPieceMovableLocations(pieceLocation, tracerPiece->getColor());
         auto foundResult = std::find_if(movableLocation.cbegin(), movableLocation.cend(), [&targetLocation](const Vector2& location)
         {
             return normalizeToIntegerVector(location) == normalizeToIntegerVector(targetLocation);
@@ -318,16 +350,62 @@ bool Board::isColorContainsPiece(const Vector2& targetLocation, const Vector2& p
 
 bool Board::isChecked(const Vector2& kingLocation) const
 {
+    return isPieceTracedByOpponent(kingLocation);
+}
+
+bool Board::isStaleMated(PieceColor pieceColor) const
+{
+    std::vector<Vector2> opponentPieceMovableLocations;
+    std::vector<Vector2> kingMovableLocations;
+
     for (size_t i = 0; i < boardCells.size(); ++i)
     {
         for (size_t j = 0; j < boardCells[i].size(); ++j)
         {
-            if (isColorContainsPiece(kingLocation, { static_cast<double>(j), static_cast<double>(i) }))
+            auto piece = getCell(i, j).getPiece();
+            Vector2 pieceLocation{ static_cast<double>(j), static_cast<double>(i) };
+            auto threshold = piece->getColor() == pieceColor ? pieceColor : PieceColor::None;
+            auto movableLocations = findPieceMovableLocations(pieceLocation, threshold);
+            auto* copyingTargetContainer = &opponentPieceMovableLocations;
+
+            if (piece->getColor() == pieceColor)
             {
-                return true;
+                if (std::dynamic_pointer_cast<King>(piece) == nullptr && movableLocations.size() > 0)
+                {
+                    return false;
+                }
+
+                copyingTargetContainer = &kingMovableLocations;
             }
+
+            if (auto pawnPtr = std::dynamic_pointer_cast<Pawn>(piece);
+                    piece->getColor() != pieceColor && pawnPtr != nullptr)
+            {
+                auto diagnoalLocations = pawnPtr->getDiagonalLocations(pieceLocation);
+
+                movableLocations.clear();
+                movableLocations.push_back(diagnoalLocations.at(0).second);
+                movableLocations.push_back(diagnoalLocations.at(1).second);
+            }
+
+            std::copy(movableLocations.begin(), movableLocations.end(), std::back_inserter(*copyingTargetContainer));
         }
     }
 
-    return false;
+    return std::all_of(kingMovableLocations.begin(), kingMovableLocations.end(),
+                       [&opponentPieceMovableLocations](const Vector2& kingMovableLocation)
+    {
+        return std::find(opponentPieceMovableLocations.begin(), opponentPieceMovableLocations.end(), kingMovableLocation)
+                != opponentPieceMovableLocations.end();
+    });
+}
+
+bool Board::isKingDead(PieceColor color) const
+{
+    auto kings = findPieces<King>();
+
+    return std::all_of(kings.cbegin(), kings.cend(), [color, this](const Vector2& kingLocation)
+    {
+        return getCell(kingLocation).getPiece()->getColor() != color;
+    });
 }

@@ -6,14 +6,21 @@
 #include "NullPiece.h"
 #include <memory>
 #include "Vector2.h"
+#include "MathUtils.h"
 
 ChessGame::ChessGame()
-    : currentTurnPlayerIndex{ 0 }
+    : result{ GameResult::None }
 {
-    players.push_back(std::make_shared<Player>(PlayerType::Human, PieceColor::White));
-    players.push_back(std::make_shared<Player>(PlayerType::Human, PieceColor::Black));
+    auto randomColors = pickRandomColorPair();
 
-    gameBoard.registerObserver(this);
+    players.push_back(std::make_shared<Player>(PlayerType::Human, randomColors.first));
+    players.push_back(std::make_shared<Player>(PlayerType::Robot, randomColors.second));
+
+    currentTurnPlayerIndex = players.at(0)->getOwningPieceColor() == PieceColor::White ?
+                0 :
+                1;
+
+    gameBoard.initializeBoardCellPieces(randomColors.second, randomColors.first);
 }
 
 std::vector<std::shared_ptr<Player>> ChessGame::getPlayers() const
@@ -48,6 +55,17 @@ const Player& ChessGame::getCurrentPlayer() const noexcept
     return *players[currentTurnPlayerIndex];
 }
 
+Player& ChessGame::getNextPlayer() noexcept
+{
+    size_t nextPlayerIndex = (currentTurnPlayerIndex + 1) % players.size();
+    return *players[nextPlayerIndex];
+}
+
+const Player& ChessGame::getNextPlayer() const noexcept
+{
+    size_t nextPlayerIndex = (currentTurnPlayerIndex + 1) % players.size();
+    return *players[nextPlayerIndex];
+}
 
 void ChessGame::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation)
 {
@@ -62,18 +80,24 @@ void ChessGame::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocati
     getBoard().movePiece(pieceLocation, deltaLocation);
 }
 
-void ChessGame::notify([[maybe_unused]] const Cell& cell, [[maybe_unused]] Vector2&& location)
+void ChessGame::setToNextPlayer()
 {
-    if (std::dynamic_pointer_cast<NullPiece>(cell.getPiece()) != nullptr)
-    {
-        Player& changingPlayer = *players[currentTurnPlayerIndex];
-        currentTurnPlayerIndex = (currentTurnPlayerIndex + 1) % players.size();
+    Player& changingPlayer = *players[currentTurnPlayerIndex];
+    currentTurnPlayerIndex = (currentTurnPlayerIndex + 1) % players.size();
 
-        notifyToObservers(changingPlayer, *players[currentTurnPlayerIndex]);
-    }
+    notifyToObservers(changingPlayer, *players[currentTurnPlayerIndex]);
+}
+
+GameResult ChessGame::getGameResult() const noexcept
+{
+    return result;
+}
+
+void ChessGame::setGameResult(GameResult newResult) noexcept
+{
+    result = newResult;
 }
 
 ChessGame::~ChessGame()
 {
-    gameBoard.unregisterObserver(this);
 }
