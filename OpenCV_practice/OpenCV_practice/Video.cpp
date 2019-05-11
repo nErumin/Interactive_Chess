@@ -54,6 +54,7 @@ void Video::captureImage() {
 	}
 	// Save the frame into a file
 	imwrite("test.jpg", save_img); // A JPG FILE IS BEING SAVED
+	showImage("test.jpg");
 	notifyToObservers("test.jpg");
 }
 
