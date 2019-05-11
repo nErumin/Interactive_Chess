@@ -31,7 +31,8 @@ NetworkLibrary/lib/
 *.pch
 
 # Compiled Dynamic libraries
-*.so
+NetworkLibrary/NetworkLibrary/*.so
+OpenCV_practice/OpenCV_practice/*.so
 *.dylib
 *.dll
 
