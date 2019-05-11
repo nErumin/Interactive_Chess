@@ -1,6 +1,18 @@
 # Created by https://www.gitignore.io/api/qt,c++,opencv,windows,visualstudio,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=qt,c++,opencv,windows,visualstudio,visualstudiocode
 
+# Qt autosave
+*.cpp*
+!*.cpp
+*.h*
+!*.h
+*.pro*
+!*.pro
+
+# Boost include + lib
+NetworkLibrary/include/
+NetworkLibrary/lib/
+
 ### User ###
 *.jpg
 
@@ -19,7 +31,8 @@
 *.pch
 
 # Compiled Dynamic libraries
-*.so
+NetworkLibrary/NetworkLibrary/*.so
+OpenCV_practice/OpenCV_practice/*.so
 *.dylib
 *.dll
 

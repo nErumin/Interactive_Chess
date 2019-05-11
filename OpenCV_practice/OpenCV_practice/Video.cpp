@@ -1,4 +1,5 @@
 #include "Video.h"
+
 Video::Video()
 	:end_video { false }
 {
@@ -53,12 +54,13 @@ void Video::captureImage() {
 	}
 	// Save the frame into a file
 	imwrite("test.jpg", save_img); // A JPG FILE IS BEING SAVED
+	showImage("test.jpg");
 	notifyToObservers("test.jpg");
 }
 
 void Video::showImage(String image_name) {
 	
-	String filePath = DEFAULT_PATH + image_name;
+	String filePath = image_name;
 	Mat image = imread(filePath);
 
 	// Check for failure

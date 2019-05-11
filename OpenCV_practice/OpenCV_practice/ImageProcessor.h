@@ -4,28 +4,44 @@
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/calib3d.hpp"
+#include "opencv2/imgcodecs.hpp"
 #include "Vector2.h"
+#include "Observable.h"
+#include "Block.h"
 #include <vector>
 #include <iostream>
-
-#include "DefaultPath.h"
 
 using namespace cv;
 using namespace std;
 
-class ImageProcessor
+#define TEST 1
+#define PI 3.1415926
+
+#define WHITE 0
+#define BLACK 1
+
+class ImageProcessor : public Observable<Vector2>
 {
 private:
-	vector<Vector2> chessboard_corners;
-	vector<Vector2> chess_pieces;
-	vector<Point2f> center_positions;
-	Point2f mean_distance;
-	Point2f calculateMeanDistanceOfCorners(vector<Point2f> corners);
-	vector<Point2f> calculateCenterPositionsOfCells(vector<Point2f> corners);
+	vector<Block> blocks;
+	vector<Block> pieces;
+	int average_black[3], average_white[3];
 
+	Mat thresholdImage(Mat image);
+	Mat findBiggestBlob(Mat image);
+	vector<Point2f> findIntersection(vector<Vec2f> lines, int max_x, int max_y);
+	vector<Point2f> findEdge(vector<Point2f> points);
+	vector<Point2f> calculateCorners(vector<Point2f> edges);
+	vector<Block> findBlocks(vector<Point2f> corners);
+	vector<Block> findColorObject(String title, int color);
+	vector<Block> findChessboardBlocks(String title);
+	vector<Block> findChessObject(String title);
+	void setAverageColor(String title);
 public:
 	ImageProcessor();
 	~ImageProcessor() = default;
-	bool detectAndDrawChessboardCorners(String img_name);
+	bool isFirst();
+	void initialize(String title);
+	void recognizeMovement(String title);
 };
 #endif
