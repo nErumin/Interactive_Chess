@@ -15,17 +15,17 @@ using namespace std;
 
 class Video : public Observable<String>
 {
-private:
-	Mat frame;
-	VideoCapture cap;
-	bool end_video;
-
 public:
 	Video();
 	void takeVideo(int devicdId);
 	void captureImage();
 	void showImage(String image_name);
+
 	~Video() = default;
+private:
+	Mat frame;
+	VideoCapture cap;
+	bool end_video;
 };
 
-#endif // OBSERVER_H
+#endif // OBSERVER_Hd
