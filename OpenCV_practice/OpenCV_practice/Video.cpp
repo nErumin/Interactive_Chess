@@ -31,6 +31,8 @@ void Video::takeVideo(int deviceId) {
 		// show live and wait for a key with timeout long enough to show images
 		imshow("Live", frame);
 
+
+		//todo server receive 
 		int inkey = waitKey(25);
 		if (inkey == ESC_KEY) {
 			break;

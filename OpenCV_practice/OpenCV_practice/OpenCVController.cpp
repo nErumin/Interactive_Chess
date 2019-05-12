@@ -1,6 +1,6 @@
 #include "OpenCVController.h"
 
-OpenCVController::OpenCVController() {
+OpenCVController::OpenCVController(Network::SocketConnection& connection) : service(connection) {
 	video.registerObserver(this);
 	processor.registerObserver(this);
 }
@@ -14,6 +14,7 @@ void OpenCVController::notify(String&& img_name) {
 void OpenCVController::notify(Vector2&& location) {
 	cout << location.x() << ", " << location.y() << endl;
 	// to do
+
 	// response to chess system
 }
 
