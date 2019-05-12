@@ -323,7 +323,7 @@ vector<Block> ImageProcessor::findColorObject(String title, int color) {
 		printf("%d, %d\n", index++, count);
 #endif
 
-		if (count > 1) {
+		if (count > 50) {
 			(*iter).setIsInObject(true);
 			objects.push_back(*iter);
 		}
@@ -347,7 +347,7 @@ vector<Block> ImageProcessor::findChessObject(String title) {
 	Mat image = imread(title);
 
 	for (vector<Block>::iterator iter = objects.begin(); iter != objects.end(); iter++) {
-		circle(image, Point((*iter).getCenterPoint()), 5, Scalar(150), 1, 8, 0);
+		circle(image, Point((*iter).getCenterPoint()), 5, Scalar(150), FILLED, 8, 0);
 	}
 
 #if TEST == 1
@@ -398,6 +398,8 @@ void ImageProcessor::initialize(String title) {
 	setAverageColor(title);
 	
 	this->pieces = findChessObject(title);
+
+	notifyToObservers(Vector2(1.0, 2.0));
 }
 
 void ImageProcessor::recognizeMovement(String title) {
