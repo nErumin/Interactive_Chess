@@ -1,212 +1,106 @@
 /*******************************************************************************
-* Copyright (c) 2016, ROBOTIS CO., LTD.
-* All rights reserved.
+* Copyright 2016 ROBOTIS CO., LTD.
 *
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
 *
-* * Redistributions of source code must retain the above copyright notice, this
-*   list of conditions and the following disclaimer.
+*     http://www.apache.org/licenses/LICENSE-2.0
 *
-* * Redistributions in binary form must reproduce the above copyright notice,
-*   this list of conditions and the following disclaimer in the documentation
-*   and/or other materials provided with the distribution.
-*
-* * Neither the name of ROBOTIS nor the names of its
-*   contributors may be used to endorse or promote products derived from
-*   this software without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-* FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-* DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
 *******************************************************************************/
 
-/* Author: Ryu Woon Jung (Leon) */
+/* Authors: Taehun Lim (Darby) */
 
-//
-// *********     Read and Write Example      *********
-//
-//
-// Available Dynamixel model on this example : All models using Protocol 2.0
-// This example is tested with a Dynamixel PRO 54-200, and an USB2DYNAMIXEL
-// Be sure that Dynamixel PRO properties are already set as %% ID : 1 / Baudnum : 1 (Baudrate : 57600)
-//
+#include <DynamixelWorkbench.h>
 
-#include <DynamixelSDK.h>
+#if defined(__OPENCM904__)
+  #define DEVICE_NAME "3" //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
+#elif defined(__OPENCR__)
+  #define DEVICE_NAME ""
+#endif   
 
+#define BAUDRATE  57600
+#define DXL_ID    1
 
-// Control table address
-#define ADDR_PRO_TORQUE_ENABLE          562                 // Control table address is different in Dynamixel model
-#define ADDR_PRO_GOAL_POSITION          596
-#define ADDR_PRO_PRESENT_POSITION       611
+DynamixelWorkbench dxl_wb;
+char buffer[20];               //통신을 할때 buffer배열에 전송받은 데이터 입력
+char bufferIndex = 0; 
 
-// Protocol version
-#define PROTOCOL_VERSION                2.0                 // See which protocol version is used in the Dynamixel
-
-// Default setting
-#define DXL_ID                          1                   // Dynamixel ID: 1
-#define BAUDRATE                        57600
-#define DEVICENAME                      "OpenCR_DXL_Port"   // This definition only has a symbolic meaning and does not affect to any functionality
-
-#define TORQUE_ENABLE                   1                   // Value for enabling the torque
-#define TORQUE_DISABLE                  0                   // Value for disabling the torque
-#define DXL_MINIMUM_POSITION_VALUE     -150000              // Dynamixel will rotate between this value
-#define DXL_MAXIMUM_POSITION_VALUE      150000              // and this value (note that the Dynamixel would not move when the position value is out of movable range. Check e-manual about the range of the Dynamixel you use.)
-#define DXL_MOVING_STATUS_THRESHOLD     20                  // Dynamixel moving status threshold
-
-#define ESC_ASCII_VALUE                 0x1b
-
-#define CMD_SERIAL                      Serial
-
-int getch()
+void setup() 
 {
-  while(1)
+  Serial.begin(57600);
+  // while(!Serial); // Wait for Opening Serial Monitor
+
+  const char *log;
+  bool result = false;
+
+  uint8_t dxl_id = DXL_ID;
+  uint16_t model_number = 0;
+
+  result = dxl_wb.init(DEVICE_NAME, BAUDRATE, &log);
+  if (result == false)
   {
-    if( CMD_SERIAL.available() > 0 )
-    {
-      break;
-    }
-  }
-
-  return CMD_SERIAL.read();
-}
-
-int kbhit(void)
-{
-  return CMD_SERIAL.available();
-}
-
-void setup()
-{
-  Serial.begin(115200);
-  while(!Serial);
-
-  Serial.println("Start..");
-
-  // Initialize PortHandler instance
-  // Set the port path
-  // Get methods and members of PortHandlerLinux or PortHandlerWindows
-  dynamixel::PortHandler *portHandler = dynamixel::PortHandler::getPortHandler(DEVICENAME);
-
-  // Initialize PacketHandler instance
-  // Set the protocol version
-  // Get methods and members of Protocol1PacketHandler or Protocol2PacketHandler
-  dynamixel::PacketHandler *packetHandler = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
-
-  int index = 0;
-  int dxl_comm_result = COMM_TX_FAIL;             // Communication result
-  int dxl_goal_position[2] = {DXL_MINIMUM_POSITION_VALUE, DXL_MAXIMUM_POSITION_VALUE};         // Goal position
-
-  uint8_t dxl_error = 0;                          // Dynamixel error
-  int32_t dxl_present_position = 0;               // Present position
-
-  // Open port
-  if (portHandler->openPort())
-  {
-    Serial.print("Succeeded to open the port!\n");
+    Serial.println(log);
+    Serial.println("Failed to init");
   }
   else
   {
-    Serial.print("Failed to open the port!\n");
-    return;
+    Serial.print("Succeeded to init : ");
+    Serial.println(BAUDRATE);  
   }
 
-  // Set port baudrate
-  if (portHandler->setBaudRate(BAUDRATE))
+  result = dxl_wb.ping(dxl_id, &model_number, &log);
+  if (result == false)
   {
-    Serial.print("Succeeded to change the baudrate!\n");
+    Serial.println(log);
+    Serial.println("Failed to ping");
   }
   else
   {
-    Serial.print("Failed to change the baudrate!\n");
-    return;
+    Serial.println("Succeeded to ping");
+    Serial.print("id : ");
+    Serial.print(dxl_id);
+    Serial.print(" model_number : ");
+    Serial.println(model_number);
   }
 
-  // Enable Dynamixel Torque
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE, &dxl_error);
-  if (dxl_comm_result != COMM_SUCCESS)
+  result = dxl_wb.jointMode(dxl_id, 0, 0, &log);
+  if (result == false)
   {
-    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
-  }
-  else if (dxl_error != 0)
-  {
-    Serial.print(packetHandler->getRxPacketError(dxl_error));
+    Serial.println(log);
+    Serial.println("Failed to change joint mode");
   }
   else
   {
-    Serial.print("Dynamixel has been successfully connected \n");
-  }
-
-  while(1)
-  {
-    Serial.print("Press any key to continue! (or press q to quit!)\n");
-    if (getch() == 'q')
-      break;
-
-    // Write goal position
-    dxl_comm_result = packetHandler->write4ByteTxRx(portHandler, DXL_ID, ADDR_PRO_GOAL_POSITION, dxl_goal_position[index], &dxl_error);
-    if (dxl_comm_result != COMM_SUCCESS)
-    {
-      Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
-    }
-    else if (dxl_error != 0)
-    {
-      Serial.print(packetHandler->getRxPacketError(dxl_error));
-    }
-
-    do
-    {
-      // Read present position
-      dxl_comm_result = packetHandler->read4ByteTxRx(portHandler, DXL_ID, ADDR_PRO_PRESENT_POSITION, (uint32_t*)&dxl_present_position, &dxl_error);
-      if (dxl_comm_result != COMM_SUCCESS)
-      {
-        Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
+    Serial.println("Succeed to change joint mode");
+    Serial.println("Dynamixel is moving...");
+    dxl_wb.goalPosition(dxl_id, (int32_t)0);
+    do {
+      while(Serial.available()) {
+        buffer[bufferIndex]  = Serial.read();   //시리얼 통신으로 버퍼배열에 데이터 수신
+        bufferIndex++;                          //데이터 수신 후 버퍼 인덱스 1 증가
       }
-      else if (dxl_error != 0)
-      {
-        Serial.print(packetHandler->getRxPacketError(dxl_error));
+      int pos = atoi(buffer);
+      if(pos!=0) {
+        int buf = 0;
+        Serial.println(pos);
+        dxl_wb.goalPosition(dxl_id, (int32_t)pos);
       }
-
-      Serial.print("[ID:"); Serial.print(DXL_ID);
-      Serial.print("] GoalPos:"); Serial.print(dxl_goal_position[index]);
-      Serial.print("  PresPos:"); Serial.print(dxl_present_position);
-      Serial.println(" ");
-
-    }while((abs(dxl_goal_position[index] - dxl_present_position) > DXL_MOVING_STATUS_THRESHOLD));
-
-    // Change goal position
-    if (index == 0)
-    {
-      index = 1;
-    }
-    else
-    {
-      index = 0;
-    }
+      delay(1000);
+      for(int a=0;a<21;a++) {
+        buffer[a] = NULL;
+      }
+      bufferIndex = 0;
+    }while(1);
   }
-
-  // Disable Dynamixel Torque
-  dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, DXL_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_DISABLE, &dxl_error);
-  if (dxl_comm_result != COMM_SUCCESS)
-  {
-    Serial.print(packetHandler->getTxRxResult(dxl_comm_result));
-  }
-  else if (dxl_error != 0)
-  {
-    Serial.print(packetHandler->getRxPacketError(dxl_error));
-  }
-
-  // Close port
-  portHandler->closePort();
 }
 
-void loop()
+void loop() 
 {
+
 }
