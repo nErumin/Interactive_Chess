@@ -25,11 +25,14 @@
 #endif   
 
 #define BAUDRATE  57600
-#define DXL_ID    1
+#define DXL_ID2    2
+#define DXL_ID3    3
 
 DynamixelWorkbench dxl_wb;
-char buffer[20];               //통신을 할때 buffer배열에 전송받은 데이터 입력
-char bufferIndex = 0; 
+char buffer1[20];               //통신을 할때 buffer배열에 전송받은 데이터 입력
+char bufferIndex1 = 0;
+char buffer2[20];
+char bufferIndex2 = 0; 
 
 void setup() 
 {
@@ -39,7 +42,8 @@ void setup()
   const char *log;
   bool result = false;
 
-  uint8_t dxl_id = DXL_ID;
+  uint8_t dxl_id2 = DXL_ID2;
+  uint8_t dxl_id3 = DXL_ID3;
   uint16_t model_number = 0;
 
   result = dxl_wb.init(DEVICE_NAME, BAUDRATE, &log);
@@ -54,7 +58,7 @@ void setup()
     Serial.println(BAUDRATE);  
   }
 
-  result = dxl_wb.ping(dxl_id, &model_number, &log);
+  result = dxl_wb.ping(dxl_id2, &model_number, &log);
   if (result == false)
   {
     Serial.println(log);
@@ -64,12 +68,12 @@ void setup()
   {
     Serial.println("Succeeded to ping");
     Serial.print("id : ");
-    Serial.print(dxl_id);
+    Serial.print(dxl_id2);
     Serial.print(" model_number : ");
     Serial.println(model_number);
   }
 
-  result = dxl_wb.jointMode(dxl_id, 0, 0, &log);
+  result = dxl_wb.jointMode(dxl_id2, 0, 0, &log);
   if (result == false)
   {
     Serial.println(log);
@@ -79,23 +83,43 @@ void setup()
   {
     Serial.println("Succeed to change joint mode");
     Serial.println("Dynamixel is moving...");
-    dxl_wb.goalPosition(dxl_id, (int32_t)0);
+    /* 
+     *  Set init state
+     *  #2 - 2250
+     *  #3 - 2250
+     *  #4 - 2350(?) => need to recheck it and change it
+     *  #5 - 2050 / min:1600, max: 2400 => Gripper
+     */
+    //dxl_wb.goalPosition(dxl_id2, (int32_t)2250);
+    //dxl_wb.goalPosition(dxl_id3, (int32_t)2250);
     do {
       while(Serial.available()) {
-        buffer[bufferIndex]  = Serial.read();   //시리얼 통신으로 버퍼배열에 데이터 수신
-        bufferIndex++;                          //데이터 수신 후 버퍼 인덱스 1 증가
+        buffer1[bufferIndex1]  = Serial.read();   //시리얼 통신으로 버퍼배열에 데이터 수신
+        bufferIndex1++;                          //데이터 수신 후 버퍼 인덱스 1 증가
       }
-      int pos = atoi(buffer);
-      if(pos!=0) {
+      while(Serial.available()){
+        buffer2[bufferIndex2]  = Serial.read();
+        bufferIndex2++;
+      }
+      int pos1 = atoi(buffer1);
+      int pos2 = atoi(buffer2);
+      if(pos1!=0) {
         int buf = 0;
-        Serial.println(pos);
-        dxl_wb.goalPosition(dxl_id, (int32_t)pos);
+        Serial.println(pos1);
+        //dxl_wb.goalPosition(dxl_id2, (int32_t)pos1);
+      }
+      if(pos2!=0) {
+        int buf = 0;
+        Serial.println(pos2);
+        //dxl_wb.goalPosition(dxl_id3, (int32_t)pos2);
       }
       delay(1000);
       for(int a=0;a<21;a++) {
-        buffer[a] = NULL;
+        buffer1[a] = NULL;
+        buffer2[a] = NULL;
       }
-      bufferIndex = 0;
+      bufferIndex1 = 0;
+      bufferIndex2 = 0;
     }while(1);
   }
 }
