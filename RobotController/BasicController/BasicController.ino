@@ -20,8 +20,10 @@ uint8_t dxl_id[5] = {DXL_ID_1, DXL_ID_2, DXL_ID_3, DXL_ID_4, DXL_ID_5};
 int32_t goal_position[2] = {0, 1023};
 int32_t init_position[5] = {2250, 2250, 2250, 2350, 1600};
 int32_t led[2] = {0, 1};
-
 const uint8_t handler_index = 0;
+
+char bufferIndex = 0;
+char buffer[20];
 
 void setup() {
   // put your setup code here, to run once:
@@ -104,6 +106,10 @@ void setup() {
       default:
         break;
     }
+    for(int a=0;a<21;a++) {
+        buffer[a] = NULL;
+    }
+    bufferIndex = 0;
     delay(1000);
   }
   
