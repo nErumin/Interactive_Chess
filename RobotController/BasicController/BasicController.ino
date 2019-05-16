@@ -86,23 +86,33 @@ void setup() {
         break;
       case '1':
         Serial.println(num);
+        Serial.println(degree);
         dxl_wb.goalPosition(dxl_id[0], (int32_t)degree);
         break;
       case '2':
         Serial.println(num);
+        Serial.println(degree);
         dxl_wb.goalPosition(dxl_id[1], (int32_t)degree);
         break;
       case '3':
         Serial.println(num);
+        Serial.println(degree);
         dxl_wb.goalPosition(dxl_id[2], (int32_t)degree);
         break;
       case '4':
         Serial.println(num);
+        Serial.println(degree);
         dxl_wb.goalPosition(dxl_id[3], (int32_t)degree);
         break;
       case '5':
         Serial.println(num);
+        Serial.println(degree);
         dxl_wb.goalPosition(dxl_id[4], (int32_t)degree);
+      case 'i':
+        Serial;.println("Init State");
+        for (int cnt=SCNT; cnt < NCNT; cnt++) {
+          dxl_wb.goalPosition(dxl_id[cnt], init_position[cnt]);
+        }
       default:
         break;
     }
