@@ -26,104 +26,104 @@ char bufferIndex = 0;
 char buffer[20];
 
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(57600);
-  while(!Serial) { // Wait for Opening Serial Monitor
-    Serial.println("Fail to use Serial");
-  }
+    // put your setup code here, to run once:
+    Serial.begin(57600);
+    while(!Serial) { // Wait for Opening Serial Monitor
+        Serial.println("Fail to use Serial");
+    }
 
-  const char *log;
-  bool result = false;
-  uint16_t model_number = 0;
+    const char *log;
+    bool result = false;
+    uint16_t model_number = 0;
 
-  // Init Actuator
-  result = dxl_wb.init(DEVICE_NAME, BAUDRATE, &log);
-  if (result == false) {
-    Serial.println(log);
-    Serial.println("Failed to init");
-  } else {
-    Serial.print("Succeeded to init : ");
-    Serial.println(BAUDRATE);  
-  }
-
-  // Setting Actuator
-  for (int cnt = SCNT; cnt < NCNT; cnt++) {
-    result = dxl_wb.ping(dxl_id[cnt], &model_number, &log);
+    // Init Actuator
+    result = dxl_wb.init(DEVICE_NAME, BAUDRATE, &log);
     if (result == false) {
-      Serial.println(log);
-      Serial.println("Failed to ping");
+        Serial.println(log);
+        Serial.println("Failed to init");
     } else {
-      Serial.println("Succeeded to ping");
-      Serial.print("id : ");
-      Serial.print(dxl_id[cnt]);
-      Serial.print(" model_number : ");
-      Serial.println(model_number);
+        Serial.print("Succeeded to init : ");
+        Serial.println(BAUDRATE);  
     }
 
-    result = dxl_wb.jointMode(dxl_id[cnt], 0, 0, &log);
-    if (result == false) {
-      Serial.println(log);
-      Serial.println("Failed to change joint mode");
-    } else {
-      Serial.println("Succeed to change joint mode");
-    }
-  }
-
-  // Set initial goalposition
-  for (int cnt=SCNT; cnt < NCNT; cnt++) {
-    dxl_wb.goalPosition(dxl_id[cnt], init_position[cnt]);
-  }
-
-  while(1){
-    while(Serial.available()) {
-      buffer[bufferIndex]  = Serial.read();
-      bufferIndex++;
-    }
-    char num = buffer[0];
-    int degree = atoi(&buffer[2]);
-    switch (num) {
-      case 0:
-        break;
-      case '1':
-        Serial.println(num);
-        Serial.println(degree);
-        dxl_wb.goalPosition(dxl_id[0], (int32_t)degree);
-        break;
-      case '2':
-        Serial.println(num);
-        Serial.println(degree);
-        dxl_wb.goalPosition(dxl_id[1], (int32_t)degree);
-        break;
-      case '3':
-        Serial.println(num);
-        Serial.println(degree);
-        dxl_wb.goalPosition(dxl_id[2], (int32_t)degree);
-        break;
-      case '4':
-        Serial.println(num);
-        Serial.println(degree);
-        dxl_wb.goalPosition(dxl_id[3], (int32_t)degree);
-        break;
-      case '5':
-        Serial.println(num);
-        Serial.println(degree);
-        dxl_wb.goalPosition(dxl_id[4], (int32_t)degree);
-      case 'i':
-        Serial;.println("Init State");
-        for (int cnt=SCNT; cnt < NCNT; cnt++) {
-          dxl_wb.goalPosition(dxl_id[cnt], init_position[cnt]);
+    // Setting Actuator
+    for (int cnt = SCNT; cnt < NCNT; cnt++) {
+        result = dxl_wb.ping(dxl_id[cnt], &model_number, &log);
+        if (result == false) {
+            Serial.println(log);
+            Serial.println("Failed to ping");
+        } else {
+            Serial.println("Succeeded to ping");
+            Serial.print("id : ");
+            Serial.print(dxl_id[cnt]);
+            Serial.print(" model_number : ");
+            Serial.println(model_number);
         }
-      default:
-        break;
+
+        result = dxl_wb.jointMode(dxl_id[cnt], 0, 0, &log);
+        if (result == false) {
+            Serial.println(log);
+            Serial.println("Failed to change joint mode");
+        } else {
+            Serial.println("Succeed to change joint mode");
+        }
     }
-    for(int a=0;a<21;a++) {
-        buffer[a] = NULL;
+
+    // Set initial goalposition
+    for (int cnt=SCNT; cnt < NCNT; cnt++) {
+        dxl_wb.goalPosition(dxl_id[cnt], init_position[cnt]);
     }
-    bufferIndex = 0;
-    delay(1000);
-  }
-  
-  
+
+    while(1){
+        while(Serial.available()) {
+            buffer[bufferIndex]  = Serial.read();
+            bufferIndex++;
+        }
+        char num = buffer[0];
+        int degree = atoi(&buffer[2]);
+        switch (num) {
+        case 0:
+            break;
+        case '1':
+            Serial.println(num);
+            Serial.println(degree);
+            dxl_wb.goalPosition(dxl_id[0], (int32_t)degree);
+            break;
+        case '2':
+            Serial.println(num);
+            Serial.println(degree);
+            dxl_wb.goalPosition(dxl_id[1], (int32_t)degree);
+            break;
+        case '3':
+            Serial.println(num);
+            Serial.println(degree);
+            dxl_wb.goalPosition(dxl_id[2], (int32_t)degree);
+            break;
+        case '4':
+            Serial.println(num);
+            Serial.println(degree);
+            dxl_wb.goalPosition(dxl_id[3], (int32_t)degree);
+            break;
+        case '5':
+            Serial.println(num);
+            Serial.println(degree);
+            dxl_wb.goalPosition(dxl_id[4], (int32_t)degree);
+            break;
+        case 'i':
+            Serial.println("Init State");
+            for (int cnt=SCNT; cnt < NCNT; cnt++) {
+                dxl_wb.goalPosition(dxl_id[cnt], init_position[cnt]);
+            }
+            break;
+        default:
+            break;
+        }
+        for(int a=0;a<21;a++) {
+            buffer[a] = NULL;
+        }
+        bufferIndex = 0;
+        delay(1000);
+    }
 }
 
 void loop() {
