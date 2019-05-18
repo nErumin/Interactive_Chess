@@ -263,6 +263,23 @@ vector<Block> ImageProcessor::findChessboardBlocks(String title) {
 	return blocks;
 }
 
+void detectHSColor(const Mat& image, double minHue, double maxHue, double minSat, double maxSat, Mat& mask) {
+	Mat hsv;
+	cvtColor(image, hsv, COLOR_BGR2HSV);
+
+	vector<Mat> channels;
+	split(hsv, channels);
+
+	imshow("hue", channels[0]);
+	imshow("sat", channels[1]);
+	imshow("value", channels[2]);
+
+	Mat threshold;
+	inRange(hsv, Scalar(minHue, minSat, 100), Scalar(maxHue, maxSat, 255), threshold);
+
+	mask = threshold;
+}
+
 vector<Block> ImageProcessor::findColorObject(String title, int color) {
 	Mat image = imread(title);
 
@@ -271,30 +288,18 @@ vector<Block> ImageProcessor::findColorObject(String title, int color) {
 #endif
 
 	Mat threshold_image;
-	Mat point_image;
 	int sub = -10, add = 15;
+
+
+	detectHSColor(image, 100, 150, 100, 255, threshold_image);
 	/*
-	inRange(image, Scalar(150, 0, 0), Scalar(255, 150, 150), threshold_image);
-	inRange(image, Scalar(150, 0, 0), Scalar(255, 150, 150), point_image);
-	*/
-	
 	if (color == WHITE) {
 		inRange(image, Scalar(average_black[0] + sub, average_black[1] + sub, average_black[2] + sub), Scalar(average_black[0] + add, average_black[1] + add, average_black[2] + add), threshold_image);
-#if TEST == 1
-		inRange(image, Scalar(average_black[0] + sub, average_black[1] + sub, average_black[2] + sub), Scalar(average_black[0] + add, average_black[1] + add, average_black[2] + add), point_image);
-#endif
-		//threshold(image, threshold_image, 240, 255, THRESH_BINARY);
-		//threshold(image, point_image, 240, 255, THRESH_BINARY);
 	}
 	else {
 		inRange(image, Scalar(average_white[0] + sub, average_white[1] + sub, average_white[2] + sub), Scalar(average_white[0] + add, average_white[1] + add, average_white[2] + add), threshold_image);
-#if TEST == 1
-		inRange(image, Scalar(average_white[0] + sub, average_white[1] + sub, average_white[2] + sub), Scalar(average_white[0] + add, average_white[1] + add, average_white[2] + add), point_image);
-#endif
-		//threshold(image, threshold_image, 20, 255, THRESH_BINARY_INV);
-		//threshold(image, point_image, 20, 255, THRESH_BINARY_INV);
 	}
-	
+	*/
 	vector<Block> objects;
 
 	int index = 0;
@@ -313,9 +318,6 @@ vector<Block> ImageProcessor::findColorObject(String title, int color) {
 				int color = threshold_image.at<uchar>(y, x);
 				if (color != 0) {
 					count++;
-#if TEST == 1
-					circle(point_image, Point(x, y), 5, Scalar(255), 1, 8, 0);
-#endif
 				}
 			}
 		}
@@ -323,7 +325,7 @@ vector<Block> ImageProcessor::findColorObject(String title, int color) {
 		printf("%d, %d\n", index++, count);
 #endif
 
-		if (count > 50) {
+		if (count > 10) {
 			(*iter).setIsInObject(true);
 			objects.push_back(*iter);
 		}
@@ -331,7 +333,6 @@ vector<Block> ImageProcessor::findColorObject(String title, int color) {
 
 #if TEST == 1
 	imshow("threshold", threshold_image);
-	imshow("finding point", point_image);
 	waitKey(0);
 #endif
 
