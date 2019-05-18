@@ -161,6 +161,7 @@
     <ClCompile Include="Address.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="NetworkError.cpp" />
+    <ClCompile Include="SerialService.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="SocketConnection.cpp" />
     <ClCompile Include="SocketWrapper.cpp" />
@@ -173,9 +174,11 @@
     <ClInclude Include="ErrorCode.h" />
     <ClInclude Include="LibraryAPI.h" />
     <ClInclude Include="NetworkError.h" />
+    <ClInclude Include="SerialService.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="SocketConnection.h" />
     <ClInclude Include="SocketWrapper.h" />
+    <ClInclude Include="TransmissionInternals.h" />
     <ClInclude Include="TransmissionService.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
