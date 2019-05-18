@@ -271,9 +271,11 @@ void detectHSColor(const Mat& image, double minHue, double maxHue, double minSat
 	vector<Mat> channels;
 	split(hsv, channels);
 
+#if TEST == 1
 	imshow("hue", channels[0]);
 	imshow("sat", channels[1]);
 	imshow("value", channels[2]);
+#endif
 
 	Mat threshold;
 	inRange(hsv, Scalar(minHue, minSat, 100), Scalar(maxHue, maxSat, 255), threshold);
