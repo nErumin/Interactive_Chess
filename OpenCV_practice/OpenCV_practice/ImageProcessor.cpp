@@ -1,6 +1,7 @@
 #include "ImageProcessor.h"
 #include <chrono>
 #include <thread>
+#include <algorithm>
 
 ImageProcessor::ImageProcessor() {
 	
@@ -403,8 +404,38 @@ void ImageProcessor::initialize(String title) {
 	notifyToObservers(Vector2(1.0, 2.0));
 }
 
+vector<int> ImageProcessor::comparePieces(vector<Block> newPieces) {
+	vector<int> previous_index;
+	vector<int> new_index;
+
+	previous_index.push_back(1); previous_index.push_back(3); previous_index.push_back(7);
+	previous_index.push_back(2); previous_index.push_back(15); previous_index.push_back(11);
+
+	new_index.push_back(1);
+	new_index.push_back(7); new_index.push_back(2);
+
+	sort(previous_index.begin(), previous_index.end());
+	sort(new_index.begin(), new_index.end());
+
+	vector<int> dif_index;
+	int count = 0;
+	for (vector<int>::iterator i = new_index.begin(); i != new_index.end(); i++) {
+		if ((*i) == previous_index[count]) count++;
+		else {
+			dif_index.push_back(previous_index[count]);
+			count++;
+			i--;
+		}
+	}
+	for (int i = count; i < previous_index.size(); i++) {
+		dif_index.push_back(previous_index[i]);
+	}
+	return dif_index;
+}
+
 void ImageProcessor::recognizeMovement(String title) {
 	vector<Block> newPieces = findChessObject(title);
+	vector<int> indexs = comparePieces(newPieces);
 
 	notifyToObservers(Vector2(1.0, 2.0));
 }

@@ -36,6 +36,7 @@ private:
 	vector<Block> findColorObject(String title, int color);
 	vector<Block> findChessboardBlocks(String title);
 	vector<Block> findChessObject(String title);
+	vector<int> comparePieces(vector<Block> newPieces);
 	void setAverageColor(String title);
 public:
 	ImageProcessor();
