@@ -1,9 +1,14 @@
 #include "OpenCVController.h"
 
-OpenCVController::OpenCVController(Network::SocketConnection& connection) : service(connection) {
+OpenCVController::OpenCVController(){ 
 	video.registerObserver(this);
 	processor.registerObserver(this);
 }
+//
+//OpenCVController::OpenCVController(Network::SocketConnection& connection) : service(connection) {
+//	video.registerObserver(this);
+//	processor.registerObserver(this);
+//}
 
 void OpenCVController::notify(String&& img_name) {
 	thread t;

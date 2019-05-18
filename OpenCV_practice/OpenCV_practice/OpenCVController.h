@@ -13,6 +13,7 @@ class OpenCVController : public Observer<String>,
 						 public Observer<Vector2>
 {
 public:
+	OpenCVController();
 	OpenCVController(Network::SocketConnection& connection);
 	void startVideo(int id);
 	void startImageProcessor(String img_name);
@@ -23,7 +24,7 @@ public:
 private:
 	ImageProcessor processor;
 	Video video;
-	Network::TransmissionService service;
+	//Network::TransmissionService service;
 };
 
 
