@@ -6,7 +6,7 @@
 #endif   
 
 #define BAUDRATE  57600
-#define NCNT      5
+#define NCNT      1
 #define SCNT      0
 #define DXL_ID_1  1
 #define DXL_ID_2  2
@@ -19,6 +19,7 @@ DynamixelWorkbench dxl_wb;
 uint8_t dxl_id[5] = {DXL_ID_1, DXL_ID_2, DXL_ID_3, DXL_ID_4, DXL_ID_5};
 int32_t goal_position[2] = {0, 1023};
 int32_t init_position[5] = {2250, 2250, 2250, 2350, 1600};
+int32_t present_position[5] = {0, 0, 0, 0, 0};
 int32_t led[2] = {0, 1};
 const uint8_t handler_index = 0;
 
@@ -69,6 +70,22 @@ void setup() {
         }
     }
 
+    // Get initial position
+    for (int cnt=SCNT; cnt < NCNT; cnt++) {
+        int32_t get_data = 0;
+        result = dxl_wb.itemRead(dxl_id[cnt], "Present_Position", &get_data, &log);
+        Serial.println("Get present State");
+        if (result == false) {
+            Serial.println(log);
+            Serial.println("Failed to get present position");
+        } else {
+            Serial.print(cnt);
+            Serial.print(": ");
+            Serial.println(get_data);
+            present_position[cnt] = get_data;
+        }
+    }
+    
     // Set initial goalposition
     for (int cnt=SCNT; cnt < NCNT; cnt++) {
         dxl_wb.goalPosition(dxl_id[cnt], init_position[cnt]);
@@ -87,7 +104,12 @@ void setup() {
         case '1':
             Serial.println(num);
             Serial.println(degree);
-            dxl_wb.goalPosition(dxl_id[0], (int32_t)degree);
+            
+            for(int e = 2250;e<=degree;e+= 1) {
+                dxl_wb.goalPosition(dxl_id[0], (int32_t)e);
+                delay(1);
+            }
+            //dxl_wb.goalPosition(dxl_id[0], (int32_t)degree);
             break;
         case '2':
             Serial.println(num);
@@ -113,6 +135,21 @@ void setup() {
             Serial.println("Init State");
             for (int cnt=SCNT; cnt < NCNT; cnt++) {
                 dxl_wb.goalPosition(dxl_id[cnt], init_position[cnt]);
+            }
+            break;
+        case 'g':
+            for (int cnt=SCNT; cnt < NCNT; cnt++) {
+                int32_t get_data = 0;
+                result = dxl_wb.itemRead(dxl_id[cnt], "Present_Position", &get_data, &log);
+                Serial.println("Get present State");
+                if (result == false) {
+                    Serial.println(log);
+                    Serial.println("Failed to get present position");
+                } else {
+                    Serial.print(cnt);
+                    Serial.print(": ");
+                    Serial.println(get_data);
+                }
             }
             break;
         default:
