@@ -6,7 +6,6 @@
 #include <Address.h>
 
 int main() {
-
 	
 	ImageProcessor ip;
 	String img_name = "test.jpg";
