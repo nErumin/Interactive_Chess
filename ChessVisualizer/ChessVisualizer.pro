@@ -66,7 +66,8 @@ HEADERS += \
     Timer.h \
     InformationModal.h \
     GameResult.h \
-    BoardUtility.h
+    BoardUtility.h \
+    StringUtility.h
 
 RESOURCES += \
     resource.qrc
