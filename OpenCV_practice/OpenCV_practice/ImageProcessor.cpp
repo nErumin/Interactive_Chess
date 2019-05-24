@@ -283,7 +283,7 @@ void detectHSColor(const Mat& image, double minHue, double maxHue, double minSat
 	mask = threshold;
 }
 
-vector<Block> ImageProcessor::findColorObject(String title, int color) {
+vector<Block> ImageProcessor::findColorObject(String title, int COLOR) {
 	Mat image = imread(title);
 
 #if TEST == 1
@@ -293,16 +293,14 @@ vector<Block> ImageProcessor::findColorObject(String title, int color) {
 	Mat threshold_image;
 	int sub = -10, add = 15;
 
-
-	detectHSColor(image, 100, 150, 100, 255, threshold_image);
-	/*
-	if (color == WHITE) {
-		inRange(image, Scalar(average_black[0] + sub, average_black[1] + sub, average_black[2] + sub), Scalar(average_black[0] + add, average_black[1] + add, average_black[2] + add), threshold_image);
+	
+	if (COLOR == RED) {
+		detectHSColor(image, 100, 150, 100, 255, threshold_image);
 	}
 	else {
-		inRange(image, Scalar(average_white[0] + sub, average_white[1] + sub, average_white[2] + sub), Scalar(average_white[0] + add, average_white[1] + add, average_white[2] + add), threshold_image);
+		detectHSColor(image, 100, 150, 100, 255, threshold_image);
 	}
-	*/
+	
 	vector<Block> objects;
 
 	int index = 0;
@@ -342,26 +340,21 @@ vector<Block> ImageProcessor::findColorObject(String title, int color) {
 	return objects;
 }
 
-vector<Block> ImageProcessor::findChessObject(String title) {
-	vector<Block> w_objects = findColorObject(title, WHITE);
-	vector<Block> b_objects = findColorObject(title, BLACK);
-
-	vector<Block> objects = w_objects;
-	objects.insert(objects.end(), b_objects.begin(), b_objects.end());
+void ImageProcessor::showChessObject(String title) {
 	Mat image = imread(title);
 
-	for (vector<Block>::iterator iter = objects.begin(); iter != objects.end(); iter++) {
+	for (vector<Block>::iterator iter = this->blackPieces.begin(); iter != this->blackPieces.end(); iter++) {
+		circle(image, Point((*iter).getCenterPoint()), 5, Scalar(150), FILLED, 8, 0);
+	}
+	for (vector<Block>::iterator iter = this->whitePieces.begin(); iter != this->whitePieces.end(); iter++) {
 		circle(image, Point((*iter).getCenterPoint()), 5, Scalar(150), FILLED, 8, 0);
 	}
 
-#if TEST == 1
 	namedWindow("Detected edge point");
 	imshow("Detected edge point", image);
 
 	waitKey(0);
 	destroyAllWindows();
-#endif
-	return objects;
 }
 
 bool ImageProcessor::isFirst() {
@@ -369,52 +362,22 @@ bool ImageProcessor::isFirst() {
 	else return false;
 }
 
-void ImageProcessor::setAverageColor(String title) {
-	Mat image = imread(title);
-	
-	int black[16][3], white[16][3];
-	
-	for (int i = 0; i < 16; i++) {
-		for (int j = 0; j < 3; j++) {
-			Point2f wblock_cp = this->blocks.at(i).getCenterPoint();
-			Point2f bblock_cp = this->blocks.at(i + 48).getCenterPoint();
-			white[i][j] = image.at<Vec3b>(wblock_cp.y, wblock_cp.x)[j];
-			black[i][j] = image.at<Vec3b>(bblock_cp.y, bblock_cp.x)[j];
-		}
-	}
-	int average_b[3] = { 0, }, average_w[3] = { 0, };
-	for (int i = 0; i < 16; i++) {
-		for (int j = 0; j < 3; j++) {
-			average_b[j] += black[i][j];
-			average_w[j] += white[i][j];
-		}
-	}
-	for (int i = 0; i < 3; i++) {
-		average_b[i] /= 16;
-		this->average_black[i] = average_b[i];
-		average_w[i] /= 16;
-		this->average_white[i] = average_w[i];
-	}
-}
-
 void ImageProcessor::initialize(String title) {
 	this->blocks = findChessboardBlocks(title);
-	setAverageColor(title);
 	
-	this->pieces = findChessObject(title);
+	this->white_pieces = findColorObject(title, RED);
+	this->black_pieces = findColorObject(title, BLUE);
 
 	notifyToObservers(Vector2(1.0, 2.0));
 }
 
-vector<int> ImageProcessor::comparePieces(vector<Block> newPieces) {
+vector<int> ImageProcessor::comparePieces(vector<Block> previous_pieces, vector<Block> new_pieces) {
 	vector<int> previous_index;
 	vector<int> new_index;
 
-	previous_index.push_back(1); previous_index.push_back(3); previous_index.push_back(7);
-	previous_index.push_back(2); previous_index.push_back(15); previous_index.push_back(11);
+	for (vector<Block>::iterator i = previous_pieces.begin(); i != previous_pieces.end(); i++) previous_index.push_back((*i).getIndex());
+	for (vector<Block>::iterator i = new_pieces.begin(); i != new_pieces.end(); i++) new_index.push_back((*i).getIndex());
 
-	new_index.push_back(1);
-	new_index.push_back(7); new_index.push_back(2);
 
 	sort(previous_index.begin(), previous_index.end());
 	sort(new_index.begin(), new_index.end());
@@ -436,8 +399,14 @@ vector<int> ImageProcessor::comparePieces(vector<Block> newPieces) {
 }
 
 void ImageProcessor::recognizeMovement(String title) {
-	vector<Block> newPieces = findChessObject(title);
-	vector<int> indexs = comparePieces(newPieces);
+	vector<Block> new_black_pieces = findColorObject(title,RED);
+	vector<Block> new_white_pieces = findColorObject(title, BLUE);
+
+	vector<int> white_dif_indexs = comparePieces(this->white_pieces, new_white_pieces);
+	vector<int> black_dif_indexs = comparePieces(this->black_pieces, new_black_pieces);
+
+	this->black_pieces = new_black_pieces;
+	this->white_pieces = new_white_pieces;
 
 	notifyToObservers(Vector2(1.0, 2.0));
 }
