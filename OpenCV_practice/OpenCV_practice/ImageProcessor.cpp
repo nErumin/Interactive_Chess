@@ -264,7 +264,7 @@ vector<Block> ImageProcessor::findChessboardBlocks(String title) {
 	return blocks;
 }
 
-void detectHSColor(const Mat& image, double minHue, double maxHue, double minSat, double maxSat, Mat& mask) {
+void detectHSColor(const Mat& image, double minHue, double maxHue, double minSat, double maxSat, double minValue, double maxValue, Mat& mask) {
 	Mat hsv;
 	cvtColor(image, hsv, COLOR_BGR2HSV);
 
@@ -278,7 +278,7 @@ void detectHSColor(const Mat& image, double minHue, double maxHue, double minSat
 #endif
 
 	Mat threshold;
-	inRange(hsv, Scalar(minHue, minSat, 100), Scalar(maxHue, maxSat, 255), threshold);
+	inRange(hsv, Scalar(minHue, minSat, minValue), Scalar(maxHue, maxSat, maxValue), threshold);
 
 	mask = threshold;
 }
@@ -295,10 +295,10 @@ vector<Block> ImageProcessor::findColorObject(String title, int COLOR) {
 
 	
 	if (COLOR == RED) {
-		detectHSColor(image, 100, 150, 100, 255, threshold_image);
+		detectHSColor(image, 40, 80, 70, 255, 80, 150, threshold_image);
 	}
 	else {
-		detectHSColor(image, 100, 150, 100, 255, threshold_image);
+		detectHSColor(image, 100, 150, 100, 255, 200, 255, threshold_image);
 	}
 	
 	vector<Block> objects;
@@ -343,15 +343,15 @@ vector<Block> ImageProcessor::findColorObject(String title, int COLOR) {
 void ImageProcessor::showChessObject(String title) {
 	Mat image = imread(title);
 
-	for (vector<Block>::iterator iter = this->blackPieces.begin(); iter != this->blackPieces.end(); iter++) {
-		circle(image, Point((*iter).getCenterPoint()), 5, Scalar(150), FILLED, 8, 0);
+	for (vector<Block>::iterator iter = this->black_pieces.begin(); iter != this->black_pieces.end(); iter++) {
+		circle(image, Point((*iter).getCenterPoint()), 5, Scalar(0, 255, 0), FILLED, 8, 0);
 	}
-	for (vector<Block>::iterator iter = this->whitePieces.begin(); iter != this->whitePieces.end(); iter++) {
-		circle(image, Point((*iter).getCenterPoint()), 5, Scalar(150), FILLED, 8, 0);
+	for (vector<Block>::iterator iter = this->white_pieces.begin(); iter != this->white_pieces.end(); iter++) {
+		circle(image, Point((*iter).getCenterPoint()), 5, Scalar(255, 0, 0), FILLED, 8, 0);
 	}
 
-	namedWindow("Detected edge point");
-	imshow("Detected edge point", image);
+	namedWindow("Detected Object");
+	imshow("Detected Object", image);
 
 	waitKey(0);
 	destroyAllWindows();
@@ -365,10 +365,10 @@ bool ImageProcessor::isFirst() {
 void ImageProcessor::initialize(String title) {
 	this->blocks = findChessboardBlocks(title);
 	
-	this->white_pieces = findColorObject(title, RED);
-	this->black_pieces = findColorObject(title, BLUE);
-
-	notifyToObservers(Vector2(1.0, 2.0));
+	this->white_pieces = findColorObject(title, BLUE);
+	this->black_pieces = findColorObject(title, RED);
+	
+	showChessObject(title);
 }
 
 vector<int> ImageProcessor::comparePieces(vector<Block> previous_pieces, vector<Block> new_pieces) {
@@ -398,12 +398,45 @@ vector<int> ImageProcessor::comparePieces(vector<Block> previous_pieces, vector<
 	return dif_index;
 }
 
+String indexToPoint(int index) {
+	String point;
+
+	point += to_string(index / 8);
+	point += ',';
+	point += to_string(index % 8);
+
+	return point;
+}
+
+String makeProtocolString(vector<int> black_index, vector<int> white_index) {
+	int count = 0;
+	count += black_index.size();
+	count += white_index.size();
+
+	String msg = "";
+	msg += to_string(count);
+	msg += ":";
+
+	for (vector<int>::iterator i = black_index.begin(); i != black_index.end(); i++) {
+		msg += ( indexToPoint(*i) + ":" );
+	}
+	for (vector<int>::iterator i = white_index.begin(); i != white_index.end(); i++) {
+		msg += (indexToPoint(*i) + ":");
+	}
+	msg.pop_back();
+
+	printf("%s\n", msg);
+	return msg;
+}
+
 void ImageProcessor::recognizeMovement(String title) {
-	vector<Block> new_black_pieces = findColorObject(title,RED);
 	vector<Block> new_white_pieces = findColorObject(title, BLUE);
+	vector<Block> new_black_pieces = findColorObject(title, RED);
 
 	vector<int> white_dif_indexs = comparePieces(this->white_pieces, new_white_pieces);
 	vector<int> black_dif_indexs = comparePieces(this->black_pieces, new_black_pieces);
+
+	makeProtocolString(black_dif_indexs, white_dif_indexs);
 
 	this->black_pieces = new_black_pieces;
 	this->white_pieces = new_white_pieces;

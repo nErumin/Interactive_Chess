@@ -8,6 +8,7 @@
 #include <thread>
 #include <TransmissionService.h>
 #include <SocketConnection.h>
+#include <memory>
 
 class OpenCVController : public Observer<String>,
 						 public Observer<Vector2>
@@ -21,10 +22,11 @@ public:
 	void notify(Vector2&& location) override;
 
 	~OpenCVController() = default;
+
 private:
 	ImageProcessor processor;
 	Video video;
-	//Network::TransmissionService service;
+	std::unique_ptr<Network::TransmissionService> service;
 };
 
 
