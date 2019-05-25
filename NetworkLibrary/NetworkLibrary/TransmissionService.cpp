@@ -1,4 +1,5 @@
 #include "TransmissionService.h"
+#include "TransmissionInternals.h"
 #include "SocketConnection.h"
 #include "SocketWrapper.h"
 #include "ConnectionInternals.h"
@@ -18,40 +19,14 @@ TransmissionService::TransmissionService(SocketConnection& connection)
 
 std::string TransmissionService::receive(size_t maximumBytesReceived)
 {
-    try
-    {
-        std::string receivedData(maximumBytesReceived, (char) 0);
-        auto& socket = ConnectionInternals::wrapper(connectionRef).socket();
-        
-        size_t receivedLength = socket.read_some(boost::asio::buffer(receivedData));
-        receivedData.resize(receivedLength);
+    auto& socket = ConnectionInternals::wrapper(connectionRef).socket();
 
-        return { receivedData.begin(), receivedData.end() };
-    }
-    catch (const boost::system::system_error& error)
-    {
-        ErrorCode code = error.code() == boost::asio::error::eof ?
-                         ErrorCode::Disconnected :
-                         ErrorCode::ReceiveFailed;
-
-        throw NetworkError{ code, error.code().message() };
-    }
+    return Network::receive(socket, maximumBytesReceived);
 }
 
 void TransmissionService::send(std::string data)
 {
-    try
-    {
-        auto& socket = ConnectionInternals::wrapper(connectionRef).socket();
-
-        boost::asio::write(socket, boost::asio::buffer(data, data.size()));
-    }
-    catch (const boost::system::system_error& error)
-    {
-        ErrorCode code = error.code() == boost::asio::error::eof ?
-                         ErrorCode::Disconnected :
-                         ErrorCode::SendFailed;
-
-        throw NetworkError{ code, error.code().message() };
-    }
+    auto& socket = ConnectionInternals::wrapper(connectionRef).socket();
+ 
+    Network::send(socket, data);
 }
