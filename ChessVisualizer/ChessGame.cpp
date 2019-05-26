@@ -11,16 +11,18 @@
 ChessGame::ChessGame()
     : result{ GameResult::None }
 {
-    auto randomColors = pickRandomColorPair();
+}
 
-    players.push_back(std::make_shared<Player>(PlayerType::Human, randomColors.first));
-    players.push_back(std::make_shared<Player>(PlayerType::Robot, randomColors.second));
+void ChessGame::initializeGame(std::pair<PieceColor, PieceColor> playerPieceColors)
+{
+    players.push_back(std::make_shared<Player>(PlayerType::Human, playerPieceColors.first));
+    players.push_back(std::make_shared<Player>(PlayerType::Robot, playerPieceColors.second));
 
     currentTurnPlayerIndex = players.at(0)->getOwningPieceColor() == PieceColor::White ?
                 0 :
                 1;
 
-    gameBoard.initializeBoardCellPieces(randomColors.second, randomColors.first);
+    getBoard().initializeBoardCellPieces(playerPieceColors.second, playerPieceColors.first);
 }
 
 std::vector<std::shared_ptr<Player>> ChessGame::getPlayers() const

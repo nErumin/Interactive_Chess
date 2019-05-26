@@ -47,7 +47,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -120,7 +120,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0A00;_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING;NETWORKLIBRARY_EXPORTS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -161,6 +161,7 @@
     <ClCompile Include="Address.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="NetworkError.cpp" />
+    <ClCompile Include="SerialService.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="SocketConnection.cpp" />
     <ClCompile Include="SocketWrapper.cpp" />
@@ -173,9 +174,11 @@
     <ClInclude Include="ErrorCode.h" />
     <ClInclude Include="LibraryAPI.h" />
     <ClInclude Include="NetworkError.h" />
+    <ClInclude Include="SerialService.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="SocketConnection.h" />
     <ClInclude Include="SocketWrapper.h" />
+    <ClInclude Include="TransmissionInternals.h" />
     <ClInclude Include="TransmissionService.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

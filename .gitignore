@@ -13,6 +13,9 @@
 NetworkLibrary/include/
 NetworkLibrary/lib/
 
+# qmake
+*.qmake.stash
+
 ### User ###
 *.jpg
 
@@ -34,7 +37,6 @@ NetworkLibrary/lib/
 NetworkLibrary/NetworkLibrary/*.so
 OpenCV_practice/OpenCV_practice/*.so
 *.dylib
-*.dll
 
 # Fortran module files
 *.mod
@@ -44,7 +46,7 @@ OpenCV_practice/OpenCV_practice/*.so
 *.lai
 *.la
 *.a
-*.lib
+NetworkLibrary/*.lib
 
 # Executables
 *.exe
