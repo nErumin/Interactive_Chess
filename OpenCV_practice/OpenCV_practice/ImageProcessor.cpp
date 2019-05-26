@@ -367,9 +367,12 @@ void ImageProcessor::initialize(String title) {
 	
 	this->white_pieces = findColorObject(title, BLUE);
 	this->black_pieces = findColorObject(title, GREEN);
+	String msg;
+	if (this->black_pieces.at(0).getIndex() == 0) msg = "BLACK";
+	else msg = "WHITE";
 	
 	showChessObject(title);
-	notifyToObservers("OK", 0);
+	notifyToObservers(String(msg), 0);
 }
 
 vector<int> duplication(vector<int>& a, vector <int>& b) {
