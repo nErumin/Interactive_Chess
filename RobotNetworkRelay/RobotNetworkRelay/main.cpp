@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
     
     try
     {
-        Network::Server relayServer{ Network::Address("localhost", 23456) };
+        Network::Server relayServer{ Network::Address("localhost", 44444) };
         Network::SerialService robotSerialService{ argv[1] };
 
         auto connection = relayServer.waitClient();
@@ -29,8 +29,16 @@ int main(int argc, char* argv[])
         while (true)
         {
             auto receivedMessage = relayTransmission.receive(1024);
+            std::cout << "Relay received: " << receivedMessage << std::endl;
 
             robotSerialService.send(receivedMessage);
+            std::cout << "To robot: " << receivedMessage << std::endl;
+
+            auto robotCompletionMessage = robotSerialService.receive(1024);
+            std::cout << "From robot: " << receivedMessage << std::endl;
+
+            relayTransmission.send("OK");
+            std::cout << "Relay sent: OK" << std::endl;
         }
     }
     catch (const Network::NetworkError & error)
