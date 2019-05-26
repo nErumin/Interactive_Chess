@@ -94,8 +94,6 @@ void ChessWindow::setWindowColor(std::tuple<int, int, int, int> colorVector)
                                            std::get<2>(colorVector) << ", " <<
                                            std::get<3>(colorVector) << "% " << ");";
 
-    std::cout << stream.str() << std::endl;
-
     windowLabel.setStyleSheet(stream.str().c_str());
     windowLabel.raise();
 }
