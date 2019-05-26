@@ -26,6 +26,7 @@ void Video::takeVideo(int deviceId) {
 	{
 		// wait for a new frame from camera and store it into 'frame'
 		cap.read(frame);
+		rectangle(frame, Point(160, 30), Point(580, 460), Scalar(255, 0, 0) /*blue*/, 10, 8, 0);
 		// check if we succeeded
 		if (frame.empty()) {
 			cerr << "ERROR! blank frame grabbed\n";
