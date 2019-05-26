@@ -160,6 +160,9 @@ void ChessController::startChess()
 
         if (response == "OK")
         {
+            // TODO: get from response
+            game.initializeGame(pickRandomColorPair());
+
             game.getCurrentPlayer().getTimer().resume();
 
             QMetaObject::invokeMethod(QApplication::instance(), [this]
