@@ -12,6 +12,8 @@ public:
 
     PlayerType getType() const noexcept;
     PieceColor getOwningPieceColor() const noexcept;
+    void setOwningPieceColor(PieceColor newColor) noexcept;
+
     Timer& getTimer() noexcept;
 private:
     PlayerType type;

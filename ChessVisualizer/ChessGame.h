@@ -18,6 +18,8 @@ class ChessGame : public Observable<Player&, Player&>
 {
 public:
     ChessGame();
+    void initializeGame(std::pair<PieceColor, PieceColor> playerPieceColors);
+
     Board& getBoard() noexcept;
     const Board& getBoard() const noexcept;
     Player& getCurrentPlayer() noexcept;
