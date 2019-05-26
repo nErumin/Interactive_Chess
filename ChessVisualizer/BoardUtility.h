@@ -8,6 +8,7 @@
 #include <map>
 #include <memory>
 #include "Piece.h"
+#include "King.h"
 
 inline std::pair<Vector2, Vector2> randomPickPieceMoving(const Board& board, PieceColor playerColor, bool isPassivePick)
 {
@@ -89,6 +90,14 @@ inline std::pair<Vector2, Vector2> randomPickPieceMoving(const Board& board, Pie
 
     for (const auto& locationScorePair : locationScores)
     {
+        auto piecePtr = board.getCell(locationScorePair.first.first).getPiece().get();
+
+        if (isPieceTypeOf<King>(piecePtr) && board.isChecked(locationScorePair.first.second))
+        {
+            std::cout << "Warning: Ignore checked king position..." << std::endl;
+            continue;
+        }
+
         if ((locationScorePair.second > bestScore) ||
             (locationScorePair.second == bestScore && pickRandomNumber(0, 2) == 0))
         {

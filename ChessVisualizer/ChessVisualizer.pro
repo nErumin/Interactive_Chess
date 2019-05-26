@@ -6,7 +6,13 @@ CONFIG += console
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-QMAKE_CXXFLAGS += -std=c++17
+unix {
+    QMAKE_CXXFLAGS += -std=c++17
+}
+
+win32 | win64 {
+    QMAKE_CXXFLAGS += /std:c++17
+}
 
 SOURCES += \
     main.cpp \
@@ -60,9 +66,13 @@ HEADERS += \
     Timer.h \
     InformationModal.h \
     GameResult.h \
-    BoardUtility.h
-
-FORMS +=
+    BoardUtility.h \
+    StringUtility.h
 
 RESOURCES += \
     resource.qrc
+
+LIBS += -L$$PWD/lib -lNetworkLibrary
+
+INCLUDEPATH += $$PWD/includes
+DESTDIR = binaries

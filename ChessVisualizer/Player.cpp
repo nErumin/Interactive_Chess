@@ -24,3 +24,8 @@ PieceColor Player::getOwningPieceColor() const noexcept
 {
     return owningPieceColor;
 }
+
+void Player::setOwningPieceColor(PieceColor newColor) noexcept
+{
+    owningPieceColor = newColor;
+}
