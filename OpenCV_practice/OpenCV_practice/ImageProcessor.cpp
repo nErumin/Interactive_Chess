@@ -35,7 +35,7 @@ Mat ImageProcessor::findBiggestBlob(Mat image) {
 	}
 
 	Mat contoursImage = Mat::zeros(image.size(), CV_8UC3);;
-	drawContours(contoursImage, contours, largest_contour_index, Scalar(255), FILLED, 8, hierarchy); // Draw the largest contour using previously stored index.
+	drawContours(contoursImage, contours, largest_contour_index, Scalar(255), FILLED, 8, hierarchy); // Draw the largest contour using previously stoGREEN index.
 	return contoursImage;
 }
 
@@ -293,8 +293,7 @@ vector<Block> ImageProcessor::findColorObject(String title, int COLOR) {
 	Mat threshold_image;
 	int sub = -10, add = 15;
 
-	
-	if (COLOR == RED) {
+	if (COLOR == GREEN) {
 		detectHSColor(image, 40, 80, 70, 255, 80, 150, threshold_image);
 	}
 	else {
@@ -335,6 +334,7 @@ vector<Block> ImageProcessor::findColorObject(String title, int COLOR) {
 #if TEST == 1
 	imshow("threshold", threshold_image);
 	waitKey(0);
+	destroyAllWindows();
 #endif
 
 	return objects;
@@ -366,9 +366,26 @@ void ImageProcessor::initialize(String title) {
 	this->blocks = findChessboardBlocks(title);
 	
 	this->white_pieces = findColorObject(title, BLUE);
-	this->black_pieces = findColorObject(title, RED);
+	this->black_pieces = findColorObject(title, GREEN);
 	
 	showChessObject(title);
+	notifyToObservers("OK", 0);
+}
+
+vector<int> duplication(vector<int>& a, vector <int>& b) {
+	vector<int>::iterator iter;
+	vector<int>::iterator iter_b;
+	vector<int> c = a; //a의 값 복사
+
+	for (iter_b = b.begin(); iter_b != b.end(); iter_b++) {
+		for (iter = c.begin(); iter != c.end();) {
+			if (*iter == *iter_b)
+				iter = c.erase(iter); //중복 제거
+			else
+				iter++;
+		}
+	}
+	return c; //결과 반환
 }
 
 vector<int> ImageProcessor::comparePieces(vector<Block> previous_pieces, vector<Block> new_pieces) {
@@ -382,20 +399,12 @@ vector<int> ImageProcessor::comparePieces(vector<Block> previous_pieces, vector<
 	sort(previous_index.begin(), previous_index.end());
 	sort(new_index.begin(), new_index.end());
 
-	vector<int> dif_index;
-	int count = 0;
-	for (vector<int>::iterator i = new_index.begin(); i != new_index.end(); i++) {
-		if ((*i) == previous_index[count]) count++;
-		else {
-			dif_index.push_back(previous_index[count]);
-			count++;
-			i--;
-		}
-	}
-	for (int i = count; i < previous_index.size(); i++) {
-		dif_index.push_back(previous_index[i]);
-	}
-	return dif_index;
+	vector<int> pdif_index, ndif_index;
+	pdif_index = duplication(previous_index, new_index);
+	ndif_index = duplication(new_index, previous_index);
+	pdif_index.insert(pdif_index.end(), ndif_index.begin(), ndif_index.end());
+
+	return pdif_index;
 }
 
 String indexToPoint(int index) {
@@ -418,28 +427,32 @@ String makeProtocolString(vector<int> black_index, vector<int> white_index) {
 	msg += ":";
 
 	for (vector<int>::iterator i = black_index.begin(); i != black_index.end(); i++) {
-		msg += ( indexToPoint(*i) + ":" );
+		msg += ( indexToPoint(*i) + "$" );
+	}
+	if (black_index.size() != 0) {
+		msg.pop_back();
+		msg += '|';
 	}
 	for (vector<int>::iterator i = white_index.begin(); i != white_index.end(); i++) {
-		msg += (indexToPoint(*i) + ":");
+		msg += (indexToPoint(*i) + "$");
 	}
 	msg.pop_back();
 
-	printf("%s\n", msg);
+	cout << msg << endl;
 	return msg;
 }
 
 void ImageProcessor::recognizeMovement(String title) {
 	vector<Block> new_white_pieces = findColorObject(title, BLUE);
-	vector<Block> new_black_pieces = findColorObject(title, RED);
+	vector<Block> new_black_pieces = findColorObject(title, GREEN);
 
 	vector<int> white_dif_indexs = comparePieces(this->white_pieces, new_white_pieces);
 	vector<int> black_dif_indexs = comparePieces(this->black_pieces, new_black_pieces);
 
-	makeProtocolString(black_dif_indexs, white_dif_indexs);
+	String msg = makeProtocolString(black_dif_indexs, white_dif_indexs);
 
 	this->black_pieces = new_black_pieces;
 	this->white_pieces = new_white_pieces;
 
-	notifyToObservers(Vector2(1.0, 2.0));
+	notifyToObservers(String(msg), 0);
 }

@@ -17,10 +17,10 @@ using namespace std;
 #define TEST 1
 #define PI 3.1415926
 
-#define RED 0
+#define GREEN 0
 #define BLUE 1
 
-class ImageProcessor : public Observable<Vector2>
+class ImageProcessor : public Observable<String, int>
 {
 private:
 	vector<Block> blocks;
