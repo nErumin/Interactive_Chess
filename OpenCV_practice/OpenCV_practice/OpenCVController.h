@@ -11,7 +11,7 @@
 #include <memory>
 
 class OpenCVController : public Observer<String>,
-						 public Observer<Vector2>
+						 public Observer<String, int>
 {
 public:
 	OpenCVController();
@@ -19,7 +19,7 @@ public:
 	void startVideo(int id);
 	void startImageProcessor(String img_name);
 	void notify(String&& img_name) override;
-	void notify(Vector2&& location) override;
+	void notify(String&& msg, int&& temp) override;
 
 	~OpenCVController() = default;
 

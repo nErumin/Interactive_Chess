@@ -13,21 +13,15 @@ OpenCVController::OpenCVController(Network::SocketConnection& connection)
 }
 
 void OpenCVController::notify(String&& img_name) {
-#ifdef NETWORK
-	service->send("OK");
-#endif
 	thread t;
 	t = thread(&OpenCVController::startImageProcessor, this, img_name);
 	t.detach();
 }
 
-void OpenCVController::notify(Vector2&& location) {
-	cout << location.x() << ", " << location.y() << endl;
-	
-	// to do
-	// response to chess system
+void OpenCVController::notify(String&& msg, int&& temmp) {
+	cout << "message to network : " << msg << endl;
 #ifdef NETWORK
-	service->send("1:0,1$0,3");
+	service->send("msg");
 #endif
 }
 
