@@ -13,6 +13,16 @@
 
 #include <QApplication>
 #include <cstdlib>
+
+#include <Client.h>
+#include <Address.h>
+#include <SocketConnection.h>
+#include <TransmissionService.h>
+#include <SerialService.h>
+#include <NetworkError.h>
+#include <ErrorCode.h>
+
+#include "StringUtility.h"
 #include "InformationModal.h"
 #include "King.h"
 #include "Queen.h"
@@ -23,7 +33,16 @@
 #include "NullPiece.h"
 #include "BoardUtility.h"
 
-constexpr double initialTimerTime = 12000.0;
+namespace
+{
+    constexpr double initialTimerTime = 12000.0;
+
+    Network::Client recognizerClient{ Network::Address("localhost", 33333) };
+    std::unique_ptr<Network::SocketConnection> recognizerConnection;
+
+    Network::Client relayClient{ Network::Address("localhost", 44444) };
+    std::unique_ptr<Network::SocketConnection> relayConnection;
+}
 
 QPixmap convertPieceToPixmap(const Piece* piecePtr)
 {
@@ -126,32 +145,79 @@ void ChessController::startChess()
         player->getTimer().pause();
     }
 
-   game.getCurrentPlayer().getTimer().resume();
-   startTurn();
+    try
+    {
+        recognizerConnection = std::make_unique<Network::SocketConnection>(recognizerClient.connect());
+        relayConnection = std::make_unique<Network::SocketConnection>(relayClient.connect());
+
+        std::cout << "Press 'ENTER' to start chess..." << std::endl;
+        std::string dummyLine;
+        std::getline(std::cin, dummyLine);
+
+        Network::TransmissionService recognizerService{ *recognizerConnection };
+        recognizerService.send("0");
+        auto response = recognizerService.receive(128);
+
+        if (response == "OK")
+        {
+            game.getCurrentPlayer().getTimer().resume();
+
+            QMetaObject::invokeMethod(QApplication::instance(), [this]
+            {
+                startTurn();
+            }, Qt::QueuedConnection);
+        }
+        else
+        {
+            throw Network::NetworkError(Network::ErrorCode::ReceiveFailed, "cannot get reponse");
+        }
+    }
+    catch (const std::exception& error)
+    {
+        using namespace std;
+
+        std::cout << error.what() << std::endl;
+
+        InformationModal disconnectionModal{ nullptr };
+        disconnectionModal.setModalTitle("Not connected");
+        disconnectionModal.setMessageText("Cannot connect to recognizer/relay server.");
+        disconnectionModal.exec();
+
+        return;
+    }
 }
 
 void ChessController::startTurn()
 {
     std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 500 });
 
-    if (game.getCurrentPlayer().getType() == PlayerType::None)
+    Network::TransmissionService recognizerService{ *recognizerConnection };
+    Network::TransmissionService relayService{ *relayConnection };
+
+    if (game.getCurrentPlayer().getType() == PlayerType::Human)
     {
-        while (true)
+        std::cout << "Press 'ENTER' to finish your turn..." << std::endl;
+
+        std::string dummyLine;
+        std::getline(std::cin, dummyLine);
+
+        try
         {
-            try
-            {
-                double x, y, deltaX, deltaY;
+            recognizerService.send("0");
+            auto differenceMessage = recognizerService.receive(1024);
 
-                std::cout << "Choose (x, y), Delta (x, y)" << std::endl;
-                std::cin >> x >> y >> deltaX >> deltaY;
+            std::cout << "[Recognition] " << differenceMessage << std::endl;
 
-                game.movePiece({ x, y }, { deltaX, deltaY });
-                break;
-            }
-            catch (const std::exception& e)
+            auto differences = parseDifferenceProtocolMessage(differenceMessage);
+
+            for (auto& difference : differences)
             {
-                std::cout << e.what() << std::endl;
+                game.movePiece(difference.first, difference.second - difference.first);
             }
+        }
+        catch (const Network::NetworkError& error)
+        {
+            std::cout << error.what() << std::endl;
         }
     }
     else
@@ -159,7 +225,20 @@ void ChessController::startTurn()
         bool isPassive = pickRandomNumber(0, 10) < 5;
         auto picked = randomPickPieceMoving(game.getBoard(), game.getCurrentPlayer().getOwningPieceColor(), isPassive);
 
-        game.movePiece(picked.first, picked.second);
+        try
+        {
+            relayService.send(formatLocationsToProtocol({ std::make_pair(picked.first, picked.first + picked.second) }));
+            auto completionMessage = relayService.receive(1024);
+
+            game.movePiece(picked.first, picked.second);
+
+            recognizerService.send("0");
+            auto okMessage = recognizerService.receive(1024);
+        }
+        catch (const Network::NetworkError& error)
+        {
+            std::cout << error.what() << std::endl;
+        }
     }
 }
 
@@ -276,15 +355,10 @@ void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
 
     nextPlayer.getTimer().resume();
 
-    std::thread([this]
+    QMetaObject::invokeMethod(QApplication::instance(), [this]
     {
-        std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 1000 });
-
-        QMetaObject::invokeMethod(QApplication::instance(), [this]
-        {
-            startTurn();
-        }, Qt::QueuedConnection);
-    }).detach();
+        startTurn();
+    }, Qt::QueuedConnection);
 }
 
 void ChessController::notify(const Cell& changedCell, Vector2&& location)
