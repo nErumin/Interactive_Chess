@@ -358,23 +358,26 @@ void ImageProcessor::showChessObject(String title) {
 }
 
 bool ImageProcessor::isFirst() {
-	if (blocks.size() == 0) return true;
+	if (this->black_pieces.size() != 16 || this->white_pieces.size() != 16) return true;
 	else return false;
 }
 
 void ImageProcessor::initialize(String title) {
 	this->blocks = findChessboardBlocks(title);
 	
-	vector<Block> new_white_pieces = findColorObject(title, BLUE);
-	vector<Block> new_black_pieces = findColorObject(title, GREEN);
+	this->white_pieces = findColorObject(title, BLUE);
+	this->black_pieces = findColorObject(title, GREEN);
 	
 	String msg;
-	if (new_white_pieces.size() != 16 ) msg = "White pieces are not initial setting";
-	else if (new_black_pieces.size() != 16) msg = "Black pieces are not initial setting";
+	if (this->white_pieces.size() != 16) {
+		msg = "White pieces are not initial setting";
+		showChessObject(title);
+	}
+	else if (this->black_pieces.size() != 16) {
+		msg = "Black pieces are not initial setting";
+		showChessObject(title);
+	}
 	else {
-		this->white_pieces = new_white_pieces;
-		this->black_pieces = new_black_pieces;
-
 		if (this->black_pieces.at(0).getIndex() == 0) msg = "BLACK";
 		else msg = "WHITE";
 
