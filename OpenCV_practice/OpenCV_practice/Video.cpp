@@ -27,6 +27,7 @@ void Video::takeVideo(int deviceId) {
 		// wait for a new frame from camera and store it into 'frame'
 		cap.read(frame);
 		rectangle(frame, Point(160, 30), Point(580, 460), Scalar(255, 0, 0) /*blue*/, 10, 8, 0);
+		
 		// check if we succeeded
 		if (frame.empty()) {
 			cerr << "ERROR! blank frame grabbed\n";
@@ -67,12 +68,18 @@ void Video::takeVideo(int deviceId, Network::TransmissionService& service) {
 	int inkey = 1;
 	auto receiveThread = std::thread([this, &inkey, &service]
 	{
-		cout << "Wait for you!" << endl;
+		try {
+			cout << "Wait for you!" << endl;
 
-		while (!end_video)
-		{
-			inkey = std::stoi(service.receive(128));
-			cout << "WOW! I GOT " << inkey << endl;
+			while (!end_video)
+			{
+				inkey = std::stoi(service.receive(128));
+				cout << "WOW! I GOT " << inkey << endl;
+			}
+
+		} 
+		catch (const std::exception&) {
+			exit(0);
 		}
 	});
 
@@ -82,6 +89,9 @@ void Video::takeVideo(int deviceId, Network::TransmissionService& service) {
 	{
 		// wait for a new frame from camera and store it into 'frame'
 		cap.read(frame);
+
+		rectangle(frame, Point(160, 30), Point(580, 460), Scalar(255, 0, 0) /*blue*/, 10, 8, 0);
+
 		// check if we succeeded
 		if (frame.empty()) {
 			cerr << "ERROR! blank frame grabbed\n";
@@ -123,8 +133,11 @@ void Video::captureImage() {
 	// Save the frame into a file
 	imwrite("origin.jpg", save_img); // A JPG FILE IS BEING SAVED
 	imwrite("test.jpg", subImage); // A JPG FILE IS BEING SAVED
+
+#if TEST == 1
 	showImage("test.jpg");
-	
+#endif
+
 	notifyToObservers("test.jpg");
 }
 
@@ -138,13 +151,9 @@ void Video::showImage(String image_name) {
 	{
 		cout << "Could not open or find the image" << endl;
 	}
-
 	String windowName = "Image"; //Name of the window
-
 	namedWindow(windowName); // Create a window
-
 	imshow(windowName, image); // Show our image inside the created window.
-
 	waitKey(0); // Wait for any keystroke in the window
 
 	destroyWindow(windowName); //destroy the created window
