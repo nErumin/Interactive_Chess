@@ -365,16 +365,23 @@ bool ImageProcessor::isFirst() {
 void ImageProcessor::initialize(String title) {
 	this->blocks = findChessboardBlocks(title);
 	
-	this->white_pieces = findColorObject(title, BLUE);
-	this->black_pieces = findColorObject(title, GREEN);
+	vector<Block> new_white_pieces = findColorObject(title, BLUE);
+	vector<Block> new_black_pieces = findColorObject(title, GREEN);
+	
 	String msg;
-	if (this->black_pieces.at(0).getIndex() == 0) msg = "BLACK";
-	else msg = "WHITE";
+	if (new_white_pieces.size() != 16 ) msg = "White pieces are not initial setting";
+	else if (new_black_pieces.size() != 16) msg = "Black pieces are not initial setting";
+	else {
+		this->white_pieces = new_white_pieces;
+		this->black_pieces = new_black_pieces;
+
+		if (this->black_pieces.at(0).getIndex() == 0) msg = "BLACK";
+		else msg = "WHITE";
 
 #if TEST == 2
-	showChessObject(title);
+		showChessObject(title);
 #endif
-
+	}
 	notifyToObservers(String(msg), 0);
 }
 
