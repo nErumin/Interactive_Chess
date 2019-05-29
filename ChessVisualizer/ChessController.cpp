@@ -261,7 +261,18 @@ void ChessController::doTurn()
 
         try
         {
-            relayService.send(formatLocationsToProtocol({ std::make_pair(picked.first, picked.first + picked.second) }));
+            auto currentPiece = game.getBoard().getCell(picked.first).getPiece();
+            auto nextTargetCellPiece = game.getBoard().getCell(picked.first + picked.second).getPiece();
+            std::vector<Difference> robotDifferences;
+
+            if (nextTargetCellPiece->getColor() == getEnemyColor(currentPiece->getColor()))
+            {
+                std::cout << "Robot tries to catch..." << std::endl;
+                robotDifferences.emplace_back(picked.first + picked.second, Vector2{ 99, 99 });
+            }
+
+            robotDifferences.emplace_back(picked.first, picked.first + picked.second);
+            relayService.send(formatLocationsToProtocol(robotDifferences));
             auto completionMessage = relayService.receive(1024);
 
             game.movePiece(picked.first, picked.second);
