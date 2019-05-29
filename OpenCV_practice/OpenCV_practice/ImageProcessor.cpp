@@ -1,6 +1,7 @@
 #include "ImageProcessor.h"
 #include <chrono>
 #include <thread>
+#include <algorithm>
 
 ImageProcessor::ImageProcessor() {
 	
@@ -8,7 +9,7 @@ ImageProcessor::ImageProcessor() {
 
 Mat ImageProcessor::thresholdImage(Mat image) {
 	Mat threshold_image;
-	//이진화를 한다.
+
 	//threshold(image, threshold_image, 0, 255, THRESH_BINARY | THRESH_OTSU);
 	adaptiveThreshold(image, threshold_image, 101, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 101, 20);
 
@@ -34,7 +35,7 @@ Mat ImageProcessor::findBiggestBlob(Mat image) {
 	}
 
 	Mat contoursImage = Mat::zeros(image.size(), CV_8UC3);;
-	drawContours(contoursImage, contours, largest_contour_index, Scalar(255), FILLED, 8, hierarchy); // Draw the largest contour using previously stored index.
+	drawContours(contoursImage, contours, largest_contour_index, Scalar(255), FILLED, 8, hierarchy); // Draw the largest contour using previously stoGREEN index.
 	return contoursImage;
 }
 
@@ -183,7 +184,7 @@ void drawLinesInImage(Mat image, Mat contours, vector<Vec2f> lines) {
 }
 
 void drawPointsInImage(Mat image, vector<Point2f> points, String title) {
-	for (vector<Point2f>::iterator i = points.begin(); i != points.end(); i++) circle(image, Point((*i)), 5, Scalar(255), 1, 8, 0);
+	for (vector<Point2f>::iterator i = points.begin(); i != points.end(); i++) circle(image, Point((*i)), 5, Scalar(0), FILLED, 8, 0);
 	imshow(title, image);
 }
 
@@ -218,28 +219,41 @@ vector<Block> ImageProcessor::findChessboardBlocks(String title) {
 	vector<Vec2f> lines;
 	HoughLines(contours, lines, 1, PI / 180, 120);  // 투표(vote) 최대 개수
 #if TEST == 1
-	drawLinesInImage(input_gray_image, contours, lines);
+	Mat lines_image;
+	input_gray_image.copyTo(lines_image);
+	drawLinesInImage(lines_image, contours, lines);
 #endif
 
 	//find intersections
 	vector<Point2f> intersections = findIntersection(lines, input_gray_image.cols, input_gray_image.rows);
-	
+#if TEST == 1
+	Mat intersections_image;
+	lines_image.copyTo(intersections_image);
+	drawPointsInImage(intersections_image, intersections, "intersections");
+#endif	
+
 	//find edge points
 	vector<Point2f> edges = findEdge(intersections);
 #if TEST == 1
-	drawPointsInImage(input_gray_image, edges, "edges");
+	Mat edges_image;
+	input_gray_image.copyTo(edges_image);
+	drawPointsInImage(edges_image, edges, "edges");
 #endif
 
 	//adjust edge points
 	vector<Point2f> adjust_edges = adjustEdgePosition(edges);
 #if TEST == 1
-	drawPointsInImage(input_gray_image, adjust_edges, "adjust_edges");
+	Mat adjust_image;
+	edges_image.copyTo(adjust_image);
+	drawPointsInImage(adjust_image, adjust_edges, "adjust_edges");
 #endif
 
 	//find all corners in chessboard
 	vector<Point2f> corners = calculateCorners(adjust_edges);
 #if TEST == 1
-	drawPointsInImage(input_gray_image, corners, "corners");
+	Mat corners_image;
+	input_gray_image.copyTo(corners_image);
+	drawPointsInImage(corners_image, corners, "corners");
 
 	waitKey(0);
 	destroyAllWindows();
@@ -250,32 +264,42 @@ vector<Block> ImageProcessor::findChessboardBlocks(String title) {
 	return blocks;
 }
 
-vector<Block> ImageProcessor::findColorObject(String title, int color) {
+void detectHSColor(const Mat& image, double minHue, double maxHue, double minSat, double maxSat, double minValue, double maxValue, Mat& mask) {
+	Mat hsv;
+	cvtColor(image, hsv, COLOR_BGR2HSV);
+
+	vector<Mat> channels;
+	split(hsv, channels);
+
+#if TEST == 1
+	imshow("hue", channels[0]);
+	imshow("sat", channels[1]);
+	imshow("value", channels[2]);
+#endif
+
+	Mat threshold;
+	inRange(hsv, Scalar(minHue, minSat, minValue), Scalar(maxHue, maxSat, maxValue), threshold);
+
+	mask = threshold;
+}
+
+vector<Block> ImageProcessor::findColorObject(String title, int COLOR) {
 	Mat image = imread(title);
+
 #if TEST == 1
 	imshow("origin", image);
 #endif
 
 	Mat threshold_image;
-	Mat point_image;
 	int sub = -10, add = 15;
-	if (color == WHITE) {
-		inRange(image, Scalar(average_black[0] + sub, average_black[1] + sub, average_black[2] + sub), Scalar(average_black[0] + add, average_black[1] + add, average_black[2] + add), threshold_image);
-#if TEST == 1
-		inRange(image, Scalar(average_black[0] + sub, average_black[1] + sub, average_black[2] + sub), Scalar(average_black[0] + add, average_black[1] + add, average_black[2] + add), point_image);
-#endif
-		//threshold(image, threshold_image, 240, 255, THRESH_BINARY);
-		//threshold(image, point_image, 240, 255, THRESH_BINARY);
+
+	if (COLOR == GREEN) {
+		detectHSColor(image, 40, 80, 70, 255, 80, 150, threshold_image);
 	}
 	else {
-		inRange(image, Scalar(average_white[0] + sub, average_white[1] + sub, average_white[2] + sub), Scalar(average_white[0] + add, average_white[1] + add, average_white[2] + add), threshold_image);
-#if TEST == 1
-		inRange(image, Scalar(average_white[0] + sub, average_white[1] + sub, average_white[2] + sub), Scalar(average_white[0] + add, average_white[1] + add, average_white[2] + add), point_image);
-#endif
-		//threshold(image, threshold_image, 20, 255, THRESH_BINARY_INV);
-		//threshold(image, point_image, 20, 255, THRESH_BINARY_INV);
+		detectHSColor(image, 100, 150, 100, 255, 200, 255, threshold_image);
 	}
-
+	
 	vector<Block> objects;
 
 	int index = 0;
@@ -294,9 +318,6 @@ vector<Block> ImageProcessor::findColorObject(String title, int color) {
 				int color = threshold_image.at<uchar>(y, x);
 				if (color != 0) {
 					count++;
-#if TEST == 1
-					circle(point_image, Point(x, y), 5, Scalar(255), 1, 8, 0);
-#endif
 				}
 			}
 		}
@@ -304,84 +325,155 @@ vector<Block> ImageProcessor::findColorObject(String title, int color) {
 		printf("%d, %d\n", index++, count);
 #endif
 
-		if (count > 50) {
+		if (count > 10) {
 			(*iter).setIsInObject(true);
 			objects.push_back(*iter);
 		}
 	}
+
 #if TEST == 1
 	imshow("threshold", threshold_image);
-	imshow("finding point", point_image);
-	waitKey(0);
-#endif
-
-	return objects;
-}
-
-vector<Block> ImageProcessor::findChessObject(String title) {
-	vector<Block> w_objects = findColorObject(title, WHITE);
-	vector<Block> b_objects = findColorObject(title, BLACK);
-
-	vector<Block> objects = w_objects;
-	objects.insert(objects.end(), b_objects.begin(), b_objects.end());
-	Mat image = imread(title);
-
-	for (vector<Block>::iterator iter = objects.begin(); iter != objects.end(); iter++) {
-		circle(image, Point((*iter).getCenterPoint()), 5, Scalar(255), 1, 8, 0);
-	}
-
-#if TEST == 1
-	namedWindow("Detected edge point");
-	imshow("Detected edge point", image);
-
 	waitKey(0);
 	destroyAllWindows();
 #endif
+
 	return objects;
 }
 
-bool ImageProcessor::isFirst() {
-	if (blocks.size() == 0) return true;
-	else return false;
+void ImageProcessor::showChessObject(String title) {
+	Mat image = imread(title);
+
+	for (vector<Block>::iterator iter = this->black_pieces.begin(); iter != this->black_pieces.end(); iter++) {
+		circle(image, Point((*iter).getCenterPoint()), 5, Scalar(0, 255, 0), FILLED, 8, 0);
+	}
+	for (vector<Block>::iterator iter = this->white_pieces.begin(); iter != this->white_pieces.end(); iter++) {
+		circle(image, Point((*iter).getCenterPoint()), 5, Scalar(255, 0, 0), FILLED, 8, 0);
+	}
+
+	namedWindow("Detected Object");
+	imshow("Detected Object", image);
+
+	waitKey(0);
+	destroyAllWindows();
 }
 
-void ImageProcessor::setAverageColor(String title) {
-	Mat image = imread(title);
-	
-	int black[16][3], white[16][3];
-	
-	for (int i = 0; i < 16; i++) {
-		for (int j = 0; j < 3; j++) {
-			Point2f wblock_cp = this->blocks.at(i).getCenterPoint();
-			Point2f bblock_cp = this->blocks.at(i + 48).getCenterPoint();
-			white[i][j] = image.at<Vec3b>(wblock_cp.y, wblock_cp.x)[j];
-			black[i][j] = image.at<Vec3b>(bblock_cp.y, bblock_cp.x)[j];
-		}
-	}
-	int average_b[3] = { 0, }, average_w[3] = { 0, };
-	for (int i = 0; i < 16; i++) {
-		for (int j = 0; j < 3; j++) {
-			average_b[j] += black[i][j];
-			average_w[j] += white[i][j];
-		}
-	}
-	for (int i = 0; i < 3; i++) {
-		average_b[i] /= 16;
-		this->average_black[i] = average_b[i];
-		average_w[i] /= 16;
-		this->average_white[i] = average_w[i];
-	}
+bool ImageProcessor::isFirst() {
+	if (this->black_pieces.size() != 16 || this->white_pieces.size() != 16) return true;
+	else return false;
 }
 
 void ImageProcessor::initialize(String title) {
 	this->blocks = findChessboardBlocks(title);
-	setAverageColor(title);
 	
-	this->pieces = findChessObject(title);
+	this->white_pieces = findColorObject(title, BLUE);
+	this->black_pieces = findColorObject(title, GREEN);
+	
+	String msg;
+	if (this->white_pieces.size() != 16) {
+		msg = "White pieces are not initial setting";
+		showChessObject(title);
+	}
+	else if (this->black_pieces.size() != 16) {
+		msg = "Black pieces are not initial setting";
+		showChessObject(title);
+	}
+	else {
+		if (this->black_pieces.at(0).getIndex() == 0) msg = "BLACK";
+		else msg = "WHITE";
+
+#if TEST == 2
+		showChessObject(title);
+#endif
+	}
+	notifyToObservers(String(msg), 0);
+}
+
+vector<int> duplication(vector<int>& a, vector <int>& b) {
+	vector<int>::iterator iter;
+	vector<int>::iterator iter_b;
+	vector<int> c = a; //a의 값 복사
+
+	for (iter_b = b.begin(); iter_b != b.end(); iter_b++) {
+		for (iter = c.begin(); iter != c.end();) {
+			if (*iter == *iter_b)
+				iter = c.erase(iter); //중복 제거
+			else
+				iter++;
+		}
+	}
+	return c; //결과 반환
+}
+
+vector<int> ImageProcessor::comparePieces(vector<Block> previous_pieces, vector<Block> new_pieces) {
+	vector<int> previous_index;
+	vector<int> new_index;
+
+	for (vector<Block>::iterator i = previous_pieces.begin(); i != previous_pieces.end(); i++) previous_index.push_back((*i).getIndex());
+	for (vector<Block>::iterator i = new_pieces.begin(); i != new_pieces.end(); i++) new_index.push_back((*i).getIndex());
+
+
+	sort(previous_index.begin(), previous_index.end());
+	sort(new_index.begin(), new_index.end());
+
+	vector<int> pdif_index, ndif_index;
+	pdif_index = duplication(previous_index, new_index);
+	ndif_index = duplication(new_index, previous_index);
+	pdif_index.insert(pdif_index.end(), ndif_index.begin(), ndif_index.end());
+
+	return pdif_index;
+}
+
+String indexToPoint(int index) {
+	String point;
+	
+	point += to_string(index % 8);
+	point += ',';
+	point += to_string(index / 8);
+
+	return point;
+}
+
+String makeProtocolString(vector<int> black_index, vector<int> white_index) {
+	int count = 0;
+	count += black_index.size()/2;
+	count += white_index.size()/2;
+
+	String msg = "";
+	msg += to_string(count);
+	msg += ":";
+	if (black_index.size() == 2) {
+		for (vector<int>::iterator i = black_index.begin(); i != black_index.end(); i++) {
+			msg += (indexToPoint(*i) + "$");
+		}
+		msg.pop_back();
+		msg += '|';
+	}
+	if (white_index.size() == 2) {
+		for (vector<int>::iterator i = white_index.begin(); i != white_index.end(); i++) {
+			msg += (indexToPoint(*i) + "$");
+		}
+	}
+	msg.pop_back();
+
+	cout << msg << endl;
+	return msg;
 }
 
 void ImageProcessor::recognizeMovement(String title) {
-	vector<Block> newPieces = findChessObject(title);
+	vector<Block> new_white_pieces = findColorObject(title, BLUE);
+	vector<Block> new_black_pieces = findColorObject(title, GREEN);
 
-	notifyToObservers(Vector2(1.0, 2.0));
+	vector<int> white_dif_indexs = comparePieces(this->white_pieces, new_white_pieces);
+	vector<int> black_dif_indexs = comparePieces(this->black_pieces, new_black_pieces);
+
+	String msg = makeProtocolString(black_dif_indexs, white_dif_indexs);
+
+	this->black_pieces = new_black_pieces;
+	this->white_pieces = new_white_pieces;
+
+#if TEST == 2
+	showChessObject(title);
+#endif
+
+	notifyToObservers(String(msg), 0);
 }
