@@ -21,7 +21,7 @@ void OpenCVController::notify(String&& img_name) {
 void OpenCVController::notify(String&& msg, int&& temmp) {
 	cout << "message to network : " << msg << endl;
 #ifdef NETWORK
-	service->send("msg");
+	service->send(msg);
 #endif
 }
 

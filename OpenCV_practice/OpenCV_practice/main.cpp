@@ -4,7 +4,7 @@
 #include <Server.h>
 #include <SocketConnection.h>
 #include <Address.h>
-
+#include <NetworkError.h>
 int main() {
 #ifdef SELF_TEST
 	ImageProcessor ip;
@@ -27,13 +27,17 @@ int main() {
 
 
 #ifdef NETWORK
-	Network::Server server{ Network::Address("", 33333) };
+	try {
+		Network::Server server{ Network::Address("", 33333) };
+		cout << "Wait for network connection!" << endl;
+		auto connection = server.waitClient();
 
-	auto connection = server.waitClient();
-
-	OpenCVController controller(connection);
-	controller.startVideo(1);
-
+		OpenCVController controller(connection);
+		controller.startVideo(1);
+	}
+	catch (const std::exception& e) {
+		exit(0);
+	}
 #endif
 
 	return 0;
