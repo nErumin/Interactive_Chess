@@ -358,7 +358,10 @@ void ImageProcessor::showChessObject(String title) {
 }
 
 bool ImageProcessor::isFirst() {
-	if (this->black_pieces.size() != 16 || this->white_pieces.size() != 16) return true;
+	if (this->isFirst) {
+		if (this->black_pieces.size() == 16 && this->white_pieces.size() == 16) this->isFirst = false;
+		return true;
+	}
 	else return false;
 }
 
