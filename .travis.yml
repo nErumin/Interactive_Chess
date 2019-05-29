@@ -73,7 +73,11 @@ jobs:
       - cmake .
       - make
   - stage: Qt
-    install: 
+    install:
+      - sudo add-apt-repository --yes ppa:mhier/libboost-latest
+      - sudo apt-get update
+      - sudo apt-get install libboost1.68-dev
+      
       - sudo add-apt-repository --yes ppa:beineri/opt-qt-5.10.1-trusty
       - sudo apt-get update
       - sudo apt-get install qt5-qmake qt510base qt510script qt510declarative qt510tools qt510x11extras qt510svg qt510quickcontrols2

@@ -17,15 +17,15 @@ using namespace std;
 #define TEST 1
 #define PI 3.1415926
 
-#define WHITE 0
-#define BLACK 1
+#define GREEN 0
+#define BLUE 1
 
-class ImageProcessor : public Observable<Vector2>
+class ImageProcessor : public Observable<String, int>
 {
 private:
 	vector<Block> blocks;
-	vector<Block> pieces;
-	int average_black[3], average_white[3];
+	vector<Block> black_pieces; 
+	vector<Block> white_pieces;
 
 	Mat thresholdImage(Mat image);
 	Mat findBiggestBlob(Mat image);
@@ -33,10 +33,13 @@ private:
 	vector<Point2f> findEdge(vector<Point2f> points);
 	vector<Point2f> calculateCorners(vector<Point2f> edges);
 	vector<Block> findBlocks(vector<Point2f> corners);
-	vector<Block> findColorObject(String title, int color);
+	vector<Block> findColorObject(String title, int COLOR);
 	vector<Block> findChessboardBlocks(String title);
-	vector<Block> findChessObject(String title);
+	void findChessObject(String title);
+	vector<int> comparePieces(vector<Block> previous_pieces, vector<Block> new_pieces);
 	void setAverageColor(String title);
+	void showChessObject(String title);
+
 public:
 	ImageProcessor();
 	~ImageProcessor() = default;
