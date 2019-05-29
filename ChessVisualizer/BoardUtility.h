@@ -46,7 +46,14 @@ inline std::pair<Vector2, Vector2> randomPickPieceMoving(const Board& board, Pie
     {
         for (const auto& movableLocation : pieceMovablePair.second)
         {
+            auto piecePtr = board.getCell(pieceMovablePair.first).getPiece();
             auto targetPiece = board.getCell(movableLocation).getPiece();
+
+            if (isPieceTypeOf<King>(piecePtr.get()) && board.isChecked(movableLocation))
+            {
+                std::cout << "Warning: Ignore checked king position..." << std::endl;
+                continue;
+            }
 
             if (targetPiece->getColor() == getEnemyColor(playerColor))
             {
