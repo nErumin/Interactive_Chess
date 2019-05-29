@@ -19,6 +19,8 @@ public:
 private:
     void makeMovingFromPlayer(Player& player);
     void startTurn();
+    void doTurn();
+    void refreshWindow();
 
     ChessGame game;
     ChessWindow window;

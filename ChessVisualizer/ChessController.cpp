@@ -95,13 +95,16 @@ ChessController::ChessController()
     // register cell changed event
     auto& board = game.getBoard();
     board.registerObserver(this);
+}
 
+void ChessController::refreshWindow()
+{
     // initialize image
     for (size_t i = 0; i < boardSize; ++i)
     {
         for (size_t j = 0; j < boardSize; ++j)
         {
-            auto piecePtr = board.getCell(i, j).getPiece();
+            auto piecePtr = game.getBoard().getCell(i, j).getPiece();
             window.getLabel(i, j).setPixmap(convertPieceToPixmap(piecePtr.get()));
         }
     }
@@ -166,14 +169,10 @@ void ChessController::startChess()
                         PieceColor::White :
                         PieceColor::Black;
 
-            game.initializeGame({ robotColor, getEnemyColor(robotColor) });
+            game.initializeGame({ getEnemyColor(robotColor), robotColor });
+            refreshWindow();
 
-            game.getCurrentPlayer().getTimer().resume();
-
-            QMetaObject::invokeMethod(QApplication::instance(), [this]
-            {
-                startTurn();
-            }, Qt::QueuedConnection);
+            startTurn();
         }
         else
         {
@@ -197,8 +196,19 @@ void ChessController::startChess()
 
 void ChessController::startTurn()
 {
-    std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 500 });
+    std::thread([this]
+    {
+        std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 3000 });
 
+        QMetaObject::invokeMethod(QApplication::instance(), [this]
+        {
+            startTurn();
+        }, Qt::QueuedConnection);
+    }).detach();
+}
+
+void ChessController::doTurn()
+{
     Network::TransmissionService recognizerService{ *recognizerConnection };
     Network::TransmissionService relayService{ *relayConnection };
 
@@ -223,7 +233,7 @@ void ChessController::startTurn()
                 game.movePiece(difference.first, difference.second - difference.first);
             }
         }
-        catch (const Network::NetworkError& error)
+        catch (const std::exception& error)
         {
             std::cout << error.what() << std::endl;
         }
@@ -338,8 +348,13 @@ inline void showGameFinishedDialog(ChessWindow& window, GameResult result)
 
 void ChessController::finalize()
 {
+    Network::TransmissionService recognizerService{ *recognizerConnection };
+
+    recognizerService.send("-1");
+
     game.getCurrentPlayer().getTimer().stop();
     game.getNextPlayer().getTimer().stop();
+
 }
 
 void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
@@ -363,10 +378,7 @@ void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
 
     nextPlayer.getTimer().resume();
 
-    QMetaObject::invokeMethod(QApplication::instance(), [this]
-    {
-        startTurn();
-    }, Qt::QueuedConnection);
+    startTurn();
 }
 
 void ChessController::notify(const Cell& changedCell, Vector2&& location)
