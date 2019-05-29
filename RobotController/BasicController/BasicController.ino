@@ -19,8 +19,8 @@
 
 DynamixelWorkbench dxl_wb;
 int32_t tmp = 0;
-int32_t start = 1;
-int32_t destination = 18;
+size_t start = 1;
+size_t destination = 18;
 int32_t grab = 2200;
 int32_t drop = 2750;
 
@@ -44,6 +44,8 @@ int loop_num = 0;
 int diff = 0;
 int e = 0;
 
+std::vector<std::pair<size_t, size_t>> command;
+std::string buf_string;
 char bufferIndex = 0;
 char buffer[20];
 
@@ -90,9 +92,12 @@ int32_t grab_path[64][5] ={ {2815, 2215, 2525, 3050, grab}, {2710, 2145, 2615, 3
 void setup() {
     // put your setup code here, to run once:
     Serial.begin(57600);
+
+/*
     while(!Serial) { // Wait for Opening Serial Monitor
         Serial.println("Fail to use Serial");
     }
+*/
 
     const char *log;
     bool result = false;
@@ -163,60 +168,23 @@ void setup() {
 */
 
     while(1){
+        buf_string.clear();
+        
         while(Serial.available()) {
-            buffer[bufferIndex]  = Serial.read();
+            char buf = Serial.read();
+            buf_string.push_back(buf);
+            buffer[bufferIndex]  = buf;
             bufferIndex++;
         }
+        
         char num = buffer[0];;
         int degree = atoi(&buffer[2]);
         
+        //std::string command_message{ "2:1,0$2,2|3,0$1,0" };
+        //auto differences = parseDifferences(buf_string);
+        
         switch (num) {
         case 0:
-            break;
-        case '1':
-            Serial.println(num);
-            Serial.println(degree);
-            if(present_position[0] < degree) { diff=1;}
-            else { diff = -1; }
-            for(e = present_position[0]; degree != e; e+= diff) {
-                dxl_wb.goalPosition(dxl_id[0], (int32_t)e);
-                present_position[0] = e;
-            }
-            break;
-        case '2':
-            Serial.println(num);
-            Serial.println(degree);
-            if(present_position[1] < degree) { diff=1;}
-            else { diff = -1; }
-            for(e = present_position[1]; degree != e; e+= diff) {
-                dxl_wb.goalPosition(dxl_id[1], (int32_t)e);
-                present_position[1] = e;
-            }
-            break;
-        case '3':
-            Serial.println(num);
-            Serial.println(degree);
-            if(present_position[2] < degree) { diff=1;}
-            else { diff = -1; }
-            for(e = present_position[2]; degree != e; e+= diff) {
-                dxl_wb.goalPosition(dxl_id[2], (int32_t)e);
-                present_position[2] = e;
-            }
-            break;
-        case '4':
-            Serial.println(num);
-            Serial.println(degree);
-            if(present_position[3] < degree) { diff=1;}
-            else { diff = -1; }
-            for(e = present_position[3]; degree != e; e+= diff) {
-                dxl_wb.goalPosition(dxl_id[3], (int32_t)e);
-                present_position[3] = e;
-            }
-            break;
-        case '5':
-            Serial.println(num);
-            Serial.println(degree);
-            dxl_wb.goalPosition(dxl_id[4], (int32_t)degree);
             break;
         case 'i':
             Serial.print("Init State");
@@ -248,7 +216,135 @@ void setup() {
             }
             Serial.println("END");
             break;
-        case 't':
+        case '1':
+        {
+            delay(100);
+            auto differences = parseDifferences(buf_string);
+            start = differences[0].first;
+            destination = differences[0].second;
+            Serial.println(buf_string.c_str());
+            Serial.println(start);
+            Serial.println(destination);
+            Serial.print("Ready position");
+            if(start<0 || start >63 ||destination<0 || destination > 63) {
+              while(1);
+            }
+            
+            loop_num = getMax(present_position, ready_position, NCNT);
+            for (e = 0; e<loop_num; e+=20) {
+                for (int cnt=SCNT; cnt < NCNT; cnt++) {
+                    if(present_position[cnt] < ready_position[cnt]) { diff=20;}
+                    else if(present_position[cnt] > ready_position[cnt]) { diff = -20; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(100);
+            
+            Serial.print("Buf position");
+            loop_num = getMax(present_position, buf_path[start], NCNT);
+            for (e = 0; e<loop_num; e+=5) {
+                for (int cnt=SCNT; cnt < NCNT; cnt++) {
+                    if(present_position[cnt] < buf_path[start][cnt]) { diff=5;}
+                    else if(present_position[cnt] > buf_path[start][cnt]) { diff = -5; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(100);
+            
+            Serial.print("Grab position");
+            loop_num = getMax(present_position, grab_path[start], NCNT);
+            for (e = 0; e<loop_num; e+=5) {
+                for (int cnt=SCNT; cnt < NCNT; cnt++) {
+                    if(present_position[cnt] < grab_path[start][cnt]) { diff=5;}
+                    else if(present_position[cnt] > grab_path[start][cnt]) { diff = -5; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(100);
+            dxl_wb.goalPosition(dxl_id[4], (int32_t)drop);
+            
+            Serial.print("Buf position");
+            loop_num = getMax(present_position, buf_path[start], NCNT);
+            for (e = 0; e<loop_num; e+=5) {
+                for (int cnt=SCNT; cnt < NCNT-1; cnt++) {
+                    if(present_position[cnt] < buf_path[start][cnt]) { diff=5;}
+                    else if(present_position[cnt] > buf_path[start][cnt]) { diff = -5; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(100);
+
+            Serial.print("Buf position");
+            loop_num = getMax(present_position, buf_path[destination], NCNT);
+            for (e = 0; e<loop_num; e+=5) {
+                for (int cnt=SCNT; cnt < NCNT-1; cnt++) {
+                    if(present_position[cnt] < buf_path[destination][cnt]) { diff=5;}
+                    else if(present_position[cnt] > buf_path[destination][cnt]) { diff = -5; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(1000);
+            
+            Serial.print("Drop position");
+            loop_num = getMax(present_position, grab_path[destination], NCNT);
+            for (e = 0; e<loop_num; e+=5) {
+                for (int cnt=SCNT; cnt < NCNT-1; cnt++) {
+                    if(present_position[cnt] < grab_path[destination][cnt]) { diff=5;}
+                    else if(present_position[cnt] > grab_path[destination][cnt]) { diff = -5; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(100);
+            dxl_wb.goalPosition(dxl_id[4], (int32_t)grab); delay(100);
+
+            Serial.print("Buf position");
+            loop_num = getMax(present_position, buf_path[destination], NCNT);
+            for (e = 0; e<loop_num; e+=5) {
+                for (int cnt=SCNT; cnt < NCNT-1; cnt++) {
+                    if(present_position[cnt] < buf_path[destination][cnt]) { diff=5;}
+                    else if(present_position[cnt] > buf_path[destination][cnt]) { diff = -5; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(100);
+            
+            Serial.print("Init State");
+            loop_num = getMax(present_position, idle_position, NCNT);
+            for (e = 0; e<loop_num; e+=20) {
+                for (int cnt=SCNT; cnt < NCNT; cnt++) {
+                    if(present_position[cnt] < idle_position[cnt]) { diff=20;}
+                    else if(present_position[cnt] > idle_position[cnt]) { diff = -20; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(100); start+=1; destination = start + 16;
+
+            Serial.write("OK");
+            
+            break; 
+        }
+//=======================================================================
+        case '2':
+        {
+            auto differences = parseDifferences(buf_string);
+            start = differences[0].first;
+            destination = differences[0].second;
             Serial.print("Ready position");
             loop_num = getMax(present_position, ready_position, NCNT);
             for (e = 0; e<loop_num; e+=20) {
@@ -316,11 +412,120 @@ void setup() {
             Serial.println(": END"); delay(1000);
             
             Serial.print("Drop position");
-            loop_num = getMax(present_position, drop_path[destination], NCNT);
+            loop_num = getMax(present_position, grab_path[destination], NCNT);
             for (e = 0; e<loop_num; e+=5) {
                 for (int cnt=SCNT; cnt < NCNT-1; cnt++) {
-                    if(present_position[cnt] < drop_path[destination][cnt]) { diff=5;}
-                    else if(present_position[cnt] > drop_path[destination][cnt]) { diff = -5; }
+                    if(present_position[cnt] < grab_path[destination][cnt]) { diff=5;}
+                    else if(present_position[cnt] > grab_path[destination][cnt]) { diff = -5; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(100);
+            dxl_wb.goalPosition(dxl_id[4], (int32_t)grab); delay(100);
+
+            Serial.print("Buf position");
+            loop_num = getMax(present_position, buf_path[destination], NCNT);
+            for (e = 0; e<loop_num; e+=5) {
+                for (int cnt=SCNT; cnt < NCNT-1; cnt++) {
+                    if(present_position[cnt] < buf_path[destination][cnt]) { diff=5;}
+                    else if(present_position[cnt] > buf_path[destination][cnt]) { diff = -5; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(100);
+            
+            Serial.print("Init State");
+            loop_num = getMax(present_position, idle_position, NCNT);
+            for (e = 0; e<loop_num; e+=20) {
+                for (int cnt=SCNT; cnt < NCNT; cnt++) {
+                    if(present_position[cnt] < idle_position[cnt]) { diff=20;}
+                    else if(present_position[cnt] > idle_position[cnt]) { diff = -20; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(100); start+=1; destination = start + 16;
+            
+//========================================================================================================
+        start = differences[1].first;
+        destination = differences[1].second;
+        Serial.print("Ready position");
+            loop_num = getMax(present_position, ready_position, NCNT);
+            for (e = 0; e<loop_num; e+=20) {
+                for (int cnt=SCNT; cnt < NCNT; cnt++) {
+                    if(present_position[cnt] < ready_position[cnt]) { diff=20;}
+                    else if(present_position[cnt] > ready_position[cnt]) { diff = -20; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(100);
+            
+            Serial.print("Buf position");
+            loop_num = getMax(present_position, buf_path[start], NCNT);
+            for (e = 0; e<loop_num; e+=5) {
+                for (int cnt=SCNT; cnt < NCNT; cnt++) {
+                    if(present_position[cnt] < buf_path[start][cnt]) { diff=5;}
+                    else if(present_position[cnt] > buf_path[start][cnt]) { diff = -5; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(100);
+            
+            Serial.print("Grab position");
+            loop_num = getMax(present_position, grab_path[start], NCNT);
+            for (e = 0; e<loop_num; e+=5) {
+                for (int cnt=SCNT; cnt < NCNT; cnt++) {
+                    if(present_position[cnt] < grab_path[start][cnt]) { diff=5;}
+                    else if(present_position[cnt] > grab_path[start][cnt]) { diff = -5; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(100);
+            dxl_wb.goalPosition(dxl_id[4], (int32_t)drop);
+            
+            Serial.print("Buf position");
+            loop_num = getMax(present_position, buf_path[start], NCNT);
+            for (e = 0; e<loop_num; e+=5) {
+                for (int cnt=SCNT; cnt < NCNT-1; cnt++) {
+                    if(present_position[cnt] < buf_path[start][cnt]) { diff=5;}
+                    else if(present_position[cnt] > buf_path[start][cnt]) { diff = -5; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(100);
+
+            Serial.print("Buf position");
+            loop_num = getMax(present_position, buf_path[destination], NCNT);
+            for (e = 0; e<loop_num; e+=5) {
+                for (int cnt=SCNT; cnt < NCNT-1; cnt++) {
+                    if(present_position[cnt] < buf_path[destination][cnt]) { diff=5;}
+                    else if(present_position[cnt] > buf_path[destination][cnt]) { diff = -5; }
+                    else { diff = 0; }
+                    present_position[cnt]+=diff;
+                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
+                }
+            }
+            Serial.println(": END"); delay(1000);
+            
+            Serial.print("Drop position");
+            loop_num = getMax(present_position, grab_path[destination], NCNT);
+            for (e = 0; e<loop_num; e+=5) {
+                for (int cnt=SCNT; cnt < NCNT-1; cnt++) {
+                    if(present_position[cnt] < grab_path[destination][cnt]) { diff=5;}
+                    else if(present_position[cnt] > grab_path[destination][cnt]) { diff = -5; }
                     else { diff = 0; }
                     present_position[cnt]+=diff;
                     dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
@@ -355,51 +560,21 @@ void setup() {
             }
             Serial.println(": END"); delay(100); start+=1; destination = start + 16;
             break;
-        case 'd':
-            Serial.println("Grab State");
-            loop_num = getMax(present_position, buf_path[start], NCNT);
-            dxl_wb.goalPosition(dxl_id[4], (int32_t)grab);
-            Serial.println(loop_num);
-            for (e = 0; e<loop_num; e+=5) {
-                for (int cnt=SCNT; cnt < NCNT-1; cnt++) {
-                    if(present_position[cnt] < buf_path[start][cnt]) { diff=5;}
-                    else if(present_position[cnt] > buf_path[start][cnt]) { diff = -5; }
-                    else { diff = 0; }
-                    present_position[cnt]+=diff;
-                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
-                }
-            }
-            delay(1000);
-            
-            loop_num = getMax(present_position, grab_path[start], NCNT);
-            Serial.println(loop_num);
-            for (e = 0; e<loop_num; e+=5) {
-                for (int cnt=SCNT; cnt < NCNT-1; cnt++) {
-                    if(present_position[cnt] < grab_path[start][cnt]) { diff=5;}
-                    else if(present_position[cnt] > grab_path[start][cnt]) { diff = -5; }
-                    else { diff = 0; continue; }
-                    present_position[cnt]+=diff;
-                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
-                }
-            }
-            delay(1000);
-            dxl_wb.goalPosition(dxl_id[4], (int32_t)drop);
-            delay(1000);
+        }
+//========================================================================================================
+        case '7':
+        {
+            std::string command_message{ "2:1,0$2,2|3,0$1,0" };
+            auto differences = parseDifferences(command_message);
 
-            loop_num = getMax(present_position, buf_path[start], NCNT);
-            Serial.println(loop_num);
-            for (e = 0; e<loop_num; e+=5) {
-                for (int cnt=SCNT; cnt < NCNT-1; cnt++) {
-                    if(present_position[cnt] < buf_path[start][cnt]) { diff=5;}
-                    else if(present_position[cnt] > buf_path[start][cnt]) { diff = -5; }
-                    else { diff = 0; continue; }
-                    present_position[cnt]+=diff;
-                    dxl_wb.goalPosition(dxl_id[cnt], (int32_t)present_position[cnt]);
-                }
+            for (size_t i = 0; i < differences.size(); ++i)
+            {
+               Serial.println(differences[i].first);
+               Serial.println(differences[i].second);
             }
-            delay(1000); start+=1;
-            Serial.println("END");
-            break;
+
+            break; 
+        }
         case 'k':
             loop_num = getMax(present_position, grab_path[tmp], NCNT);
             for (e = 0; e<loop_num; e+=5) {
@@ -453,6 +628,7 @@ int getMax(int32_t* arr1, int32_t* arr2, int arr_len) {
 
 //===============================================
 // network code
+
 std::vector<std::string> splitString(const std::string& str, const std::string& delimiter)
 {
     std::vector<std::string> brokenString;
@@ -477,7 +653,12 @@ std::vector<std::string> splitString(const std::string& str, const std::string& 
 
 std::vector<std::pair<size_t, size_t>> parseDifferences(const std::string& message)
 {
+    Serial.println(message.c_str());
+    
     auto countSplitMessage = splitString(message, ":");
+    
+    Serial.println(countSplitMessage[0].c_str());
+    
     size_t diffCount = strtoul(countSplitMessage.at(0).c_str(), nullptr, 10);
 
     std::vector<std::pair<size_t, size_t>> parsedResult;
@@ -487,14 +668,14 @@ std::vector<std::pair<size_t, size_t>> parseDifferences(const std::string& messa
         auto differences = splitString(countSplitMessage.at(1), "|");
 
         for (size_t index = 0; index < diffCount; ++index)
-        {
+        { 
             auto beforeAfter = splitString(differences[index], "$");
             auto before = splitString(beforeAfter.at(0), ",");
             auto after = splitString(beforeAfter.at(1), ",");
 
-            size_t beforePosition = strtoul(before.at(1).c_str(), nullptr, 10) * 8 + strtoul(before.at(0).c_str(), nullptr, 10);
-            size_t afterPosition = strtoul(after.at(1).c_str(), nullptr, 10) * 8 + strtoul(after.at(1).c_str(), nullptr, 10);
-            
+            size_t beforePosition = strtoul(before.at(1).c_str(), nullptr, 10) * 8 + (7 - strtoul(before.at(0).c_str(), nullptr, 10));
+            size_t afterPosition = strtoul(after.at(1).c_str(), nullptr, 10) * 8 + (7 - strtoul(after.at(0).c_str(), nullptr, 10));
+          
             parsedResult.emplace_back(
                 std::make_pair(beforePosition, afterPosition)
             );
@@ -503,6 +684,7 @@ std::vector<std::pair<size_t, size_t>> parseDifferences(const std::string& messa
 
     return parsedResult;
 }
+
 
 
 //================================================
