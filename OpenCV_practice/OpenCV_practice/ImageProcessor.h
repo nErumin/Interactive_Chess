@@ -14,7 +14,7 @@
 using namespace cv;
 using namespace std;
 
-#define TEST 1
+#define TEST 2
 #define PI 3.1415926
 
 #define GREEN 0
@@ -26,6 +26,7 @@ private:
 	vector<Block> blocks;
 	vector<Block> black_pieces; 
 	vector<Block> white_pieces;
+	bool first = true;
 
 	Mat thresholdImage(Mat image);
 	Mat findBiggestBlob(Mat image);

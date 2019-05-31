@@ -358,7 +358,10 @@ void ImageProcessor::showChessObject(String title) {
 }
 
 bool ImageProcessor::isFirst() {
-	if (blocks.size() == 0) return true;
+	if (this->first) {
+		if (this->black_pieces.size() == 16 && this->white_pieces.size() == 16) this->first = false;
+		return true;
+	}
 	else return false;
 }
 
@@ -367,11 +370,24 @@ void ImageProcessor::initialize(String title) {
 	
 	this->white_pieces = findColorObject(title, BLUE);
 	this->black_pieces = findColorObject(title, GREEN);
-	String msg;
-	if (this->black_pieces.at(0).getIndex() == 0) msg = "BLACK";
-	else msg = "WHITE";
 	
-	showChessObject(title);
+	String msg;
+	if (this->white_pieces.size() != 16) {
+		msg = "White pieces are not initial setting";
+		showChessObject(title);
+	}
+	else if (this->black_pieces.size() != 16) {
+		msg = "Black pieces are not initial setting";
+		showChessObject(title);
+	}
+	else {
+		if (this->black_pieces.at(0).getIndex() == 0) msg = "BLACK";
+		else msg = "WHITE";
+
+#if TEST == 2
+		showChessObject(title);
+#endif
+	}
 	notifyToObservers(String(msg), 0);
 }
 
@@ -412,32 +428,33 @@ vector<int> ImageProcessor::comparePieces(vector<Block> previous_pieces, vector<
 
 String indexToPoint(int index) {
 	String point;
-
-	point += to_string(index / 8);
-	point += ',';
+	
 	point += to_string(index % 8);
+	point += ',';
+	point += to_string(index / 8);
 
 	return point;
 }
 
 String makeProtocolString(vector<int> black_index, vector<int> white_index) {
 	int count = 0;
-	count += black_index.size();
-	count += white_index.size();
+	count += black_index.size()/2;
+	count += white_index.size()/2;
 
 	String msg = "";
 	msg += to_string(count);
 	msg += ":";
-
-	for (vector<int>::iterator i = black_index.begin(); i != black_index.end(); i++) {
-		msg += ( indexToPoint(*i) + "$" );
-	}
-	if (black_index.size() != 0) {
+	if (black_index.size() == 2) {
+		for (vector<int>::iterator i = black_index.begin(); i != black_index.end(); i++) {
+			msg += (indexToPoint(*i) + "$");
+		}
 		msg.pop_back();
 		msg += '|';
 	}
-	for (vector<int>::iterator i = white_index.begin(); i != white_index.end(); i++) {
-		msg += (indexToPoint(*i) + "$");
+	if (white_index.size() == 2) {
+		for (vector<int>::iterator i = white_index.begin(); i != white_index.end(); i++) {
+			msg += (indexToPoint(*i) + "$");
+		}
 	}
 	msg.pop_back();
 
@@ -456,6 +473,10 @@ void ImageProcessor::recognizeMovement(String title) {
 
 	this->black_pieces = new_black_pieces;
 	this->white_pieces = new_white_pieces;
+
+#if TEST == 2
+	showChessObject(title);
+#endif
 
 	notifyToObservers(String(msg), 0);
 }
