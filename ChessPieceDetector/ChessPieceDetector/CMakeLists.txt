@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project( ChessBoardRecognizer )
+project( ChessPieceDetector )
 
 find_library(
     NETWORK_LIBRARY
@@ -16,9 +16,9 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 aux_source_directory( ${CMAKE_CURRENT_SOURCE_DIR} SOURCES )
 
-add_executable( ChessBoardRecognizer ${SOURCES} )
+add_executable( ChessPieceDetector ${SOURCES} )
 
-target_link_libraries( ChessBoardRecognizer ${OpenCV_LIBS} )
+target_link_libraries( ChessPieceDetector ${OpenCV_LIBS} )
 target_include_directories(${PROJECT_NAME} PUBLIC ../include)
 target_link_libraries(${PROJECT_NAME} ${NETWORK_LIBRARY})
 
