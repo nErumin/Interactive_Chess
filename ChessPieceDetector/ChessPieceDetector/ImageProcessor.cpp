@@ -313,8 +313,8 @@ vector<Block> ImageProcessor::findColorObject(String title, int COLOR) {
 		y_h = points.at(2).y < points.at(3).y ? points.at(2).y : points.at(3).y;
 
 		int count = 0;
-		for (int x = x_l; x < x_h; x++) {
-			for (int y = y_l; y < y_h; y++) {
+		for (int x = x_l + 2; x < x_h - 2; x++) {
+			for (int y = y_l + 2; y < y_h - 2; y++) {
 				int color = threshold_image.at<uchar>(y, x);
 				if (color != 0) {
 					count++;
