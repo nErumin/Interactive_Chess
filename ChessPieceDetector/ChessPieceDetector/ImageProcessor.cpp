@@ -359,7 +359,10 @@ void ImageProcessor::showChessObject(String title) {
 
 bool ImageProcessor::isFirst() {
 	if (this->first) {
-		if (this->black_pieces.size() == 16 && this->white_pieces.size() == 16) this->first = false;
+		if (this->black_pieces.size() == 16 && this->white_pieces.size() == 16) {
+			this->first = false;
+			return false;
+		}
 		return true;
 	}
 	else return false;
@@ -474,7 +477,7 @@ void ImageProcessor::recognizeMovement(String title) {
 	this->black_pieces = new_black_pieces;
 	this->white_pieces = new_white_pieces;
 
-#if TEST == 2
+#if TEST == 1
 	showChessObject(title);
 #endif
 
