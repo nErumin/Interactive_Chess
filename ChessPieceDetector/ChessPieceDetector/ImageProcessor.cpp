@@ -294,7 +294,7 @@ vector<Block> ImageProcessor::findColorObject(String title, int COLOR) {
 	int sub = -10, add = 15;
 
 	if (COLOR == GREEN) {
-		detectHSColor(image, 50, 80, 50, 255, 150, 220, threshold_image);
+		detectHSColor(image, 50, 80, 50, 255, 120, 250, threshold_image);
 	}
 	else {
 		detectHSColor(image, 100, 150, 100, 255, 200, 255, threshold_image);
