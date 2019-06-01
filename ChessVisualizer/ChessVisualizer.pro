@@ -76,3 +76,5 @@ LIBS += -L$$PWD/lib -lNetworkLibrary
 
 INCLUDEPATH += $$PWD/includes
 DESTDIR = binaries
+
+RC_ICONS = AppIcon.ico
