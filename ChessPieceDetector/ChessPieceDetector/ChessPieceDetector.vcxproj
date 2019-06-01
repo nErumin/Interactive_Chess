@@ -170,8 +170,15 @@
     <ClInclude Include="Observer.h" />
     <ClInclude Include="Observable.h" />
     <ClInclude Include="OpenCVController.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Vector2.h" />
     <ClInclude Include="Video.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ChessPieceDetector.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\resources\favicon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
