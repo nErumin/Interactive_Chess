@@ -33,13 +33,11 @@
 #include "NullPiece.h"
 #include "BoardUtility.h"
 
-#define WOOJINS_IP ("10.210.60.150")
-
 namespace
 {
     constexpr double initialTimerTime = 12000.0;
 
-    Network::Client recognizerClient{ Network::Address(WOOJINS_IP, 33333) };
+    Network::Client recognizerClient{ Network::Address("localhost", 33333) };
     std::unique_ptr<Network::SocketConnection> recognizerConnection;
 
     Network::Client relayClient{ Network::Address("localhost", 44444) };
