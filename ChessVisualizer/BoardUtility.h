@@ -88,8 +88,8 @@ inline std::pair<Vector2, Vector2> randomPickPieceMoving(const Board& board, Pie
                 }
 
                 locationScores[std::make_pair(pieceMovablePair.first, difference)] = isPassivePick ?
-                            -(static_cast<int>(piece->getPriority()) / 2) - deltaScore :
-                            -(static_cast<int>(piece->getPriority()) / 2) + deltaScore;
+                            -(static_cast<int>(piece->getPriority() / 2)) - pickRandomNumber(0, deltaScore) :
+                            -(static_cast<int>(piece->getPriority() / 2)) + pickRandomNumber(0, deltaScore);
             }
         }
 

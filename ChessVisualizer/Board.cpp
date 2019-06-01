@@ -196,7 +196,13 @@ void Board::movePiece(const Vector2 pieceLocation, const Vector2 deltaLocation)
         currentCell.setPiece(targetCell.getPiece());
         targetCell.setPiece(originalTargetPiece);
 
-        std::cout << "Invalid movement" << std::endl;
+        std::cout << "Invalid movement ==> Current: " << pieceLocation << ", Delta: " << deltaLocation << std::endl;
+
+        for (const auto& movableLocation : movableLocations)
+        {
+            std::cout << "[L] " << movableLocation << std::endl;
+        }
+
         throw std::invalid_argument{ "cannot move to that location " };
     }
 
