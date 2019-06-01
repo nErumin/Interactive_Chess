@@ -217,7 +217,7 @@ vector<Block> ImageProcessor::findChessboardBlocks(String title) {
 
 	//Hough transformation for finding lines
 	vector<Vec2f> lines;
-	HoughLines(contours, lines, 1, PI / 180, 100);  // 투표(vote) 최대 개수
+	HoughLines(contours, lines, 1, PI / 180, 120);  // 투표(vote) 최대 개수
 #if TEST == 1
 	Mat lines_image;
 	input_gray_image.copyTo(lines_image);
@@ -359,7 +359,10 @@ void ImageProcessor::showChessObject(String title) {
 
 bool ImageProcessor::isFirst() {
 	if (this->first) {
-		if (this->black_pieces.size() == 16 && this->white_pieces.size() == 16) this->first = false;
+		if (this->black_pieces.size() == 16 && this->white_pieces.size() == 16) {
+			this->first = false;
+			return false;
+		}
 		return true;
 	}
 	else return false;
@@ -474,7 +477,7 @@ void ImageProcessor::recognizeMovement(String title) {
 	this->black_pieces = new_black_pieces;
 	this->white_pieces = new_white_pieces;
 
-#if TEST == 2
+#if TEST == 1
 	showChessObject(title);
 #endif
 
