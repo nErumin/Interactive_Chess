@@ -33,11 +33,13 @@
 #include "NullPiece.h"
 #include "BoardUtility.h"
 
+#define WOOJINS_IP ("10.210.60.150")
+
 namespace
 {
     constexpr double initialTimerTime = 12000.0;
 
-    Network::Client recognizerClient{ Network::Address("localhost", 33333) };
+    Network::Client recognizerClient{ Network::Address(WOOJINS_IP, 33333) };
     std::unique_ptr<Network::SocketConnection> recognizerConnection;
 
     Network::Client relayClient{ Network::Address("localhost", 44444) };
@@ -85,6 +87,18 @@ QPixmap convertPieceToPixmap(const Piece* piecePtr)
     }
 }
 
+void shutdown()
+{
+    InformationModal disconnectionModal{ nullptr };
+    disconnectionModal.setModalTitle("Not connected");
+    disconnectionModal.setMessageText("Cannot connect to recognizer/relay server.");
+    disconnectionModal.exec();
+
+    std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 3000 });
+    QMetaObject::invokeMethod(QApplication::instance(), "quit", Qt::QueuedConnection);
+
+}
+
 ChessController::ChessController()
 {
     // register turn changed event
@@ -93,13 +107,16 @@ ChessController::ChessController()
     // register cell changed event
     auto& board = game.getBoard();
     board.registerObserver(this);
+}
 
+void ChessController::refreshWindow()
+{
     // initialize image
     for (size_t i = 0; i < boardSize; ++i)
     {
         for (size_t j = 0; j < boardSize; ++j)
         {
-            auto piecePtr = board.getCell(i, j).getPiece();
+            auto piecePtr = game.getBoard().getCell(i, j).getPiece();
             window.getLabel(i, j).setPixmap(convertPieceToPixmap(piecePtr.get()));
         }
     }
@@ -151,40 +168,39 @@ void ChessController::startChess()
         relayConnection = std::make_unique<Network::SocketConnection>(relayClient.connect());
 
         std::cout << "Press 'ENTER' to start chess..." << std::endl;
-        std::string dummyLine;
-        std::getline(std::cin, dummyLine);
 
-        Network::TransmissionService recognizerService{ *recognizerConnection };
-        recognizerService.send("0");
-        auto response = recognizerService.receive(128);
-
-        if (response == "OK")
+        while (true)
         {
-            // TODO: get from response
-            game.initializeGame(pickRandomColorPair());
+            std::string dummyLine;
+            std::getline(std::cin, dummyLine);
 
-            game.getCurrentPlayer().getTimer().resume();
+            Network::TransmissionService recognizerService{ *recognizerConnection };
+            recognizerService.send("0");
+            auto response = recognizerService.receive(128);
 
-            QMetaObject::invokeMethod(QApplication::instance(), [this]
+            if (response == "WHITE" || response == "BLACK")
             {
+                auto robotColor = response == "WHITE" ?
+                            PieceColor::White :
+                            PieceColor::Black;
+
+                game.initializeGame({ getEnemyColor(robotColor), robotColor });
+                refreshWindow();
+
                 startTurn();
-            }, Qt::QueuedConnection);
-        }
-        else
-        {
-            throw Network::NetworkError(Network::ErrorCode::ReceiveFailed, "cannot get reponse");
+                break;
+            }
+            else
+            {
+                std::cout << "Cannot get valid response... Press 'ENTER' when you're ready..." << std::endl;
+                std::cout << response << std::endl;
+            }
         }
     }
     catch (const std::exception& error)
     {
-        using namespace std;
-
         std::cout << error.what() << std::endl;
-
-        InformationModal disconnectionModal{ nullptr };
-        disconnectionModal.setModalTitle("Not connected");
-        disconnectionModal.setMessageText("Cannot connect to recognizer/relay server.");
-        disconnectionModal.exec();
+        shutdown();
 
         return;
     }
@@ -192,8 +208,22 @@ void ChessController::startChess()
 
 void ChessController::startTurn()
 {
-    std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 500 });
+    std::thread([this]
+    {
+        std::cout << "Initialized... Please wait..." << std::endl;
+        std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 3000 });
 
+        game.getCurrentPlayer().getTimer().resume();
+
+        QMetaObject::invokeMethod(QApplication::instance(), [this]
+        {
+            doTurn();
+        }, Qt::QueuedConnection);
+    }).detach();
+}
+
+void ChessController::doTurn()
+{
     Network::TransmissionService recognizerService{ *recognizerConnection };
     Network::TransmissionService relayService{ *relayConnection };
 
@@ -218,9 +248,10 @@ void ChessController::startTurn()
                 game.movePiece(difference.first, difference.second - difference.first);
             }
         }
-        catch (const Network::NetworkError& error)
+        catch (const std::exception& error)
         {
             std::cout << error.what() << std::endl;
+            shutdown();
         }
     }
     else
@@ -230,7 +261,18 @@ void ChessController::startTurn()
 
         try
         {
-            relayService.send(formatLocationsToProtocol({ std::make_pair(picked.first, picked.first + picked.second) }));
+            auto currentPiece = game.getBoard().getCell(picked.first).getPiece();
+            auto nextTargetCellPiece = game.getBoard().getCell(picked.first + picked.second).getPiece();
+            std::vector<Difference> robotDifferences;
+
+            if (nextTargetCellPiece->getColor() == getEnemyColor(currentPiece->getColor()))
+            {
+                std::cout << "Robot tries to catch..." << std::endl;
+                robotDifferences.emplace_back(picked.first + picked.second, Vector2{ 99, 99 });
+            }
+
+            robotDifferences.emplace_back(picked.first, picked.first + picked.second);
+            relayService.send(formatLocationsToProtocol(robotDifferences));
             auto completionMessage = relayService.receive(1024);
 
             game.movePiece(picked.first, picked.second);
@@ -241,6 +283,11 @@ void ChessController::startTurn()
         catch (const Network::NetworkError& error)
         {
             std::cout << error.what() << std::endl;
+            shutdown();
+        }
+        catch (const std::exception& error)
+        {
+            std::cout << "Something wrong: " << error.what() << std::endl;
         }
     }
 }
@@ -323,6 +370,17 @@ inline void showGameFinishedDialog(ChessWindow& window, GameResult result)
         stream << "You " << resultMessage << "!";
     }
 
+    try
+    {
+        Network::TransmissionService recognizerService{ *recognizerConnection };
+        recognizerService.send("-1");
+    }
+    catch (const std::exception& error)
+    {
+        std::cout << error.what() << std::endl;
+        shutdown();
+    }
+
     dialog.setModalTitle("Game Finished");
     dialog.setMessageText(stream.str());
     dialog.exec();
@@ -335,6 +393,7 @@ void ChessController::finalize()
 {
     game.getCurrentPlayer().getTimer().stop();
     game.getNextPlayer().getTimer().stop();
+
 }
 
 void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
@@ -358,10 +417,7 @@ void ChessController::notify(Player& changingPlayer, Player& nextPlayer)
 
     nextPlayer.getTimer().resume();
 
-    QMetaObject::invokeMethod(QApplication::instance(), [this]
-    {
-        startTurn();
-    }, Qt::QueuedConnection);
+    startTurn();
 }
 
 void ChessController::notify(const Cell& changedCell, Vector2&& location)

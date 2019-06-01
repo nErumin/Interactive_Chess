@@ -15,98 +15,114 @@ inline std::pair<Vector2, Vector2> randomPickPieceMoving(const Board& board, Pie
     std::vector<std::pair<Vector2, std::vector<Vector2>>> movablePieces;
     std::vector<Vector2> opponentLocations;
 
-    // find movable pieces, then map them to movable locations.
-    for (size_t i = 0; i < boardSize; ++i)
+    try
     {
-        for (size_t j = 0; j < boardSize; ++j)
+        // find movable pieces, then map them to movable locations.
+        for (size_t i = 0; i < boardSize; ++i)
         {
-            Vector2 locationVector{ static_cast<double>(j), static_cast<double>(i) };
-
-            auto piecePtr = board.getCell(i, j).getPiece();
-
-            if (piecePtr->getColor() == playerColor)
+            for (size_t j = 0; j < boardSize; ++j)
             {
-                auto movableLocations = board.findPieceMovableLocations(locationVector, playerColor);
+                Vector2 locationVector{ static_cast<double>(j), static_cast<double>(i) };
 
-                if (movableLocations.size() > 0)
+                auto piecePtr = board.getCell(i, j).getPiece();
+
+                if (piecePtr->getColor() == playerColor)
                 {
-                    movablePieces.emplace_back(locationVector, std::move(movableLocations));
+                    auto movableLocations = board.findPieceMovableLocations(locationVector, playerColor);
+
+                    if (movableLocations.size() > 0)
+                    {
+                        movablePieces.emplace_back(locationVector, std::move(movableLocations));
+                    }
+                }
+                else if (piecePtr->getColor() == getEnemyColor(playerColor))
+                {
+                    opponentLocations.push_back(locationVector);
                 }
             }
-            else if (piecePtr->getColor() == getEnemyColor(playerColor))
+        }
+
+        // find catchable locations...
+        std::map<size_t, std::pair<Vector2, Vector2>, std::greater<size_t>> catchableLocations;
+        for (const auto& pieceMovablePair : movablePieces)
+        {
+            for (const auto& movableLocation : pieceMovablePair.second)
             {
-                opponentLocations.push_back(locationVector);
+                auto piecePtr = board.getCell(pieceMovablePair.first).getPiece();
+                auto targetPiece = board.getCell(movableLocation).getPiece();
+
+                if (isPieceTypeOf<King>(piecePtr.get()) && board.isChecked(movableLocation))
+                {
+                    std::cout << "Warning: Ignore checked king position..." << std::endl;
+                    continue;
+                }
+
+                if (targetPiece->getColor() == getEnemyColor(playerColor))
+                {
+                    auto difference = movableLocation - pieceMovablePair.first;
+                    catchableLocations.emplace(targetPiece->getPriority(), std::make_pair(pieceMovablePair.first, difference));
+                }
             }
         }
-    }
 
-    // find catchable locations...
-    std::map<size_t, std::pair<Vector2, Vector2>, std::greater<size_t>> catchableLocations;
-    for (const auto& pieceMovablePair : movablePieces)
-    {
-        for (const auto& movableLocation : pieceMovablePair.second)
+        // ...then return if exists.
+        if (catchableLocations.size() > 0)
         {
-            auto targetPiece = board.getCell(movableLocation).getPiece();
+            return catchableLocations.begin()->second;
+        }
 
-            if (targetPiece->getColor() == getEnemyColor(playerColor))
+        std::map<std::pair<Vector2, Vector2>, int> locationScores;
+        for (const auto& pieceMovablePair : movablePieces)
+        {
+            auto piece = board.getCell(pieceMovablePair.first).getPiece();
+
+            for (const auto& movableLocation : pieceMovablePair.second)
             {
+                int deltaScore = 0;
                 auto difference = movableLocation - pieceMovablePair.first;
-                catchableLocations.emplace(targetPiece->getPriority(), std::make_pair(pieceMovablePair.first, difference));
+
+                for (const auto& opponentLocation : opponentLocations)
+                {
+                    double roundedMagnitude = std::round((opponentLocation - movableLocation).magitude());
+                    deltaScore += static_cast<int>(roundedMagnitude);
+                }
+
+                locationScores[std::make_pair(pieceMovablePair.first, difference)] = isPassivePick ?
+                            -(static_cast<int>(piece->getPriority()) / 2) - deltaScore :
+                            -(static_cast<int>(piece->getPriority()) / 2) + deltaScore;
             }
         }
-    }
 
-    // ...then return if exists.
-    if (catchableLocations.size() > 0)
-    {
-        return catchableLocations.begin()->second;
-    }
+        // What is the best location?
+        std::pair<Vector2, Vector2> chosenLocation;
+        int bestScore = std::numeric_limits<int>::min();
 
-    std::map<std::pair<Vector2, Vector2>, int> locationScores;
-    for (const auto& pieceMovablePair : movablePieces)
-    {
-        auto piece = board.getCell(pieceMovablePair.first).getPiece();
-
-        for (const auto& movableLocation : pieceMovablePair.second)
+        for (const auto& locationScorePair : locationScores)
         {
-            int deltaScore = 0;
-            auto difference = movableLocation - pieceMovablePair.first;
+            auto piecePtr = board.getCell(locationScorePair.first.first).getPiece().get();
 
-            for (const auto& opponentLocation : opponentLocations)
+            if (isPieceTypeOf<King>(piecePtr) && board.isChecked(locationScorePair.first.second))
             {
-                double roundedMagnitude = std::round((opponentLocation - movableLocation).magitude());
-                deltaScore += static_cast<int>(roundedMagnitude);
+                std::cout << "Warning: Ignore checked king position..." << std::endl;
+                continue;
             }
 
-            locationScores[std::make_pair(pieceMovablePair.first, difference)] = isPassivePick ?
-                        -(static_cast<int>(piece->getPriority()) / 2) - deltaScore :
-                        -(static_cast<int>(piece->getPriority()) / 2) + deltaScore;
+            if ((locationScorePair.second > bestScore) ||
+                (locationScorePair.second == bestScore && pickRandomNumber(0, 2) == 0))
+            {
+                chosenLocation = locationScorePair.first;
+                bestScore = locationScorePair.second;
+            }
         }
+
+        return chosenLocation;
     }
-
-    // What is the best location?
-    std::pair<Vector2, Vector2> chosenLocation;
-    int bestScore = std::numeric_limits<int>::min();
-
-    for (const auto& locationScorePair : locationScores)
+    catch (const std::exception& error)
     {
-        auto piecePtr = board.getCell(locationScorePair.first.first).getPiece().get();
+        std::cout << error.what() << std::endl;
 
-        if (isPieceTypeOf<King>(piecePtr) && board.isChecked(locationScorePair.first.second))
-        {
-            std::cout << "Warning: Ignore checked king position..." << std::endl;
-            continue;
-        }
-
-        if ((locationScorePair.second > bestScore) ||
-            (locationScorePair.second == bestScore && pickRandomNumber(0, 2) == 0))
-        {
-            chosenLocation = locationScorePair.first;
-            bestScore = locationScorePair.second;
-        }
+        throw;
     }
-
-    return chosenLocation;
 }
 
 
