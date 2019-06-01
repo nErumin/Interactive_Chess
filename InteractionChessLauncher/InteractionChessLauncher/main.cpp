@@ -11,8 +11,8 @@
 namespace
 {
     constexpr const char RelayProcessName[] = "RobotNetworkRelay.exe";
-    constexpr const char DetectorProcessName[] = ".exe";
-    constexpr const char SystemProcessName[] = ".exe";
+    constexpr const char DetectorProcessName[] = "ChessPieceDetector.exe";
+    constexpr const char SystemProcessName[] = "ChessVisualizer.exe";
 }
 
 void waitEnter()
