@@ -3,25 +3,28 @@
 #include <string>
 #include <iostream>
 #include <exception>
+#include <memory>
+#include <thread>
+#include <chrono>
+#include "ChildProcess.h"
 
 namespace
 {
     constexpr const char RelayProcessName[] = "RobotNetworkRelay.exe";
+    constexpr const char DetectorProcessName[] = ".exe";
+    constexpr const char SystemProcessName[] = ".exe";
 }
 
-boost::process::child SpawnRelayProcess()
+void waitRobotConnected()
 {
-    if (!boost::filesystem::exists(RelayProcessName))
-    {
-        using namespace std;
-        throw std::logic_error{ "You don't have '"s + RelayProcessName + "' in the same directory." };
-    }
-
     std::string responseLine;
 
     std::cout << "Press 'ENTER' if you connect the robot to your system..." << std::endl;
     std::getline(std::cin, responseLine);
+}
 
+std::string getPortName()
+{
     std::cout << "What is your serial port name?" << std::endl;
 
     std::string portName;
@@ -32,26 +35,49 @@ boost::process::child SpawnRelayProcess()
         throw std::logic_error{ "You cannot enter a wrong serial port." };
     }
 
-    std::cout << "Execute the relay server process..." << std::endl;
-    return boost::process::child{ RelayProcessName, portName };
+    return portName;
 }
 
 int main()
 {
+    ChildProcess relayProcess{ RelayProcessName };
+    ChildProcess detectorProcess{ DetectorProcessName };
+    ChildProcess chessSystemProcess{ SystemProcessName };
+
     try
     {
-        auto relayProcess = SpawnRelayProcess();
+        waitRobotConnected();
+        
+        relayProcess.run(getPortName());
+        std::this_thread::sleep_for(std::chrono::milliseconds{ 1500 });
 
-        relayProcess.wait();
+        detectorProcess.run();
+        std::this_thread::sleep_for(std::chrono::milliseconds{ 1500 });
+        
+        chessSystemProcess.run();
+        std::this_thread::sleep_for(std::chrono::milliseconds{ 1500 });
+        
+        while (true)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds{ 500 });
 
-        int relayResultCode = relayProcess.exit_code();
-        std::cout << relayResultCode << std::endl;
+            chessSystemProcess.assureRunning();
+            detectorProcess.assureRunning();
+            relayProcess.assureRunning();
+        }
     }
-    catch (const std::exception& error)
+    catch (const std::logic_error& error)
     {
         std::cout << error.what() << std::endl;
         std::cout << "Please execute the launcher again later..." << std::endl;
     }
+    catch (const std::runtime_error&)
+    {
+    }
+
+    chessSystemProcess.terminate();
+    detectorProcess.terminate();
+    relayProcess.terminate();
 
     return 0;
 }
