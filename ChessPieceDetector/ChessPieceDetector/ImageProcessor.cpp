@@ -217,7 +217,7 @@ vector<Block> ImageProcessor::findChessboardBlocks(String title) {
 
 	//Hough transformation for finding lines
 	vector<Vec2f> lines;
-	HoughLines(contours, lines, 1, PI / 180, 120);  // 투표(vote) 최대 개수
+	HoughLines(contours, lines, 1, PI / 180, 100);  // 투표(vote) 최대 개수
 #if TEST == 1
 	Mat lines_image;
 	input_gray_image.copyTo(lines_image);
@@ -294,7 +294,7 @@ vector<Block> ImageProcessor::findColorObject(String title, int COLOR) {
 	int sub = -10, add = 15;
 
 	if (COLOR == GREEN) {
-		detectHSColor(image, 40, 80, 70, 255, 80, 150, threshold_image);
+		detectHSColor(image, 50, 80, 50, 255, 120, 250, threshold_image);
 	}
 	else {
 		detectHSColor(image, 100, 150, 100, 255, 200, 255, threshold_image);
@@ -325,7 +325,7 @@ vector<Block> ImageProcessor::findColorObject(String title, int COLOR) {
 		printf("%d, %d\n", index++, count);
 #endif
 
-		if (count > 10) {
+		if (count > 30) {
 			(*iter).setIsInObject(true);
 			objects.push_back(*iter);
 		}
@@ -384,7 +384,7 @@ void ImageProcessor::initialize(String title) {
 		if (this->black_pieces.at(0).getIndex() == 0) msg = "BLACK";
 		else msg = "WHITE";
 
-#if TEST == 2
+#if TEST == 1
 		showChessObject(title);
 #endif
 	}

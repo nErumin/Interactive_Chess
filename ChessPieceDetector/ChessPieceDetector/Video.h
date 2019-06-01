@@ -18,7 +18,7 @@ using namespace std;
 
 #define EXIT -1
 #define CAPTURE 0
-#define TEST 2
+#define TEST 1
 
 class Video : public Observable<String>
 {

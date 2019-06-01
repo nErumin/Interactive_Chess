@@ -68,7 +68,7 @@ jobs:
       - export CXX=/usr/bin/g++-7
       - gcc -v && g++ -v
       - cd ../../
-      - cd OpenCV_practice/OpenCV_practice
+      - cd ChessPieceDetector/ChessPieceDetector
     script:
       - cmake .
       - make
