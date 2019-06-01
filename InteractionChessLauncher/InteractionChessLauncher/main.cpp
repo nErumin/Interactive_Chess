@@ -15,12 +15,18 @@ namespace
     constexpr const char SystemProcessName[] = ".exe";
 }
 
+void waitEnter()
+{
+    std::cin.clear();
+
+    std::string responseLine;
+    std::getline(std::cin, responseLine);
+}
+
 void waitRobotConnected()
 {
-    std::string responseLine;
-
     std::cout << "Press 'ENTER' if you connect the robot to your system..." << std::endl;
-    std::getline(std::cin, responseLine);
+    waitEnter();
 }
 
 std::string getPortName()
@@ -28,7 +34,7 @@ std::string getPortName()
     std::cout << "What is your serial port name?" << std::endl;
 
     std::string portName;
-    std::cin >> portName;
+    std::getline(std::cin, portName);
 
     if (std::cin.fail())
     {
@@ -73,11 +79,14 @@ int main()
     }
     catch (const std::runtime_error&)
     {
+        // Pass
     }
 
     chessSystemProcess.terminate();
     detectorProcess.terminate();
     relayProcess.terminate();
 
+    std::cout << "Press 'ENTER' to finish the launcher..." << std::endl;
+    waitEnter();
     return 0;
 }
