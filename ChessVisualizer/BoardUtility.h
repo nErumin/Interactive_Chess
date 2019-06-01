@@ -121,7 +121,7 @@ inline std::pair<Vector2, Vector2> randomPickPieceMoving(const Board& board, Pie
     {
         std::cout << error.what() << std::endl;
 
-        throw std::exception{ "?" };
+        throw;
     }
 }
 

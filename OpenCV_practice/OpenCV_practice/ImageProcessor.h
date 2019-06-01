@@ -26,6 +26,7 @@ private:
 	vector<Block> blocks;
 	vector<Block> black_pieces; 
 	vector<Block> white_pieces;
+	bool first = true;
 
 	Mat thresholdImage(Mat image);
 	Mat findBiggestBlob(Mat image);
