@@ -9,6 +9,9 @@
 *.pro*
 !*.pro
 
+# Detector OpenCV
+ChessPieceDetector/ChessPieceDetector/opencv*.dll
+
 # Boost include + lib
 NetworkLibrary/include/
 NetworkLibrary/lib/
