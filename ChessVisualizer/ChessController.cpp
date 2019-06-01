@@ -280,10 +280,14 @@ void ChessController::doTurn()
             recognizerService.send("0");
             auto okMessage = recognizerService.receive(1024);
         }
-        catch (const std::exception& error)
+        catch (const Network::NetworkError& error)
         {
             std::cout << error.what() << std::endl;
             shutdown();
+        }
+        catch (const std::exception& error)
+        {
+            std::cout << "Something wrong: " << error.what() << std::endl;
         }
     }
 }
