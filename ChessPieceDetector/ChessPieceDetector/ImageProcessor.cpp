@@ -217,7 +217,7 @@ vector<Block> ImageProcessor::findChessboardBlocks(String title) {
 
 	//Hough transformation for finding lines
 	vector<Vec2f> lines;
-	HoughLines(contours, lines, 1, PI / 180, 100);  // 투표(vote) 최대 개수
+	HoughLines(contours, lines, 1, PI / 180, 120);  // 투표(vote) 최대 개수
 #if TEST == 1
 	Mat lines_image;
 	input_gray_image.copyTo(lines_image);
