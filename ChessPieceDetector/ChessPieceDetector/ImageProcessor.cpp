@@ -325,7 +325,7 @@ vector<Block> ImageProcessor::findColorObject(String title, int COLOR) {
 		printf("%d, %d\n", index++, count);
 #endif
 
-		if (count > 10) {
+		if (count > 30) {
 			(*iter).setIsInObject(true);
 			objects.push_back(*iter);
 		}
@@ -384,7 +384,7 @@ void ImageProcessor::initialize(String title) {
 		if (this->black_pieces.at(0).getIndex() == 0) msg = "BLACK";
 		else msg = "WHITE";
 
-#if TEST == 2
+#if TEST == 1
 		showChessObject(title);
 #endif
 	}
