@@ -33,13 +33,11 @@
 #include "NullPiece.h"
 #include "BoardUtility.h"
 
-#define WOOJINS_IP ("10.210.60.150")
-
 namespace
 {
     constexpr double initialTimerTime = 12000.0;
 
-    Network::Client recognizerClient{ Network::Address(WOOJINS_IP, 33333) };
+    Network::Client recognizerClient{ Network::Address("localhost", 33333) };
     std::unique_ptr<Network::SocketConnection> recognizerConnection;
 
     Network::Client relayClient{ Network::Address("localhost", 44444) };
@@ -210,15 +208,22 @@ void ChessController::startTurn()
 {
     std::thread([this]
     {
-        std::cout << "Initialized... Please wait..." << std::endl;
-        std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 3000 });
-
-        game.getCurrentPlayer().getTimer().resume();
-
-        QMetaObject::invokeMethod(QApplication::instance(), [this]
+        try
         {
-            doTurn();
-        }, Qt::QueuedConnection);
+            std::cout << "Initialized... Please wait..." << std::endl;
+            std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 3000 });
+
+            game.getCurrentPlayer().getTimer().resume();
+
+            QMetaObject::invokeMethod(QApplication::instance(), [this]
+            {
+                doTurn();
+            }, Qt::QueuedConnection);
+        }
+        catch (const std::exception& error)
+        {
+            std::cout << "Warning: " << error.what() << std::endl;
+        }
     }).detach();
 }
 
@@ -258,6 +263,8 @@ void ChessController::doTurn()
     {
         bool isPassive = pickRandomNumber(0, 10) < 5;
         auto picked = randomPickPieceMoving(game.getBoard(), game.getCurrentPlayer().getOwningPieceColor(), isPassive);
+
+        std::cout << "[Selection] Robot picked (" << picked.first << ", " << picked.second << ")" << std::endl;
 
         try
         {
