@@ -208,15 +208,22 @@ void ChessController::startTurn()
 {
     std::thread([this]
     {
-        std::cout << "Initialized... Please wait..." << std::endl;
-        std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 3000 });
-
-        game.getCurrentPlayer().getTimer().resume();
-
-        QMetaObject::invokeMethod(QApplication::instance(), [this]
+        try
         {
-            doTurn();
-        }, Qt::QueuedConnection);
+            std::cout << "Initialized... Please wait..." << std::endl;
+            std::this_thread::sleep_for(std::chrono::duration<size_t, std::milli>{ 3000 });
+
+            game.getCurrentPlayer().getTimer().resume();
+
+            QMetaObject::invokeMethod(QApplication::instance(), [this]
+            {
+                doTurn();
+            }, Qt::QueuedConnection);
+        }
+        catch (const std::exception& error)
+        {
+            std::cout << "Warning: " << error.what() << std::endl;
+        }
     }).detach();
 }
 
@@ -256,6 +263,8 @@ void ChessController::doTurn()
     {
         bool isPassive = pickRandomNumber(0, 10) < 5;
         auto picked = randomPickPieceMoving(game.getBoard(), game.getCurrentPlayer().getOwningPieceColor(), isPassive);
+
+        std::cout << "[Selection] Robot picked (" << picked.first << ", " << picked.second << ")" << std::endl;
 
         try
         {

@@ -5,6 +5,7 @@
 
 Pawn::Pawn(PieceColor initColor)
     : Piece{ initColor },
+      isNotMovedYet{ true },
       diagonalMask{ PawnDiagonalMask::None }
 {
     reconstructStrategy();
