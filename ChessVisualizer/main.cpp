@@ -4,12 +4,20 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication application(argc, argv);
-    ChessController controller;
+    try
+    {
+        QApplication application(argc, argv);
+        ChessController controller;
 
-    controller.startChess();
-    application.exec();
+        controller.startChess();
+        application.exec();
 
-    controller.finalize();
+        controller.finalize();
+    }
+    catch (const std::exception& error)
+    {
+        std::cout << "Warning: " << error.what() << std::endl;
+    }
+
     return 0;
 }
