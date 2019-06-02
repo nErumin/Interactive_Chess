@@ -156,8 +156,9 @@ void ChessController::startChess()
             game.setGameResult(result);
         });
 
-        player->getTimer().start(initialTimerTime);
-        player->getTimer().pause();
+        // Suppress Timer now...
+        // player->getTimer().start(initialTimerTime);
+        // player->getTimer().pause();
     }
 
     try
