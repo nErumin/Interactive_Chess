@@ -35,7 +35,7 @@
 
 namespace
 {
-    constexpr double initialTimerTime = 12000.0;
+    constexpr double initialTimerTime = std::numeric_limits<double>::max();
 
     Network::Client recognizerClient{ Network::Address("localhost", 33333) };
     std::unique_ptr<Network::SocketConnection> recognizerConnection;
