@@ -95,7 +95,7 @@ vector<Point2f> ImageProcessor::findEdge(vector<Point2f> points) {
 }
 
 vector<Point2f> adjustEdgePosition(vector<Point2f> edges) {
-	const float scaler = 0.07;
+	const float scaler = 0.0215;
 	float dx[2] = { (edges[1].x - edges[0].x) * scaler, (edges[3].x - edges[2].x) * scaler };
 	float dy[2] = { (edges[2].y - edges[0].y) * scaler, (edges[3].y - edges[1].y) * scaler };
 
