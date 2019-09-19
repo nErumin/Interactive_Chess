@@ -685,9 +685,31 @@ void setup() {
                     gripper = releasing;
                 }
 
-                delay(100);
-                dxl_wb.goalPosition(DXL_ID_5, (int32_t)gripper);
-                delay(100);
+                do {
+                    result = dxl_wb.ping(DXL_ID_5, &model_number, &log);
+                    if (result == false) {
+                        Serial.println(log);;
+                        Serial.print("id : ");
+                        Serial.print(DXL_ID_5);
+                        Serial.println("Failed to ping");
+                        result = dxl_wb.reboot(DXL_ID_5, &log);
+                        if (result == false) {
+                            Serial.println(log);
+                            Serial.println("Failed to change joint mode");
+                        } else {
+                            Serial.println("Reset: Succeed to change joint mode");
+                        }
+                        result = dxl_wb.jointMode(DXL_ID_5, 0, 0, &log);
+                        dxl_wb.goalPosition(DXL_ID_5, (int32_t)gripper);
+                        if (result == false) {
+                            Serial.println(log);
+                            Serial.println("Failed to change joint mode");
+                        } else {
+                            Serial.println("Succeed to change joint mode");
+                        }
+                    }
+                    dxl_wb.goalPosition(DXL_ID_5, (int32_t)gripper); delay(1000);
+                } while(!result);
                     
                 // Up
                 start_timer = millis()/10;
